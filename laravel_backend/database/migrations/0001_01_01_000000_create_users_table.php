@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['Admin', 'Biller', 'Payment Poster'])
                   ->default('Biller');
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes(); 
         });

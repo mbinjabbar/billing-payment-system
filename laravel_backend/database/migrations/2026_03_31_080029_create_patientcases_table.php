@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patientcases', function (Blueprint $table) {
+        Schema::create('patient_cases', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('patient_id')->withForeignKey('patient_id')->references('id')->on('patients')->onDelete('cascade');
-            $table->enum('case_type', ['New', 'Followup', 'Emergency','Consultation','Surgical','Chronic']);
-            $table->enum('case_category', ['General Medicine', ' Pediatrics', 'Cardiology', 'Orthopedics', 'Dermatology','Neurology', 'Gynecology','Ophthalmology', 'ENT', 'Dental', 'Psychiatry' ,'Other']);
-            $table->enum('priority', ['Low', 'Normal', 'High','Urgent']);
-            $table->enum('status', ['Active', 'Closed','Transfered','On Hold']);
+            $table->string('case_number');
+            $table->enum('case_type', ['New', 'Follow-up', 'Emergency', 'Consultation', 'Surgical', 'Chronic']);
+            $table->enum('case_category', ['General Medicine', 'Pediatrics', 'Cardiology', 'Orthopedics', 'Dermatology', 'Neurology', 'Gynecology', 'Ophthalmology', 'ENT', 'Dental', 'Psychiatry', 'Other']);
+            $table->enum('priority', ['Low', 'Normal', 'High', 'Urgent']);
+            $table->enum('status', ['Active', 'Closed', 'Transfered', 'On Hold']);
             $table->text('description');
             $table->date('opened_date');
             $table->date('closed_date')->nullable();
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patientcases');
+        Schema::dropIfExists('patient_cases');
     }
 };

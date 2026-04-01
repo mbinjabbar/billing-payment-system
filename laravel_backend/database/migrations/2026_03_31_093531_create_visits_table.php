@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('appointment_id')->withForeignKey('appointment_id')->references('id')->on('appointments')->onDelete('cascade');
+            $table->foreignId('appointment_id')->unique()->constrained('appointments')->onDelete('cascade');
             $table->date('visit_date');
             $table->time('visit_time');
             $table->text('diagnosis');

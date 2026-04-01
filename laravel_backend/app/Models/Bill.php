@@ -7,14 +7,15 @@ use App\Models\Visit;
 use App\Models\Payment;
 use App\Models\Document;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\relations\BelongsTo;
-use Illuminate\Database\Eloquent\relations\HasMany;
 
 class Bill extends Model
 {
     use SoftDeletes;
+
     protected $fillable = [
         'visit_id',
+        'created_by',
+        'insurance_firm_id',
         'bill_number',
         'bill_date',
         'procedure_codes',
@@ -31,22 +32,41 @@ class Bill extends Model
         'due_date'
     ];
 
+    protected $casts = [
+        'procedure_codes' => 'array',
+        'bill_date' => 'date',
+        'due_date' => 'date',
+    ];
+
     protected static function booted()
     {
-        static::creating(function ($bill) {       
-        $bill->bill_number = 'BILL-' . now()->format('Ymd') . '-' . strtoupper(uniqid());
+        static::creating(function ($bill) {
+            $bill->bill_number = 'BILL-' . now()->format('Ymd') . '-' . strtoupper(uniqid());
         });
     }
 
-    public function visit() {
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function insurance_firm()
+    {
+        // return $this->belongsTo(InsuranceFirm::class);
+    }
+
+    public function visit()
+    {
         return $this->belongsTo(Visit::class);
     }
 
-    public function payments() {
+    public function payments()
+    {
         return $this->hasMany(Payment::class);
     }
 
-    public function documents() {
+    public function documents()
+    {
         return $this->hasMany(Document::class);
     }
 }

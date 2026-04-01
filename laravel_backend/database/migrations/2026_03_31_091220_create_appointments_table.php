@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patientcase_id')->withForeignKey('patientcase_id')->references('id')->on('patientcases')->onDelete('cascade');
+            $table->foreignId('patient_case_id')->constrained('patient_cases')->cascadeOnDelete();
             $table->enum('appointment_type', ['Initial', 'Follow-up', 'Consultation', 'Procedure', 'Emergency', 'Telehealth', 'Routine Checkup']);
             $table->enum('appointment_status', ['Scheduled', 'Confirmed', 'Checked In', 'In Progress', 'Completed', 'Cancelled', 'No Show', 'Rescheduled']);
             $table->date('appointment_date');
             $table->time('appointment_time');
             $table->integer('duration_minutes')->default(30);
-            $table->unsignedBigInteger('doctor_id')->withForeignKey('doctor_id')->references('id')->on('doctors')->onDelete('set null');
             $table->string('doctor_name')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('reminder_sent')->default(false);

@@ -6,10 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Patient;
 use App\Models\Appointment;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Patientcase extends Model
+class PatientCase extends Model
 {
      use SoftDeletes;
     protected $fillable = [
