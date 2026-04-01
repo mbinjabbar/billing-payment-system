@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('appointments', function (Blueprint $table) {
@@ -19,17 +16,15 @@ return new class extends Migration
             $table->date('appointment_date');
             $table->time('appointment_time');
             $table->integer('duration_minutes')->default(30);
-            $table->string('doctor_name')->nullable();
+            $table->string('doctor_name');
             $table->text('notes')->nullable();
+            $table->string('specialty_required')->nullable();
             $table->boolean('reminder_sent')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('appointments');
