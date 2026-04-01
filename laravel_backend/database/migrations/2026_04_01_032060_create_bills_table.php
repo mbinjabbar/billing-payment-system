@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('bill_date');
             $table->json('procedure_codes')->nullable();
             $table->decimal('charges', 10, 2);
-            $table->decimal('insurance_coverage', 10, 2);
+            $table->decimal('insurance_coverage', 10, 2)->default(0);
             $table->decimal('bill_amount', 10, 2);
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);

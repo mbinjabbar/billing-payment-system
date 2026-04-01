@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Patient;
 use App\Models\Appointment;
+use App\Models\Visit;
 
 class PatientCase extends Model
 {
-     use SoftDeletes;
+    use SoftDeletes;
     protected $fillable = [
         'patient_id',
         'case_number',
@@ -22,13 +23,18 @@ class PatientCase extends Model
         'closed_date',
         'referring_doctor',
     ];
-       public function patient() {
+    public function patient()
+    {
         return $this->belongsTo(Patient::class);
     }
 
-    public function appointments() {
+    public function appointments()
+    {
         return $this->hasMany(Appointment::class);
     }
 
-   
+    public function visits()
+    {
+        return $this->hasManyThrough(Visit::class, Appointment::class);
+    }
 }

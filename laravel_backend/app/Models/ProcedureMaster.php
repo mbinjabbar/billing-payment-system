@@ -9,9 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProcedureMaster extends Model
 {
     use HasFactory, SoftDeletes;
-
-    protected $table = 'procedure_master';
-
     protected $fillable = [
         'code',
         'name',

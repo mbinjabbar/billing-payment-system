@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Appointment;
+use App\Models\PatientCase;
 use Faker\Factory;
 
 class AppointmentSeeder extends Seeder
@@ -11,10 +12,11 @@ class AppointmentSeeder extends Seeder
     public function run(): void
     {
         $faker = Factory::create();
+        $caseIds = PatientCase::pluck('id')->toArray();
 
         for ($i = 1; $i <= 25; $i++) {
             Appointment::create([
-                'patient_case_id'    => $i,
+                'patient_case_id' => $faker->randomElement($caseIds),
                 'appointment_type'   => $faker->randomElement(['Initial', 'Follow-up', 'Consultation', 'Procedure', 'Telehealth', 'Emergency', 'Routine Checkup']),
                 'appointment_status' => 'Completed',
                 'appointment_date'   => $faker->dateTimeBetween('-10 days', '-2 days')->format('Y-m-d'),

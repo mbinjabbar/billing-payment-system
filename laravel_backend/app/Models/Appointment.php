@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\PatientCase;
 use App\Models\Visit;
-use Illuminate\Database\Eloquent\relations\BelongsTo;
-use Illuminate\Database\Eloquent\relations\HasOne;
 
 class Appointment extends Model
 {
@@ -25,7 +23,7 @@ class Appointment extends Model
         'reminder_sent',
     ];
 
-    public function case(): BelongsTo
+    public function patientCase()
     {
         return $this->belongsTo(PatientCase::class);
     }

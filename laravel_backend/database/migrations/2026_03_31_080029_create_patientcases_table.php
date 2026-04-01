@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('patient_cases', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id')->withForeignKey('patient_id')->references('id')->on('patients')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->cascadeOnDelete();
             $table->string('case_number');
             $table->enum('case_type', ['New', 'Follow-up', 'Emergency', 'Consultation', 'Surgical', 'Chronic']);
             $table->enum('case_category', ['General Medicine', 'Pediatrics', 'Cardiology', 'Orthopedics', 'Dermatology', 'Neurology', 'Gynecology', 'Ophthalmology', 'ENT', 'Dental', 'Psychiatry', 'Other']);

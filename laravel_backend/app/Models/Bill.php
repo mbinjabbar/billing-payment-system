@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Visit;
 use App\Models\Payment;
 use App\Models\Document;
+use App\Models\InsuranceFirm;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Bill extends Model
@@ -36,6 +37,13 @@ class Bill extends Model
         'procedure_codes' => 'array',
         'bill_date' => 'date',
         'due_date' => 'date',
+        'charges'            => 'decimal:2',
+        'insurance_coverage' => 'decimal:2',
+        'bill_amount'        => 'decimal:2',
+        'discount_amount'    => 'decimal:2',
+        'tax_amount'         => 'decimal:2',
+        'outstanding_amount' => 'decimal:2',
+        'paid_amount'        => 'decimal:2',
     ];
 
     protected static function booted()
@@ -52,7 +60,7 @@ class Bill extends Model
 
     public function insurance_firm()
     {
-        // return $this->belongsTo(InsuranceFirm::class);
+        return $this->belongsTo(InsuranceFirm::class);
     }
 
     public function visit()

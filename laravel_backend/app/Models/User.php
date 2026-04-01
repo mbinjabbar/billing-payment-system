@@ -26,4 +26,19 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class, 'created_by');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'received_by');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'uploaded_by');
+    }
 }

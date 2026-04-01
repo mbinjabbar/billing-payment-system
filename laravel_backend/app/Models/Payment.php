@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Bill;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
@@ -26,7 +25,8 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'upload_date' => 'datetime',
+        'payment_date' => 'date',
+        'amount_paid'  => 'decimal:2',
     ];
 
     protected static function booted()
@@ -40,13 +40,8 @@ class Payment extends Model
         return $this->belongsTo(Bill::class);
     }
 
-    public function uploader()
+    public function receiver()
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
-    }
-
-    public function payment()
-    {
-        return $this->belongsTo(Payment::class);
+        return $this->belongsTo(User::class, 'received_by');
     }
 }

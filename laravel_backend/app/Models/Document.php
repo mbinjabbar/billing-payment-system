@@ -12,6 +12,7 @@ class Document extends Model
     use SoftDeletes;
     protected $fillable = [
         'bill_id',
+        'payment_id',
         'document_type',
         'file_name',
         'file_type',
@@ -22,7 +23,18 @@ class Document extends Model
         'version',
     ];
 
-    public function bill() {
+    public function bill()
+    {
         return $this->belongsTo(Bill::class);
+    }
+
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
     }
 }
