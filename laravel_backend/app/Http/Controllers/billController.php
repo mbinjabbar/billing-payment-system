@@ -34,7 +34,7 @@ class billController extends Controller
         'bill_amount' => $billAmount,
         'outstanding_amount' => $billAmount, 
         'paid_amount' => $data['paid_amount'],
-        'status' => 'Pending',
+        'status' => $data['status'],
         'due_date' => $data['due_date'],
         'notes' => $data['notes'] 
     ]);
@@ -43,7 +43,7 @@ class billController extends Controller
     }
     catch(\Exception $e){
         Log::error('Error generating bill: ' . $e->getMessage());
-        return $this->error('visit data not found.');
+        return $this->error('Bill data not found.');
     }
 }
 }
