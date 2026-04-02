@@ -3,10 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Visit;
-use App\Models\Payment;
-use App\Models\Document;
-use App\Models\InsuranceFirm;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Bill extends Model

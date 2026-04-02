@@ -12,7 +12,7 @@ class PatientSeeder extends Seeder
     {
         $faker = Factory::create();
 
-        for ($i = 0; $i < 25; $i++) {
+        for ($i = 1; $i <= 25; $i++) {
             $gender = $faker->randomElement(['Male', 'Female', 'Other']);
             Patient::create([
                 'first_name'              => $faker->firstName($gender),

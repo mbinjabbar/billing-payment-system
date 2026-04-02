@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Bill;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
@@ -43,5 +42,10 @@ class Payment extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'received_by');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
     }
 }

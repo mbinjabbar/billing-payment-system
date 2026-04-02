@@ -3,28 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\PatientCase;
 use App\Models\Visit;
-use App\Models\Appointment;
-use App\Models\Patient;
-use App\Models\Bill;
 use log;
 use Exception;
 
 
 class VisitController extends Controller
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
         $validated = $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
         ]);
-        try{
+        try {
             $visit = Visit::where('appointment_id', $validated['appointment_id'])->with(['appointment.case.patient', 'bill'])->firstOrFail();
             return response()->json([
                 'success' => true,
                 'data' => $visit
-            ],200);
+            ], 200);
         } catch (Exception $e) {
             Log::error('error fetching visits list: ' . $e->getMessage());
             return response()->json([
@@ -33,9 +29,8 @@ class VisitController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-        
     }
-    
+
 
     public function getVisitDetails(Request $request, $visitId)
     {
@@ -58,5 +53,3 @@ class VisitController extends Controller
         }
     }
 }
-
-

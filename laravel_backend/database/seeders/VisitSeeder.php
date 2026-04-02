@@ -13,11 +13,10 @@ class VisitSeeder extends Seeder
     public function run(): void
     {
         $faker = Factory::create();
-        $apptIds = Appointment::pluck('id')->toArray();
 
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= 25; $i++) {
             Visit::create([
-                'appointment_id'  => $faker->randomElement($apptIds),
+                'appointment_id'  => $i,
                 'visit_date'      => $faker->dateTimeBetween('-5 days', 'now')->format('Y-m-d'),
                 'visit_time'      => $faker->time('H:i:s'),
                 'diagnosis'       => $faker->sentence(6),
