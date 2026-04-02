@@ -13,7 +13,6 @@ class Bill extends Model
         'visit_id',
         'created_by',
         'insurance_firm_id',
-        'bill_number',
         'bill_date',
         'procedure_codes',
         'charges',
