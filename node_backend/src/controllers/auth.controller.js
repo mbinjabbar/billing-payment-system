@@ -91,3 +91,29 @@ export const logout = async (req, res, next) => {
         next(err);
     }
 }
+
+export const getMe = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        const user = await User.findByPk(userId, {
+            attributes: { exclude: ['password'] }
+        });
+
+        if (!user) {
+            return res.api.notFound("User session is no longer valid");
+        }
+
+        return res.api.success({
+            user: {
+                id: user.id,
+                role: user.role,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                name: `${user.first_name} ${user.last_name}`
+            }
+        }, "Current user profile retrieved")
+    } catch (err) {
+        next(err);
+    }
+}
