@@ -1,19 +1,14 @@
 import express from 'express';
 import { authenticate } from '../middlewares/auth.middleware.js';
+import { login, logout, register } from '../controllers/auth.controller.js';
 
 const router = express.Router();
 
 router.get('/me', authenticate, (req, res) => {
     // for current user profile
 });
-router.post('/login', (req, res) => {
-    // role based login
-});
-router.post('/register', (req, res) => {
-    // biller and poster registeration and confirmation by admin
-});
-router.post('/logout', authenticate, (req, res) => {
-    // remove access token
-});
+router.post('/login', login);
+router.post('/register', register);
+router.post('/logout', logout);
 
 export default router;
