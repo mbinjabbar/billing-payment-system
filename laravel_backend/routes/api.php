@@ -7,5 +7,5 @@ use App\Http\Controllers\billController;
 
 
 Route::get('/visits', [VisitController::class, 'index']);
-Route::get('/visits/{id}', [VisitController::class, 'show']);
+Route::get('/visits/{visit}', [VisitController::class, 'show']);
 Route::apiResource('/bills', billController::class);
