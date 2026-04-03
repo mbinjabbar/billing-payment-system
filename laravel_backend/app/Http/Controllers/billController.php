@@ -36,9 +36,9 @@ class billController extends Controller
                 });
             });
 
-            $bills = $query->latest('bill_date')->paginate(2);
+            $bills = $query->latest('bill_date')->paginate(10);
 
-            return $this->success(['bills' => $bills], 'Bills retrieved successfully');
+            return $this->success($bills, 'Bills retrieved successfully');
         } catch (Exception $e) {
             return $this->error('Unable to fetch bills.');
         }
@@ -70,10 +70,67 @@ class billController extends Controller
                 'due_date' => $data['due_date'],
                 'notes' => $data['notes']
             ]);
-            return $this->success(['bill' => $bill], 'Bill generated successfully.');
+            return $this->success($bill, 'Bill generated successfully.');
         } catch (Exception $e) {
             Log::error('Error generating bill: ' . $e->getMessage());
             return $this->error('Bill data not found.');
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $bill = Bill::with(['visit.appointment.patientCase.patient'])->findOrFail($id);
+            return $this->success($bill, 'Bill detail fetched successfully.');
+        } catch (Exception $e) {
+            return $this->error('Bill data not found.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $bill = Bill::findOrFail($id);
+            // $user = $request->get('auth_user');
+
+            // if($user->role === 'Payment Poster') {
+            //     return $this->error("Payment poster cannot edit billing details", 403);
+            // }
+
+            $bill->fill($request->only([
+                'procedure_codes',
+                'charges',
+                'insurance_coverage',
+                'discount_amount',
+                'tax_amount',
+                'notes',
+                'due_date'
+            ]));
+
+            $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
+            $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
+
+            if ($bill->outstanding_amount <= 0) {
+                $bill->status = 'Paid';
+            } elseif ($bill->outstanding_amount > 0) {
+                $bill->status = 'Partial';
+            }
+
+            $bill->save();
+            return $this->success($bill, 'Bill updated and recalculated successfully.');
+        } catch (Exception $e) {
+            return $this->error('Failed to update bill.');
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $bill = Bill::findOrFail($id);
+            $bill->delete();
+            return $this->success(null, 'Bill has been soft-deleted successfully.');
+        } catch (Exception $e) {
+            return $this->error('Failed to delete the bill.');
         }
     }
 }
