@@ -33,41 +33,6 @@ export const login = async (req, res, next) => {
     }
 }
 
-export const register = async (req, res, next) => {
-    try {
-        const { first_name, last_name, email, password, role } = req.body;
-
-        const allowedRoles = ['Admin', 'Biller', 'Payment Poster'];
-        if (role && !allowedRoles.includes(role)) {
-            return res.api.error("Invalid role assigned", 400);
-        }
-
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.api.conflict("This email is already registered")
-        };
-
-        const hash = await bcrypt.hash(password, 10);
-
-        const newUser = await User.create({
-            first_name,
-            last_name,
-            email,
-            password: hash,
-            role: role || 'Biller'
-        })
-
-        return res.api.created({
-            id: newUser.id,
-            email: newUser.email,
-            role: newUser.role,
-            name: `${newUser.first_name} ${newUser.last_name}`,
-        }, "Staff member added successfully");
-    } catch (err) {
-        next(err);
-    }
-}
-
 export const logout = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
