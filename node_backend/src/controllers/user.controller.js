@@ -1,11 +1,10 @@
-
 import User from '../models/User.model.js';
 import bcrypt from 'bcryptjs';
 
-const getAllUsers = async (req, res,next) => {
+const getAllUsers = async (req, res, next) => {
     try {
-        const users = await User.findAll(); 
-        return res.api.success("Users retrieved successfully", users); 
+        const users = await User.findAll();
+        return res.api.success("Users retrieved successfully", users);
     } catch (error) {
         return res.api.error();
     }
@@ -23,10 +22,10 @@ const createUser = async (req, res) => {
     }
 };
 const getUserById = async (req, res) => {
-    try{
+    try {
         const { id } = req.params;
         const user = await User.findByPk(id);
-        if(!user) {
+        if (!user) {
             return res.api.error("User not found");
         }
         return res.api.success("User retrieved successfully", user);
@@ -39,7 +38,7 @@ const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const { first_name, last_name, email, role } = req.body;
-        
+
         const user = await User.findByPk(id);
         if (!user) {
             return res.api.notFound("User not found");
@@ -58,7 +57,7 @@ const deleteUser = async (req, res) => {
         if (!user) {
             return res.api.notFound("User not found");
         }
-       await  user.destroy(); 
+        await user.destroy();
         return res.api.success("User deleted successfully");
     } catch (error) {
         return res.api.error("Failed to delete user");
