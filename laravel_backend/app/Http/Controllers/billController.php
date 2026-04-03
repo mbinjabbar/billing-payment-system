@@ -21,8 +21,8 @@ class billController extends Controller
                 return $q->where('status', $request->status);
             });
 
-            $query->when($request->start_date && $request->end_data, function ($q) use ($request) {
-                return $q->whereBetween('bill_data', [$request->start_date, $request->end_date]);
+            $query->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                return $q->whereBetween('bill_date', [$request->start_date, $request->end_date]);
             });
 
             $query->when($request->min_amount && $request->max_amount, function ($q) use ($request) {
