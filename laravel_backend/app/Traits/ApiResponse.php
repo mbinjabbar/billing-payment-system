@@ -33,7 +33,7 @@ trait ApiResponse
     protected function error(string $message = 'Error', int $code = 500, mixed $data = null): JsonResponse
     {
         return response()->json([
-            'status' => 'Error',
+            'success' => false,
             'message' => $message,
             'data' => $data
         ], $code);
