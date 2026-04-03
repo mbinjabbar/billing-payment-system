@@ -32,6 +32,7 @@ class billController extends Controller
             $query->when($request->patient_name, function ($q) use ($request) {
                 return $q->whereHas('visit.appointment.patientCase.patient', function ($sub) use ($request) {
                     return $sub->where('first_name', 'like', '%' . $request->patient_name . '%')
+                            ->orWhere('middle_name', 'like', '%' . $request->patient_name . '%')
                         ->orWhere('last_name', 'like', '%' . $request->patient_name . '%');
                 });
             });
