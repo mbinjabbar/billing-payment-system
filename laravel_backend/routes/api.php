@@ -7,5 +7,5 @@ use App\Http\Controllers\billController;
 
 
 Route::get('/visits', [VisitController::class, 'index']);
-Route::get('/visits/{id}', [VisitController::class, 'getVisitById']);
-Route::post('/generate-bill', [billController::class, 'generateBill']);
+Route::get('/visits/{id}', [VisitController::class, 'show']);
+Route::apiResource('/bills', billController::class);

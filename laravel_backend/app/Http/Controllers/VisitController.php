@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
 use App\Models\Visit;
 use Exception;
 use App\Traits\ApiResponse;
@@ -9,7 +8,7 @@ use App\Traits\ApiResponse;
 class VisitController extends Controller
 {
     use ApiResponse;
-    public function index(Request $request)
+    public function index()
     {
         try {
             $visits = Visit::with(['appointment.patientCase.patient', 'bill'])->get();
@@ -19,7 +18,7 @@ class VisitController extends Controller
         }
     }
 
-    public function getVisitById(Request $request, $id)
+    public function show($id)
     {
         try {
             $visit = Visit::with(['appointment.patientCase.patient', 'bill'])->findOrFail($id);
