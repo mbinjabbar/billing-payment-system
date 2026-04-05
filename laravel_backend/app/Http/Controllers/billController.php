@@ -7,6 +7,7 @@ use App\Models\Bill;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
+use PDF;
 
 class billController extends Controller
 {
@@ -53,7 +54,7 @@ class billController extends Controller
             $discount = $data['discount_amount'];
             $tax = $data['tax_amount'];
             $insurance = $data['insurance_coverage'];
-            $billAmount = ($charges - $discount + $tax) - $insurance;
+            $billAmount = ($charges - $insurance - $discount) + $tax;
 
             $bill = Bill::create([
                 'visit_id' => $data['visit_id'],
@@ -134,4 +135,26 @@ class billController extends Controller
             return $this->error('Failed to delete the bill.');
         }
     }
+        public function generatePDF($id)
+{
+    try {
+        $bill = Bill::with(['visit.appointment.patientCase.patient'])->findOrFail($id);
+
+        $pdf = PDF::loadView('bill_pdf', compact('bill'));
+
+        //For Download
+        //return $pdf->download('bill_'.$bill->bill_number.'.pdf');
+
+        // For browser preview
+         return $pdf->stream('bill_'.$bill->bill_number.'.pdf');
+
+    } catch (Exception $e) {
+        return $this->error('Failed to generate PDF.');
+    }
 }
+}
+
+
+        
+
+

@@ -7,3 +7,5 @@ use App\Http\Controllers\billController;
 
 Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
 Route::apiResource('/bills', billController::class);
+
+Route::get('/bills/pdf/{id}', [billController::class, 'generatePDF']);
