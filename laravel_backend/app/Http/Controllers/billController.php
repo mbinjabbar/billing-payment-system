@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Bill;
+use App\Models\Document;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
 use PDF;
+use Illuminate\Support\Facades\Storage;
 
 class billController extends Controller
 {
@@ -72,6 +74,35 @@ class billController extends Controller
                 'due_date' => $data['due_date'],
                 'notes' => $data['notes']
             ]);
+
+            $bill->load('visit.appointment.patientCase.patient');
+
+            $pdf = PDF::loadView('bill_pdf', compact('bill'));
+
+            $fileName = 'nf2_bill_' . $bill->id . '.pdf';
+            $path = 'bills/' . $fileName;
+
+            Storage::put($path, $pdf->output());
+
+            $bill->update([
+                'generated_document_path' => $path
+            ]);
+
+        $fileSize = Storage::size($path);
+
+        Document::create([
+            'bill_id' => $bill->id,
+            'payment_id' => null, 
+            'document_type' => 'NF2 Form',
+            'file_name' => $fileName,
+            'file_type' => 'pdf',
+            'file_path' => $path,
+            'file_size' => $fileSize,
+            'upload_date' => now(),
+            'uploaded_by' => $data['created_by'],
+            'version' => 1
+        ]);
+
             return $this->success($bill, 'Bill generated successfully.');
         } catch (Exception $e) {
             Log::error('Error generating bill: ' . $e->getMessage());
@@ -139,14 +170,11 @@ class billController extends Controller
 {
     try {
         $bill = Bill::with(['visit.appointment.patientCase.patient'])->findOrFail($id);
-
-        $pdf = PDF::loadView('bill_pdf', compact('bill'));
-
-        //For Download
-        //return $pdf->download('bill_'.$bill->bill_number.'.pdf');
-
-        // For browser preview
-         return $pdf->stream('bill_'.$bill->bill_number.'.pdf');
+           $filePath = storage_path('app/private/' . $bill->generated_document_path);
+        if (!file_exists($filePath)) {
+            return $this->error('PDF file not found.');
+        }
+        return response()->download($filePath);
 
     } catch (Exception $e) {
         return $this->error('Failed to generate PDF.');
