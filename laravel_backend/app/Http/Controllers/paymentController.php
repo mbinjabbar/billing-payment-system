@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Payment;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Bill;
+use App\Traits\ApiResponse;
+
+class paymentController extends Controller
+{
+    use ApiResponse;
+    public function index()
+    {
+        try {
+            $payments = Payment::with('bill.visit.appointment.patientCase.patient')->latest()->paginate(10);
+            return $this->success($payments, 'Payments retrieved successfully');
+        } catch (Exception $e) {
+            return $this->error('An error occurred while fetching payments');
+        }
+    }
+
+    
+    public function store(Request $request)
+    {
+        
+            try {
+                
+            $data= $request->all();
+             $bill = Bill::findOrFail($data['bill_id']);
+            //if($data['payment_mode'] === 'Cheque' && $request->hasFile('cheque_file')) {
+                //$file = $request->file('cheque_file');
+                //$filePath = $file->store('cheque_files', 'public');
+                //$data['cheque_file_path'] = $filePath;
+            //}
+
+            if($data['amount_paid'] > $bill->outstanding_amount) {
+                return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
+            }
+
+            $payment = Payment::create([
+                'bill_id' => $data['bill_id'],
+                'received_by' => $data['received_by'],
+                'amount_paid' => $data['amount_paid'],
+                'payment_mode' => $data['payment_mode'],
+                'check_number' => $data['check_number'],
+                'bank_name' => $data['bank_name'],
+                'transaction_reference' => $data['transaction_reference'],
+                'payment_date' => $data['payment_date'],
+                'payment_status' => $data['payment_status'],
+                'cheque_file_path' => $data['cheque_file_path']?? null, 
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+        
+           
+            $bill->paid_amount += $data['amount_paid'];
+            $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
+            $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
+            if ($bill->outstanding_amount <= 0) {
+                $bill->status = 'Paid';
+            } elseif ($bill->outstanding_amount > 0) {
+                $bill->status = 'Partial';
+            }
+
+            $bill->save();
+
+                return $this->success($payment, 'Payment created and bill updated successfully');
+            } catch (Exception $e) {
+               
+                return $this->error('An error occurred while creating the payment');
+            }
+    }
+
+   
+    public function show($id)
+    {
+        try {
+            $payment = Payment::findOrFail($id);
+            return $this->success($payment, 'Payment retrieved successfully');
+        
+        } catch (Exception $e) {
+            return $this->error('Payment not found');
+        }
+    }
+
+    
+    
+    public function update(Request $request, $id)
+{
+    try {
+        $payment = Payment::findOrFail($id);
+        $bill = Bill::findOrFail($request->bill_id);
+        $oldAmountPaid = $payment->amount_paid;
+        $newAmountPaid = $request->amount_paid;
+        if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
+            return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
+        }
+        $payment->fill($request->only([
+            'bill_id',
+            'received_by', 
+            'amount_paid', 
+            'payment_mode',
+            'check_number', 
+            'bank_name', 
+            'transaction_reference',
+            'payment_date', 
+            'payment_status',
+            'notes'
+        ]));
+        $payment->save();
+        $difference = $newAmountPaid - $oldAmountPaid;
+        $bill->paid_amount += $difference;
+        $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
+        $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
+        if ($bill->outstanding_amount <= 0) {
+            $bill->status = 'Paid';
+        } else {
+            $bill->status = 'Partial';
+        }
+        $bill->save();
+        return $this->success($payment, 'Payment and Bill updated successfully');   
+    } catch (Exception $e) {
+        return $this->error('An error occurred while updating the payment');
+    }
+}
+
+    
+    public function destroy($id)
+    {
+        try {
+            $payment = Payment::findOrFail($id);
+            $payment->delete();
+            return $this->success(null, 'Payment deleted successfully');
+        } catch (Exception $e) {
+            return $this->error('An error occurred while deleting the payment');
+        }
+    
+    }
+}
