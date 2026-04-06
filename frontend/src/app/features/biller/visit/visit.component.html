@@ -1,0 +1,158 @@
+<div class="bg-surface text-on-surface min-h-screen flex font-body">
+
+  <!-- Main -->
+  <main class="flex-1 ml-64 min-h-screen flex flex-col">
+
+    <!-- Content -->
+    <div class="pt-10 px-10 pb-12 space-y-10 w-full">
+
+      <!-- Header -->
+      <section class="flex justify-between items-end">
+        <div>
+          <h2 class="text-4xl font-extrabold tracking-tight font-headline">
+            Completed Visits
+          </h2>
+          <p class="text-on-surface-variant mt-2 max-w-2xl">
+            Review clinical visits that have been finalized and are ready for professional billing processing.
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            class="px-5 py-2.5 rounded-lg bg-surface-container-high text-primary font-bold flex items-center gap-2 hover:bg-surface-container transition-all">
+            <span class="material-symbols-outlined">filter_list</span>
+            Filter Results
+          </button>
+
+          <button
+            class="text-white px-6 py-2.5 rounded-lg font-headline font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
+            style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+            <span class="material-symbols-outlined">add</span>
+            Manual Entry
+          </button>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="grid grid-cols-3 gap-6">
+
+        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+            Ready For Billing
+          </p>
+          <div class="flex items-end gap-2">
+            <span class="text-4xl font-extrabold">{{ visits.length }}</span>
+            <span class="text-primary font-bold">+5 today</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+            Average Wait Time
+          </p>
+          <div class="flex items-end gap-2">
+            <span class="text-4xl font-extrabold">1.4</span>
+            <span class="text-on-surface-variant">days</span>
+          </div>
+        </div>
+
+        <div class="bg-primary rounded-xl p-6 shadow-lg shadow-primary/20 text-white">
+          <p class="text-xs font-bold uppercase tracking-widest text-blue-100 mb-2">
+            Total Value Pending
+          </p>
+          <span class="text-4xl font-extrabold">${{ totalPending }}</span>
+        </div>
+      </section>
+
+      <!-- Visits Table -->
+      <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+
+        <!-- Table Header -->
+        <div class="flex justify-between items-center px-6 py-5 border-b border-outline-variant/10">
+          <h3 class="text-xl font-bold font-headline">Pending Queue</h3>
+
+          <div class="flex items-center gap-3 text-sm text-on-surface-variant">
+            <span>Showing 1-{{ visits.length }} of {{ visits.length }} visits</span>
+
+            <div class="flex gap-2">
+              <button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>
+              </button>
+              <button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center">
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Patient Name</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Date Of Visit</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Service Description</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-center">Status</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-right">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-outline-variant/10">
+              @for (visit of visits; track $index) {
+                <tr class="hover:bg-surface-container-low transition-colors">
+
+                  <td class="px-6 py-5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary font-bold text-xs">
+                        {{ visit.initials }}
+                      </div>
+                      <div>
+                        <p class="font-bold">{{ visit.patientName }}</p>
+                        <p class="text-xs text-on-surface-variant">ID: {{ visit.id }}</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-5">
+                    <p class="font-medium">{{ visit.date }}</p>
+                    <p class="text-xs text-on-surface-variant">{{ visit.time }}</p>
+                  </td>
+
+                  <td class="px-6 py-5">
+                    <p>{{ visit.service }}</p>
+                    <p class="text-xs text-primary font-semibold">{{ visit.icd }}</p>
+                  </td>
+
+                  <td class="px-6 py-5 text-center">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">
+                      Completed
+                    </span>
+                  </td>
+
+                  <td class="px-6 py-5 text-right">
+                    <button
+                      class="px-4 py-2 rounded-lg text-xs font-bold text-white shadow-md shadow-primary/10"
+                      style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+                      Create Bill
+                    </button>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 bg-surface-container-low flex justify-center">
+          <button class="text-primary text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+            View All Completed Visits
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
