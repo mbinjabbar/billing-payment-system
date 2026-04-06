@@ -2,35 +2,30 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-type Role = 'admin' | 'biller' | 'poster';
-
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  selectedRole: Role = 'admin';
-  roles: Role[] = ['admin', 'biller', 'poster'];
+  loginForm: FormGroup;
   showPassword = false;
   isLoading = false;
-
-  loginForm: FormGroup;
 
   constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(8)]],
     });
   }
 
-  get email() { return this.loginForm.get('email')!; }
-  get password() { return this.loginForm.get('password')!; }
+  get email() {
+    return this.loginForm.get('email')!;
+  }
 
-  selectRole(role: Role) {
-    this.selectedRole = role;
+  get password() {
+    return this.loginForm.get('password')!;
   }
 
   togglePassword() {
@@ -43,10 +38,9 @@ export class LoginComponent {
       return;
     }
     this.isLoading = true;
-    // Simulate API call
     setTimeout(() => {
       this.isLoading = false;
-      console.log('Login:', { role: this.selectedRole, ...this.loginForm.value });
-    }, 1500);
+      console.log('Form submitted:', this.loginForm.value);
+    }, 2000);
   }
 }
