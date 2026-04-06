@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BillService } from '../../../core/services/bill.service';
 
@@ -9,19 +9,28 @@ import { BillService } from '../../../core/services/bill.service';
 })
 export class DashboardComponent {
   private billService = inject(BillService);
-  bills: any = [];
-  totalBill = 0;
 
-  ngOnInit(){
-    this.billService.getBills().subscribe(data => this.bills = data)
+  bills = signal<any>({ data: [] });
+  ngOnInit() {
+    this.billService.getBills().subscribe((data) => {
+      this.bills.set(data);
+    });
   }
 
-  totalBillAmount(){
-    for(let bill of this.bills.data){
-      this.totalBill += Number(bill.bill_amount);
-    }
-    return this.totalBill;
-  }
+  totalBillAmount = computed(() =>
+    this.bills().data.reduce((sum: number, bill: any) =>
+      sum + Number(bill.bill_amount), 0)
+  );
+
+  totalOutstandingAmount = computed(() =>
+    this.bills().data.reduce((sum: number, bill: any) =>
+      sum + Number(bill.outstanding_amount), 0)
+  );
+
+  pendingBillsCount = computed(() =>
+    this.bills().data.filter((bill: any) =>
+      bill.status === 'Pending').length
+  );
 
   getStatusClass(status: string): string {
     switch (status) {

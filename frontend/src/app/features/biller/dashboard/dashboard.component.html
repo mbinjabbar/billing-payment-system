@@ -42,7 +42,7 @@
               </div>
               <div>
                 <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Outstanding</p>
-                <p class="text-2xl font-extrabold text-on-surface font-headline mb-4">$28,402</p>
+                <p class="text-2xl font-extrabold text-on-surface font-headline mb-4">{{totalOutstandingAmount() | currency}}</p>
               </div>
             </div>
 
@@ -53,7 +53,7 @@
                 <span class="material-symbols-outlined text-on-secondary-container icon-md">pending_actions</span>
               </div>
               <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Pending Bills</p>
-              <p class="text-2xl font-extrabold text-on-surface font-headline leading-none">128<br/>Invoices</p>
+              <p class="text-2xl font-extrabold text-on-surface font-headline leading-none">{{ pendingBillsCount() }}<br/>Invoices</p>
             </div>
 
           </div>
@@ -64,8 +64,7 @@
             <div class="flex justify-between items-center px-6 py-5 border-b border-outline-variant/10">
               <h3 class="text-lg font-bold text-on-surface font-headline">Recent Billing Activity</h3>
               <button class="text-primary text-sm font-bold font-label hover:underline flex items-center gap-1">
-                View All Task History
-                <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+                View All Bills
               </button>
             </div>
 
@@ -81,13 +80,13 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant/10">
-                  @for (bill of bills.data; track $index) {
+                  @for (bill of bills().data; track $index) {
                     <tr class="hover:bg-surface-container-low transition-colors cursor-pointer">
 
                       <!-- Bill ID -->
                       <td class="px-6 py-5">
                         <p class="text-sm font-bold text-on-surface font-headline">{{ bill.bill_number }}</p>
-                        <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ bill.bill_date }}</p>
+                        <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ bill.bill_date | date }}</p>
                       </td>
 
                       <!-- Patient -->
