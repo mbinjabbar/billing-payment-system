@@ -26,7 +26,7 @@
             <div class="col-span-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 relative overflow-hidden">
               <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-3">Total Bill Amount</p>
               <div class="flex items-baseline gap-2 mb-6">
-                <span class="text-3xl font-extrabold text-on-surface font-headline tracking-tight">$142,850</span>
+                <span class="text-3xl font-extrabold text-on-surface font-headline tracking-tight">{{totalBillAmount() | currency}}</span>
               </div>
               <!-- Progress Bar -->
               <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
@@ -81,37 +81,37 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant/10">
-                  @for (entry of billingEntries; track entry.billId) {
+                  @for (bill of bills.data; track $index) {
                     <tr class="hover:bg-surface-container-low transition-colors cursor-pointer">
 
                       <!-- Bill ID -->
                       <td class="px-6 py-5">
-                        <p class="text-sm font-bold text-on-surface font-headline">{{ entry.billId }}</p>
-                        <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ entry.time }}</p>
+                        <p class="text-sm font-bold text-on-surface font-headline">{{ bill.bill_number }}</p>
+                        <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ bill.bill_date }}</p>
                       </td>
 
                       <!-- Patient -->
                       <td class="px-6 py-5">
                         <div class="flex items-center gap-3">
                           <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs font-headline"
-                            [class]="entry.initialsColor">
-                            {{ entry.initials }}
+                            [class]="bill.initialsColor">
+                            {{ bill.initials }}
                           </div>
-                          <span class="text-sm font-semibold text-on-surface font-headline">{{ entry.patientName }}</span>
+                          <span class="text-sm font-semibold text-on-surface font-headline">{{ bill.visit.appointment.patient_case.patient.first_name }}</span>
                         </div>
                       </td>
 
                       <!-- Status -->
                       <td class="px-6 py-5">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold font-label"
-                          [class]="getStatusClass(entry.status)">
-                          {{ entry.status }}
+                          [class]="getStatusClass(bill.status)">
+                          {{ bill.status }}
                         </span>
                       </td>
 
                       <!-- Amount -->
                       <td class="px-6 py-5 text-right font-bold text-sm text-on-surface font-headline">
-                        {{ entry.amount }}
+                        {{ bill.bill_amount | currency}}
                       </td>
 
                     </tr>
