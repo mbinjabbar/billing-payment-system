@@ -1,2 +1,9 @@
-<app-login></app-login>
-<router-outlet></router-outlet>
+@if (showShell()) {
+  <app-sidebar />
+  <app-header />
+  <div class="pt-16 min-h-screen">
+    <router-outlet />
+  </div>
+} @else {
+  <router-outlet />
+}

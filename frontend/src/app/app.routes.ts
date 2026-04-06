@@ -6,4 +6,5 @@ export const routes: Routes = [
     { path: 'admin', loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent) },
     { path: 'biller', loadComponent: () => import('./features/biller/dashboard/dashboard.component').then(m => m.DashboardComponent) },
     { path: 'payment-poster', loadComponent: () => import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+    { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];

@@ -1,13 +1,31 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { LoginComponent } from "./features/auth/login/login.component";
+import { Component, computed, inject } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { SidebarComponent } from './shared/sidebar/sidebar.component';
+import { HeaderComponent } from './shared/header/header.component';
+import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoginComponent],
+  standalone: true,
+  imports: [RouterOutlet, SidebarComponent, HeaderComponent, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'frontend';
+  private router = inject(Router);
+
+  private url = toSignal(
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map(e => (e as NavigationEnd).urlAfterRedirects),
+      startWith(this.router.url)
+    )
+  );
+
+  showShell = computed(() => {
+    const url = this.url();
+    if (!url) return false;
+    return !url.includes('/login');
+  });
 }

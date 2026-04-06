@@ -1,8 +1,140 @@
-<div class="flex h-screen overflow-hidden">
-  <app-sidebar />
-  <div class="flex flex-col flex-1 overflow-hidden">
-    <app-header />
-    <main class="flex-1 overflow-y-auto bg-background p-6">
-    </main>
-  </div>
+<div class="bg-surface text-on-surface min-h-screen flex font-body">
+
+  <!-- Main -->
+  <main class="flex-1 ml-64 min-h-screen flex flex-col">
+
+    <!-- Page Content -->
+    <div class="pt-10 px-10 pb-12 space-y-10 w-full">
+
+      <!-- Page Title Row -->
+      <section class="flex justify-between items-end">
+        <div>
+          <h2 class="text-3xl font-extrabold text-on-surface tracking-tight font-headline">Financial Overview</h2>
+          <p class="text-on-surface-variant font-medium mt-1 font-body">Real-time billing performance and outstanding revenue metrics.</p>
+        </div>
+          <button class="text-white px-6 py-2.5 rounded-lg font-headline font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
+            style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+            <span class="material-symbols-outlined icon-sm">add</span>
+            Create New Bill
+      </button>
+      </section>
+
+          <!-- Stats Row -->
+          <div class="grid grid-cols-3 gap-6">
+
+            <!-- Total Bill Amount -->
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 relative overflow-hidden">
+              <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-3">Total Bill Amount</p>
+              <div class="flex items-baseline gap-2 mb-6">
+                <span class="text-3xl font-extrabold text-on-surface font-headline tracking-tight">$142,850</span>
+              </div>
+              <!-- Progress Bar -->
+              <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                <div class="bg-primary h-full rounded-full" style="width: 72%"></div>
+              </div>
+              <p class="text-[10px] text-on-surface-variant font-label mt-2 text-right">72% Goal</p>
+            </div>
+
+            <!-- Outstanding -->
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 flex flex-col justify-between">
+              <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-primary icon-md">account_balance</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Outstanding</p>
+                <p class="text-2xl font-extrabold text-on-surface font-headline mb-4">$28,402</p>
+              </div>
+            </div>
+
+            <!-- Pending Bills -->
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 relative">
+              <span class="absolute top-4 right-4 text-[9px] font-extrabold bg-error text-white px-2 py-0.5 rounded-full font-label tracking-wider">URGENT</span>
+              <div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-on-secondary-container icon-md">pending_actions</span>
+              </div>
+              <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Pending Bills</p>
+              <p class="text-2xl font-extrabold text-on-surface font-headline leading-none">128<br/>Invoices</p>
+            </div>
+
+          </div>
+
+          <!-- Recent Billing Activity Table -->
+          <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+            <!-- Table Header -->
+            <div class="flex justify-between items-center px-6 py-5 border-b border-outline-variant/10">
+              <h3 class="text-lg font-bold text-on-surface font-headline">Recent Billing Activity</h3>
+              <button class="text-primary text-sm font-bold font-label hover:underline flex items-center gap-1">
+                View All Task History
+                <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+              </button>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="bg-surface-container-low">
+                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label">Bill ID</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label">Patient Name</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label">Status</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/10">
+                  @for (entry of billingEntries; track entry.billId) {
+                    <tr class="hover:bg-surface-container-low transition-colors cursor-pointer">
+
+                      <!-- Bill ID -->
+                      <td class="px-6 py-5">
+                        <p class="text-sm font-bold text-on-surface font-headline">{{ entry.billId }}</p>
+                        <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ entry.time }}</p>
+                      </td>
+
+                      <!-- Patient -->
+                      <td class="px-6 py-5">
+                        <div class="flex items-center gap-3">
+                          <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs font-headline"
+                            [class]="entry.initialsColor">
+                            {{ entry.initials }}
+                          </div>
+                          <span class="text-sm font-semibold text-on-surface font-headline">{{ entry.patientName }}</span>
+                        </div>
+                      </td>
+
+                      <!-- Status -->
+                      <td class="px-6 py-5">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold font-label"
+                          [class]="getStatusClass(entry.status)">
+                          {{ entry.status }}
+                        </span>
+                      </td>
+
+                      <!-- Amount -->
+                      <td class="px-6 py-5 text-right font-bold text-sm text-on-surface font-headline">
+                        {{ entry.amount }}
+                      </td>
+
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex items-center justify-between px-6 py-4 bg-surface-container-low/50 border-t border-outline-variant/10">
+              <span class="text-xs font-medium text-on-surface-variant font-label">Showing 1 to 4 of 128 entries</span>
+              <div class="flex gap-2">
+                <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant cursor-not-allowed font-label">
+                  Previous
+                </button>
+                <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container-lowest border border-outline-variant/20 text-on-surface hover:bg-surface-container-low transition-colors font-label">
+                  Next
+                </button>
+              </div>
+            </div>
+
+          </section>
+
+        </div>
+  </main>
 </div>

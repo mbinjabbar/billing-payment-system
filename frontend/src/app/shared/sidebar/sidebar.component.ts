@@ -1,11 +1,23 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+
+interface NavItem {
+  label: string;
+  icon: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-sidebar',
-  imports: [],
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
 })
 export class SidebarComponent {
-
+  navItems: NavItem[] = [
+    { label: 'Dashboard', icon: 'dashboard', route: '/biller' },
+    { label: 'Visits', icon: 'calendar_today', route: '/biller/visits' },
+    { label: 'Bills', icon: 'receipt_long', route: '/biller/bills' },
+    { label: 'Documents', icon: 'description', route: '/biller/documents' },
+  ];
 }

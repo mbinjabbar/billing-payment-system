@@ -90,3 +90,13 @@
 .bg-login-gradient {
     background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);
 }
+
+.icon-sm  { font-size: 18px; }
+.icon-md  { font-size: 24px; }
+.icon-lg  { font-size: 32px; }
+.icon-xl  { font-size: 40px; }
+.icon-2xl { font-size: 48px; }
+ 
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);
+}

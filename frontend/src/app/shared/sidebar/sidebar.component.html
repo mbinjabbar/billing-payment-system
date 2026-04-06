@@ -1,1 +1,22 @@
-<p>sidebar works!</p>
+<aside class="fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 bg-surface border-r border-outline-variant/15 overflow-y-auto z-40">
+  <nav class="flex flex-col gap-1 p-6 h-full">
+
+    <!-- Brand -->
+    <div class="mb-8">
+      <p class="text-xs text-on-surface-variant font-semibold uppercase tracking-widest mt-1 font-label">Biller</p>
+    </div>
+
+    <!-- Nav Items -->
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="bg-surface-container-low text-primary font-bold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-3 px-4 py-3 text-on-surface/70 hover:bg-surface-container-low rounded-xl transition-all duration-200 font-body font-medium text-sm">
+        <span class="material-symbols-outlined icon-md">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+
+  </nav>
+</aside>
