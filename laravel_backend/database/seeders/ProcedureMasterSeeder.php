@@ -9,23 +9,31 @@ class ProcedureMasterSeeder extends Seeder
 {
     public function run(): void
     {
-        $data = [
-            ['CONS-001', 'General Consultation', 125.50],
-            ['CONS-002', 'Extended Specialist Visit', 210.00],
-            ['XRAY-101', 'Chest X-Ray (Single View)', 85.00],
-            ['XRAY-102', 'Lower Limb X-Ray', 115.00],
-            ['LAB-201', 'Complete Blood Count (CBC)', 45.00],
-            ['LAB-202', 'Metabolic Panel', 75.00],
-            ['MRI-501', 'Brain MRI without Contrast', 1450.00],
-            ['MRI-502', 'Lumbar Spine MRI', 1200.00],
-            ['PT-001', 'Physical Therapy (Initial)', 185.00],
-            ['PT-002', 'PT Session (Follow-up)', 95.00],
-            ['SURG-901', 'Laceration Repair (Simple)', 350.00],
-            ['SURG-902', 'Minor Cyst Removal', 650.00],
-            ['ER-001', 'ER Triage Assessment', 250.00],
-            ['EKG-001', 'Electrocardiogram', 145.00],
-            ['FLU-001', 'Influenza Rapid Test', 35.00],
-        ];
+$data = [
+    ['99213', 'Office Visit, (Mid-Level)', 125.50],
+    ['99214', 'Office Visit, (Extended)', 210.00],
+    ['71045', 'Chest X-Ray', 85.00],
+    ['73590', 'Lower Limb X-Ray', 115.00],
+    ['85025', 'Complete Blood Count (CBC) Automated', 45.00],
+    ['80048', 'Basic Metabolic Panel', 75.00],
+    ['70551', 'Brain MRI without Contrast', 1450.00],
+    ['72148', 'Lumbar Spine MRI without Contrast', 1200.00],
+    ['97161', 'Physical Therapy Evaluation', 185.00],
+    ['97110', 'Therapeutic Exercise', 95.00],
+    ['12001', 'Simple Laceration Repair', 350.00],
+    ['11400', 'Excision of Benign Lesion', 650.00],
+    ['99281', 'Emergency Dept', 250.00],
+    ['93000', 'Electrocardiogram (ECG/EKG) Routine', 145.00],
+    ['87804', 'Influenza Rapid Antigen Test', 35.00],
+    ['99203', 'Initial Injury Evaluation', 185.00],
+    ['72040', 'Cervical Spine X-Ray', 95.00],
+    ['72100', 'Lumbosacral Spine X-Ray', 110.00],
+    ['97140', 'Manual Therapy', 75.00],
+    ['98940', 'Chiropractic Manipulative Treatment', 65.00],
+    ['97112', 'Neuromuscular Reeducation', 85.00],
+    ['99215', 'High Complexity Injury Assessment', 275.00],
+    ['95811', 'Sleep Study / Polysomnography', 950.00],
+];
 
         foreach ($data as $p) {
             ProcedureMaster::create([
