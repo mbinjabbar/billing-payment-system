@@ -27,7 +27,20 @@ export class VisitComponent {
   );
 
   ngOnInit() {
-    this.visitService.getVisits().subscribe((data) => this.visits.set(data));
+    this.loadVisits(1);
+  }
+
+  loadVisits(page: number) {
+    this.visitService.getVisits(page).subscribe((res: any) => {
+      this.visits.set(res);
+
+      this.currentPage.set(res.meta.current_page);
+      this.totalPages.set(res.meta.last_page);
+      this.totalItems.set(res.meta.total);
+      this.perPage.set(res.meta.per_page);
+      this.from.set(res.meta.from);
+      this.to.set(res.meta.to);
+    });
   }
 
   getVisitStatusClass(status: string): string {
@@ -58,6 +71,45 @@ export class VisitComponent {
   }
 
   isCancelled(visit: any): boolean {
-  return visit.status?.toLowerCase() === 'cancelled';
-}
+    return visit.status?.toLowerCase() === 'cancelled';
+  }
+
+  currentPage = signal(1);
+  totalPages = signal(1);
+  totalItems = signal(0);
+  perPage = signal(10);
+  from = signal(0);
+  to = signal(0);
+
+  visiblePages = computed(() => {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push('...');
+      const start = Math.max(2, current - 1);
+      const end = Math.min(total - 1, current + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (current < total - 2) pages.push('...');
+      pages.push(total);
+    }
+    return pages;
+  });
+
+  goToPage(page: number | string) {
+    if (typeof page !== 'number') return;
+    if (page < 1 || page > this.totalPages()) return;
+    this.loadVisits(page);
+  }
+
+  goToFirst() { this.loadVisits(1); }
+  goToLast()  { this.loadVisits(this.totalPages()); }
+  goToPrev()  { this.loadVisits(this.currentPage() - 1); }
+  goToNext()  { this.loadVisits(this.currentPage() + 1); }
+
+  protected Math = Math;
 }

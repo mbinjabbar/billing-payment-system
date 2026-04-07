@@ -24,6 +24,8 @@ trait ApiResponse
                 'last_page'    => $data->lastPage(),
                 'per_page'     => $data->perPage(),
                 'total'        => $data->total(),
+                'from'         => $data->firstItem(),
+                'to'           => $data->lastItem(),
             ];
         }
 

@@ -8,7 +8,7 @@ export class VisitService {
   private apiUrl = 'http://localhost:8000/api';
   private http = inject(HttpClient);
 
-  getVisits(){
-    return this.http.get(`${this.apiUrl}/visits`)
+  getVisits(page: number = 1){
+    return this.http.get(`${this.apiUrl}/visits?page=${page}`)
   }
 }
