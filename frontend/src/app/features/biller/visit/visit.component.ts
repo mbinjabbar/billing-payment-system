@@ -1,11 +1,12 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VisitService } from '../../../core/services/visit.service';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-visit',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './visit.component.html',
 })
 export class VisitComponent {

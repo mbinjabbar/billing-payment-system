@@ -1,0 +1,239 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+
+  <!-- MAIN -->
+  <main class="flex-1 p-8 md:p-12 mx-auto w-full">
+
+    <!-- Header -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+
+      <div>
+        <a
+          [routerLink]="['/biller/visits']"
+          class="inline-flex items-center text-primary text-sm font-semibold mb-4 hover:translate-x-1 transition-transform">
+          <span class="material-symbols-outlined mr-1 text-lg">arrow_back</span>
+          Back to Visits
+        </a>
+
+        <h1 class="text-4xl font-headline font-extrabold tracking-tight">
+          Generate New Bill
+        </h1>
+      </div>
+
+      <!-- Patient Card -->
+      <div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-4 border border-outline-variant/15 shadow-sm">
+
+
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Patient</div>
+          <div class="font-headline font-bold">{{ visit().patient_name }}</div>
+        </div>
+
+        <div class="h-10 w-px bg-outline-variant/30"></div>
+
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Visit Date</div>
+          <div class="font-headline font-bold">{{ visit().date }}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- LEFT -->
+      <div class="lg:col-span-8 space-y-8">
+
+        <!-- Procedures + Billing -->
+        <div class="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/15">
+
+          <!-- Header -->
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-headline font-bold">Procedure Details</h2>
+
+            <button
+              (click)="addProcedure()"
+              class="bg-surface-container-high text-primary font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Add Procedure
+            </button>
+          </div>
+
+          <!-- Table Head -->
+          <div class="grid grid-cols-12 px-4 py-2 text-xs font-bold uppercase text-on-surface-variant">
+            <div class="col-span-9">Procedure / Code</div>
+            <div class="col-span-3 text-right">Charge ($)</div>
+          </div>
+
+          <!-- Rows -->
+          <div class="space-y-3 mb-10">
+
+            @for (p of procedures(); track $index) {
+            <div class="grid grid-cols-12 items-center px-4 py-4 bg-surface-container-low/50 rounded-lg">
+
+              <!-- Name -->
+              <div class="col-span-9">
+                <div class="font-semibold">
+                  {{ p.code }} - {{ p.name }}
+                </div>
+                <div class="text-xs text-on-surface-variant">
+                  {{ p.description }}
+                </div>
+              </div>
+
+              <!-- Charge -->
+              <div class="col-span-3 text-right font-bold font-headline">
+                ${{ (p.units * p.charge).toFixed(2) }}
+              </div>
+
+            </div>
+            }
+
+          </div>
+
+          <!-- Billing Info -->
+          <div class="pt-8 border-t border-outline-variant/15">
+
+            <h2 class="text-xl font-headline font-bold mb-8">
+              Billing Information
+            </h2>
+
+            <div class="grid md:grid-cols-3 gap-6">
+
+              <!-- Insurance -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2">
+                  Insurance Coverage (%)
+                </label>
+
+                <div class="relative">
+                  <input
+                    type="number"
+                    class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg"
+                    [ngModel]="billing().insurance"
+                    (ngModelChange)="updateBilling('insurance', $event)" />
+
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2">%</span>
+                </div>
+              </div>
+
+              <!-- Discount -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2">
+                  Discount Amount
+                </label>
+
+                <div class="relative">
+                  <input
+                    type="number"
+                    class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg pl-6"
+                    [ngModel]="billing().discount"
+                    (ngModelChange)="updateBilling('discount', $event)" />
+
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2">$</span>
+                </div>
+              </div>
+
+              <!-- Tax -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2">
+                  Tax (%)
+                </label>
+
+                <div class="relative">
+                  <input
+                    type="number"
+                    class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg"
+                    [ngModel]="billing().tax"
+                    (ngModelChange)="updateBilling('tax', $event)" />
+
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2">%</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Info -->
+            <div class="mt-6 bg-primary/5 rounded-lg p-4 flex gap-3">
+              <span class="material-symbols-outlined text-primary">info</span>
+              <p class="text-xs text-on-surface-variant">
+                Changes update patient responsibility automatically.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div class="lg:col-span-4">
+
+        <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 sticky top-24">
+
+          <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-8">
+            Calculation Summary
+          </h3>
+
+          <div class="space-y-6">
+
+            <!-- Total -->
+            <div class="flex justify-between border-b pb-4">
+              <span>Total Gross Charge</span>
+              <span class="font-bold">${{ summary().total }}</span>
+            </div>
+
+            <!-- Insurance -->
+            <div class="flex justify-between border-b pb-4">
+              <span>Insurance ({{ billing().insurance }}%)</span>
+              <span class="text-secondary font-bold">
+                -${{ summary().insurance }}
+              </span>
+            </div>
+
+            <!-- Final -->
+            <div class="pt-4">
+              <span class="text-primary text-xs font-bold uppercase">
+                Patient Responsibility
+              </span>
+
+              <div class="text-4xl font-extrabold font-headline mt-1">
+                ${{ summary().final }}
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col gap-3 mt-6">
+
+              <button
+                (click)="generateBill()"
+                class="w-full bg-linear-to-br from-primary to-primary-container text-white font-bold py-4 rounded-lg shadow-lg">
+                Generate Bill
+              </button>
+
+              <button
+                (click)="saveDraft()"
+                class="w-full bg-surface-container-high font-bold py-4 rounded-lg">
+                Save as Draft
+              </button>
+
+            </div>
+
+            <!-- Status -->
+            <div class="pt-6 border-t">
+              <div class="flex items-center gap-2 px-3 py-1 bg-secondary-container rounded-full text-[10px] font-bold w-fit">
+                <span class="w-1.5 h-1.5 rounded-full bg-on-secondary-container"></span>
+                DRAFT STATUS
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>

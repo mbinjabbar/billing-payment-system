@@ -146,6 +146,7 @@
                 </span>
                 } @else if (isReadyForBilling(visit)) {
                 <button
+                  [routerLink]="['/bills/create', visit.id]"
                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary-container text-white shadow-md shadow-primary/20 hover:bg-primary active:scale-98 transition-all font-headline cursor-pointer">
                   <span class="material-symbols-outlined icon-sm">add</span>
                   Create Bill

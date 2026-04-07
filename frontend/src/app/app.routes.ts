@@ -21,6 +21,7 @@ export const routes: Routes = [
       }
     ]
   },
+    { path: 'bills/create/:visitId', loadComponent: () => import('./features/bills/create-bill/create-bill.component').then(m => m.CreateBillComponent)},
     { path: 'payment-poster', loadComponent: () => import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent) },
     { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
