@@ -1,48 +1,51 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { VisitService } from '../../../core/services/visit.service';
 
 @Component({
   selector: 'app-visit',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './visit.component.html',
 })
 export class VisitComponent {
-  totalPending = 12840;
+  private visitService = inject(VisitService);
 
-  visits = [
-    {
-      initials: 'SM',
-      patientName: 'Sarah Mitchell',
-      id: '#PX-9920',
-      date: 'Oct 24, 2023',
-      time: '09:15 AM',
-      service: 'Comprehensive Physical Exam',
-      icd: 'ICD-10: Z00.00',
-    },
-    {
-      initials: 'JW',
-      patientName: 'James Wilson',
-      id: '#PX-8142',
-      date: 'Oct 24, 2023',
-      time: '10:30 AM',
-      service: 'Diagnostic Ultrasound: Abdominal',
-      icd: 'ICD-10: R10.9',
-    },
-    {
-      initials: 'EK',
-      patientName: 'Elena Kovach',
-      id: '#PX-4421',
-      date: 'Oct 23, 2023',
-      time: '02:45 PM',
-      service: 'Cardiac Follow-up Consultation',
-      icd: 'ICD-10: I10',
-    },
-    {
-      initials: 'MT',
-      patientName: 'Marcus Thorne',
-      id: '#PX-2209',
-      date: 'Oct 23, 2023',
-      time: '11:15 AM',
-      service: 'Blood Lab Panel - Standard',
-      icd: 'ICD-10: E78.5',
-    },
-  ];
+  visits = signal<any>({ data: [] });
+
+  totalPending = computed(() =>
+    this.visits().data.reduce((sum: number, v: any) =>
+      sum + (v.bill === null ? 1 : 0), 0)
+  );
+
+  unbilledCount = computed(() =>
+    this.visits().data.filter((v: any) => v.bill === null).length
+  );
+
+  billedCount = computed(() =>
+    this.visits().data.filter((v: any) => v.bill !== null).length
+  );
+
+  ngOnInit() {
+    this.visitService.getVisits().subscribe((data) => this.visits.set(data));
+  }
+
+  getVisitStatusClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'completed': return 'bg-secondary-container text-on-secondary-container';
+      case 'pending':   return 'bg-error-container/20 text-error';
+      case 'cancelled': return 'bg-surface-container-high text-on-surface-variant';
+      default:          return 'bg-surface-container-high text-on-surface-variant';
+    }
+  }
+
+  getBillingStatusClass(billed: boolean): string {
+    return billed
+      ? 'bg-secondary-container text-on-secondary-container'
+      : 'bg-error-container/20 text-error';
+  }
+
+  getBillingLabel(bill: any): string {
+    return bill !== null ? 'Billed' : 'Unbilled';
+  }
 }

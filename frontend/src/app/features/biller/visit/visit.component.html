@@ -1,143 +1,159 @@
-<div class="bg-surface text-on-surface min-h-screen flex font-body">
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <div class="pt-10 px-10 pb-12 space-y-8 w-full">
 
-  <!-- Main -->
-  <main class="flex-1 ml-64 min-h-screen flex flex-col">
+    <!-- Page Header -->
+    <section class="flex justify-between items-end">
+      <div>
+        <h2 class="text-4xl font-extrabold tracking-tight font-headline">Completed Visits</h2>
+        <p class="text-on-surface-variant mt-2 max-w-2xl font-body">
+          Review clinical visits that have been finalized and are ready for professional billing processing.
+        </p>
+      </div>
+    </section>
 
-    <!-- Content -->
-    <div class="pt-10 px-10 pb-12 space-y-10 w-full">
+    <!-- Stats -->
+    <section class="grid grid-cols-3 gap-6">
 
-      <!-- Header -->
-      <section class="flex justify-between items-end">
-        <div>
-          <h2 class="text-4xl font-extrabold tracking-tight font-headline">
-            Completed Visits
-          </h2>
-          <p class="text-on-surface-variant mt-2 max-w-2xl">
-            Review clinical visits that have been finalized and are ready for professional billing processing.
-          </p>
+      <!-- Ready for Billing -->
+      <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-3">Total Visits</p>
+        <div class="flex items-end gap-2">
+          <span class="text-4xl font-extrabold font-headline text-on-surface">{{ visits().data.length }}</span>
+          <span class="text-primary font-bold text-sm font-label mb-1">visits</span>
         </div>
-      </section>
+      </div>
 
-      <!-- Stats -->
-      <section class="grid grid-cols-3 gap-6">
-
-        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
-          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
-            Ready For Billing
-          </p>
-          <div class="flex items-end gap-2">
-            <span class="text-4xl font-extrabold">{{ visits.length }}</span>
-            <span class="text-primary font-bold">+5 today</span>
-          </div>
+      <!-- Billed -->
+      <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-3">Already Billed</p>
+        <div class="flex items-end gap-2">
+          <span class="text-4xl font-extrabold font-headline text-on-surface">{{ billedCount() }}</span>
+          <span class="text-on-surface-variant font-label text-sm mb-1">visits</span>
         </div>
+      </div>
 
-        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
-          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
-            Average Wait Time
-          </p>
-          <div class="flex items-end gap-2">
-            <span class="text-4xl font-extrabold">1.4</span>
-            <span class="text-on-surface-variant">days</span>
-          </div>
-        </div>
+      <!-- Total Pending Value -->
+      <div class="rounded-xl p-6 shadow-lg shadow-primary/20 text-white"
+        style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+        <p class="text-xs font-bold uppercase tracking-widest text-blue-100 font-label mb-3">Total Pending</p>
+        <span class="text-4xl font-extrabold font-headline">{{ totalPending() }}</span>
+        <span class="text-blue-100 font-label text-sm ml-1">unbilled</span>
+      </div>
 
-        <div class="bg-primary rounded-xl p-6 shadow-lg shadow-primary/20 text-white">
-          <p class="text-xs font-bold uppercase tracking-widest text-blue-100 mb-2">
-            Total Value Pending
-          </p>
-          <span class="text-4xl font-extrabold">${{ totalPending }}</span>
-        </div>
-      </section>
+    </section>
 
-      <!-- Visits Table -->
-      <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+    <!-- Visits Table -->
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
-        <!-- Table Header -->
-        <div class="flex justify-between items-center px-6 py-5 border-b border-outline-variant/10">
-          <h3 class="text-xl font-bold font-headline">Pending Queue</h3>
+      <!-- Table Header -->
+      <div class="px-6 py-5 border-b border-outline-variant/10">
+        <h3 class="text-xl font-bold font-headline">Pending Queue</h3>
+      </div>
 
-          <div class="flex items-center gap-3 text-sm text-on-surface-variant">
-            <span>Showing 1-{{ visits.length }} of {{ visits.length }} visits</span>
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="bg-surface-container-low">
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label whitespace-nowrap">Patient Name</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label whitespace-nowrap">Case No.</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label whitespace-nowrap">Date Of Visit</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label whitespace-nowrap">Doctor</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label whitespace-nowrap">Diagnosis</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label text-center whitespace-nowrap">Visit Status</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label text-center whitespace-nowrap">Billing</th>
+              <th class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label text-right whitespace-nowrap">Action</th>
+            </tr>
+          </thead>
 
-            <div class="flex gap-2">
-              <button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center">
-                <span class="material-symbols-outlined text-sm">chevron_left</span>
-              </button>
-              <button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center">
-                <span class="material-symbols-outlined text-sm">chevron_right</span>
-              </button>
-            </div>
-          </div>
-        </div>
+          <tbody class="divide-y divide-outline-variant/10">
+            @for (visit of visits().data; track $index) {
+              <tr class="hover:bg-surface-container-low transition-colors">
 
-        <!-- Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="bg-surface-container-low">
-                <th class="px-6 py-4 text-xs text-on-surface-variant font-bold uppercase tracking-wider">Patient Name</th>
-                <th class="px-6 py-4 text-xs text-on-surface-variant font-bold uppercase tracking-wider">Date Of Visit</th>
-                <th class="px-6 py-4 text-xs text-on-surface-variant font-bold uppercase tracking-wider">Service Description</th>
-                <th class="px-6 py-4 text-xs text-on-surface-variant font-bold uppercase tracking-wider text-center">Status</th>
-                <th class="px-6 py-4 text-xs text-on-surface-variant font-bold uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
+                <!-- Patient Name -->
+                <td class="px-5 py-4">
+                  <p class="font-bold text-on-surface font-headline whitespace-nowrap">
+                    {{ visit.appointment.patient_case.patient.full_name }}
+                  </p>
+                  <p class="text-[10px] text-on-surface-variant font-label mt-0.5">ID: {{ visit.id }}</p>
+                </td>
 
-            <tbody class="divide-y divide-outline-variant/10">
-              @for (visit of visits; track $index) {
-                <tr class="hover:bg-surface-container-low transition-colors">
+                <!-- Case No -->
+                <td class="px-5 py-4 whitespace-nowrap">
+                  <p class="font-medium text-on-surface font-body">
+                    {{ visit.appointment.patient_case.case_number }}
+                  </p>
+                </td>
 
-                  <td class="px-6 py-5">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary font-bold text-xs">
-                        {{ visit.initials }}
-                      </div>
-                      <div>
-                        <p class="font-bold">{{ visit.patientName }}</p>
-                        <p class="text-xs text-on-surface-variant">ID: {{ visit.id }}</p>
-                      </div>
-                    </div>
-                  </td>
+                <!-- Date Of Visit -->
+                <td class="px-5 py-4 whitespace-nowrap">
+                  <p class="font-medium text-on-surface font-body">{{ visit.visit_date | date }}</p>
+                  <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ visit.visit_time }}</p>
+                </td>
 
-                  <td class="px-6 py-5">
-                    <p class="font-medium">{{ visit.date }}</p>
-                    <p class="text-xs text-on-surface-variant">{{ visit.time }}</p>
-                  </td>
+                <!-- Doctor -->
+                <td class="px-5 py-4 whitespace-nowrap">
+                  <p class="font-medium text-on-surface font-body">{{ visit.appointment.doctor_name }}</p>
+                </td>
 
-                  <td class="px-6 py-5">
-                    <p>{{ visit.service }}</p>
-                    <p class="text-xs text-primary font-semibold">{{ visit.icd }}</p>
-                  </td>
+                <!-- Diagnosis -->
+                <td class="px-5 py-4 max-w-40">
+                  <p class="text-on-surface font-body truncate" [title]="visit.diagnosis">
+                    {{ visit.diagnosis }}
+                  </p>
+                  <p class="text-[10px] text-primary font-semibold font-label mt-0.5">{{ visit.icd }}</p>
+                </td>
 
-                  <td class="px-6 py-5 text-center">
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">
-                      Completed
-                    </span>
-                  </td>
+                <!-- Visit Status -->
+                <td class="px-5 py-4 text-center whitespace-nowrap">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-wide"
+                    [class]="getVisitStatusClass(visit.status)">
+                    {{ visit.status }}
+                  </span>
+                </td>
 
-                  <td class="px-6 py-5 text-right">
+                <!-- Billing Status -->
+                <td class="px-5 py-4 text-center whitespace-nowrap">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-wide"
+                    [class]="getBillingStatusClass(visit.bill !== null)">
+                    {{ getBillingLabel(visit.bill) }}
+                  </span>
+                </td>
+
+                <!-- Action -->
+                <td class="px-5 py-4 text-right whitespace-nowrap">
+                  @if (visit.bill === null) {
                     <button
-                      class="px-4 py-2 rounded-lg text-xs font-bold text-white shadow-md shadow-primary/10"
-                      style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+                      class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary-container text-white shadow-md shadow-primary/20 hover:bg-primary active:scale-98 transition-all font-headline cursor-pointer">
+                      <span class="material-symbols-outlined icon-sm">add</span>
                       Create Bill
                     </button>
-                  </td>
+                  } @else {
+                    <button
+                      class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container hover:text-on-primary active:scale-98 transition-all font-headline cursor-pointer">
+                      <span class="material-symbols-outlined icon-sm">visibility</span>
+                      View Bill
+                    </button>
+                  }
+                </td>
 
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Footer -->
-        <div class="p-6 bg-surface-container-low flex justify-center">
-          <button class="text-primary text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-            View All Completed Visits
-            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </button>
-        </div>
-      </section>
+      <!-- Footer -->
+      <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
+        <span class="text-xs text-on-surface-variant font-label">
+          Showing {{ visits().data.length }} visits
+        </span>
+        <button class="text-primary text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 font-label hover:underline">
+          View All Completed Visits
+          <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+        </button>
+      </div>
 
-    </div>
-  </main>
+    </section>
+  </div>
 </div>
