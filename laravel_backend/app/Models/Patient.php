@@ -25,6 +25,8 @@ class Patient extends Model
         'emergency_contact_name',
         'emergency_contact_phone',
     ];
+    protected $appends = ['full_name']; 
+    
     public function cases()
     {
         return $this->hasMany(PatientCase::class);
