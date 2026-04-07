@@ -98,7 +98,7 @@ class billController extends Controller
         Document::create([
             'bill_id' => $bill->id,
             'payment_id' => null, 
-            'document_type' => $data['document_type'] ?? 'NF2 Form',
+            'document_type' => $data['document_type'] ?? 'Invoice',
             'file_name' => $fileName,
             'file_type' => $filetype,
             'file_path' => $path,
