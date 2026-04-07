@@ -101,22 +101,28 @@ export class CreateBillComponent {
   }
 
   addProcedure() {
-  this.procedures.update(p => [
-    ...p,
-    {
-      code: '00000',
-      name: 'New Procedure',
-      description: '',
-      units: 1,
-      charge: 0
-    }
-  ]);
-}
+    this.procedures.update(p => [
+      ...p,
+      {
+        code: '00000',
+        name: 'New Procedure',
+        description: '',
+        units: 1,
+        charge: 0
+      }
+    ]);
+  }
 
-updateBilling(field: string, value: number) {
-  this.billing.update(b => ({
-    ...b,
-    [field]: Number(value)
-  }));
-}
+  updateBilling(field: string, value: number) {
+    let val = Number(value);
+
+    if (field === 'insurance' || field === 'tax') {
+      val = Math.max(0, Math.min(100, val));
+    }
+
+    this.billing.update(b => ({
+      ...b,
+      [field]: val
+    }));
+  }
 }
