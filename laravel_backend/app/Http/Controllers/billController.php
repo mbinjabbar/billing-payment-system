@@ -81,21 +81,26 @@ class billController extends Controller
 
             $fileName = 'nf2_bill_' . $bill->id . '.pdf';
             $path = 'bills/' . $fileName;
-
+        
             Storage::put($path, $pdf->output());
+            $fileSize = Storage::size($path);
+            $filetype = Storage::mimeType($path);
+            $maxSize = 5 * 1024 * 1024; 
+            if ($fileSize > $maxSize) {
+            Storage::delete($path);
+             return $this->error('File size exceeds the 5MB limit.');
+           }
 
             $bill->update([
                 'generated_document_path' => $path
             ]);
 
-        $fileSize = Storage::size($path);
-
         Document::create([
             'bill_id' => $bill->id,
             'payment_id' => null, 
-            'document_type' => 'NF2 Form',
+            'document_type' => $data['document_type'] ?? 'NF2 Form',
             'file_name' => $fileName,
-            'file_type' => 'pdf',
+            'file_type' => $filetype,
             'file_path' => $path,
             'file_size' => $fileSize,
             'upload_date' => now(),
