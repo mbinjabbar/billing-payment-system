@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('case_number');
             $table->enum('case_type', ['New', 'Follow-up', 'Emergency', 'Consultation', 'Surgical', 'Chronic']);
             $table->enum('case_category', ['General Medicine', 'Pediatrics', 'Cardiology', 'Orthopedics', 'Dermatology', 'Neurology', 'Gynecology', 'Ophthalmology', 'ENT', 'Dental', 'Psychiatry', 'Other']);
+            $table->boolean('car_accident')->default(false);
             $table->enum('priority', ['Low', 'Normal', 'High', 'Urgent']);
             $table->enum('status', ['Active', 'Closed', 'Transferred', 'On Hold'])->default('Active');
             $table->text('description');

@@ -77,7 +77,7 @@ class billController extends Controller
 
             $bill->load('visit.appointment.patientCase.patient');
 
-            $pdf = PDF::loadView('bill_pdf', compact('bill'));
+            $pdf = PDF::loadView('NF2_pdf', compact('bill'));
 
             $fileName = 'nf2_bill_' . $bill->id . '.pdf';
             $path = 'bills/' . $fileName;

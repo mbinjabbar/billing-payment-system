@@ -23,6 +23,7 @@ class PatientCaseSeeder extends Seeder
                 'description'   => $faker->paragraph(1),
                 'opened_date' => $faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
                 'referring_doctor' => $faker->boolean(40) ? 'Dr. ' . $faker->lastName : null,
+                'car_accident' => $faker->boolean(),
             ]);
         }
     }
