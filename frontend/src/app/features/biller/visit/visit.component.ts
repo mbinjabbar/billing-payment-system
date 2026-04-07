@@ -32,20 +32,32 @@ export class VisitComponent {
 
   getVisitStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
-      case 'completed': return 'bg-secondary-container text-on-secondary-container';
-      case 'pending':   return 'bg-error-container/20 text-error';
+      case 'completed': return 'bg-green-200 text-green-700';
+      case 'pending': return 'bg-orange-200 text-orange-700';
       case 'cancelled': return 'bg-surface-container-high text-on-surface-variant';
-      default:          return 'bg-surface-container-high text-on-surface-variant';
+      default: return 'bg-surface-container-high text-on-surface-variant';
     }
   }
 
   getBillingStatusClass(billed: boolean): string {
     return billed
-      ? 'bg-secondary-container text-on-secondary-container'
+      ? 'bg-green-200 text-green-700'
       : 'bg-error-container/20 text-error';
   }
 
   getBillingLabel(bill: any): string {
     return bill !== null ? 'Billed' : 'Unbilled';
   }
+
+  isReadyForBilling(visit: any): boolean {
+    return visit.status?.toLowerCase() === 'completed' && visit.bill === null;
+  }
+
+  isBilled(visit: any): boolean {
+    return visit.bill !== null;
+  }
+
+  isCancelled(visit: any): boolean {
+  return visit.status?.toLowerCase() === 'cancelled';
+}
 }

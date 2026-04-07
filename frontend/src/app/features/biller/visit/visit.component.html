@@ -122,19 +122,25 @@
 
                 <!-- Action -->
                 <td class="px-5 py-4 text-right whitespace-nowrap">
-                  @if (visit.bill === null) {
-                    <button
-                      class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary-container text-white shadow-md shadow-primary/20 hover:bg-primary active:scale-98 transition-all font-headline cursor-pointer">
-                      <span class="material-symbols-outlined icon-sm">add</span>
-                      Create Bill
-                    </button>
-                  } @else {
-                    <button
-                      class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container hover:text-on-primary active:scale-98 transition-all font-headline cursor-pointer">
-                      <span class="material-symbols-outlined icon-sm">visibility</span>
-                      View Bill
-                    </button>
-                  }
+@if (isCancelled(visit)) {
+  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-surface-container-high text-on-surface-variant">
+    Cancelled
+  </span>
+} @else if (isReadyForBilling(visit)) {
+  <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary-container text-white shadow-md shadow-primary/20 hover:bg-primary active:scale-98 transition-all font-headline cursor-pointer">
+    <span class="material-symbols-outlined icon-sm">add</span>
+    Create Bill
+  </button>
+} @else if (isBilled(visit)) {
+  <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container hover:text-on-primary active:scale-98 transition-all font-headline cursor-pointer">
+    <span class="material-symbols-outlined icon-sm">visibility</span>
+    View Bill
+  </button>
+} @else {
+  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-secondary-container text-on-secondary-container font-label">
+    In Progress
+  </span>
+}
                 </td>
 
               </tr>
