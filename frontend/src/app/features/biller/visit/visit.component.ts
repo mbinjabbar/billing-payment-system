@@ -13,6 +13,12 @@ export class VisitComponent {
 
   visits = signal<any>({ data: [] });
 
+  stats = signal<any>({
+    total_visits: 0,
+    billed: 0,
+    unbilled: 0,
+  });
+
   totalPending = computed(() =>
     this.visits().data.reduce((sum: number, v: any) =>
       sum + (v.bill === null ? 1 : 0), 0)
@@ -40,6 +46,9 @@ export class VisitComponent {
       this.perPage.set(res.meta.per_page);
       this.from.set(res.meta.from);
       this.to.set(res.meta.to);
+      if (res.stats) {
+        this.stats.set(res.stats);
+      }
     });
   }
 
@@ -107,9 +116,9 @@ export class VisitComponent {
   }
 
   goToFirst() { this.loadVisits(1); }
-  goToLast()  { this.loadVisits(this.totalPages()); }
-  goToPrev()  { this.loadVisits(this.currentPage() - 1); }
-  goToNext()  { this.loadVisits(this.currentPage() + 1); }
+  goToLast() { this.loadVisits(this.totalPages()); }
+  goToPrev() { this.loadVisits(this.currentPage() - 1); }
+  goToNext() { this.loadVisits(this.currentPage() + 1); }
 
   protected Math = Math;
 }

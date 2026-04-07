@@ -8,7 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 trait ApiResponse
 {
-    protected function success(mixed $data, string $message = 'Success', int $code = 200): JsonResponse
+    protected function success(mixed $data, string $message = 'Success', int $code = 200, $stats = null): JsonResponse
     {
 
         $response = [
@@ -28,6 +28,10 @@ trait ApiResponse
                 'to'           => $data->lastItem(),
             ];
         }
+
+     if ($stats) {
+        $response['stats'] = $stats;
+    }
 
         return response()->json($response, $code);
     }

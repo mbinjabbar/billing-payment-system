@@ -18,7 +18,7 @@
       <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-3">Total Visits</p>
         <div class="flex items-end gap-2">
-          <span class="text-4xl font-extrabold font-headline text-on-surface">{{ visits().data.length }}</span>
+          <span class="text-4xl font-extrabold font-headline text-on-surface">{{ stats()?.total_visits }}</span>
           <span class="text-primary font-bold text-sm font-label mb-1">visits</span>
         </div>
       </div>
@@ -28,7 +28,7 @@
         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-3">Already Billed
         </p>
         <div class="flex items-end gap-2">
-          <span class="text-4xl font-extrabold font-headline text-on-surface">{{ billedCount() }}</span>
+          <span class="text-4xl font-extrabold font-headline text-on-surface">{{ stats()?.billed }}</span>
           <span class="text-on-surface-variant font-label text-sm mb-1">visits</span>
         </div>
       </div>
@@ -37,7 +37,7 @@
       <div class="rounded-xl p-6 shadow-lg shadow-primary/20 text-white"
         style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
         <p class="text-xs font-bold uppercase tracking-widest text-blue-100 font-label mb-3">Total Pending</p>
-        <span class="text-4xl font-extrabold font-headline">{{ totalPending() }}</span>
+        <span class="text-4xl font-extrabold font-headline">{{ stats()?.unbilled }}</span>
         <span class="text-blue-100 font-label text-sm ml-1">unbilled</span>
       </div>
 

@@ -27,14 +27,20 @@ class VisitController extends Controller
             $query->when($request->patient_name, function ($q) use ($request) {
                 return $q->whereHas('appointment.patientCase.patient', function ($sub) use ($request) {
                     $sub->where('first_name', 'like', '%' . $request->patient_name . '%')
-                         ->orWhere('middle_name', 'like', '%' . $request->patient_name . '%')
+                        ->orWhere('middle_name', 'like', '%' . $request->patient_name . '%')
                         ->orWhere('last_name', 'like', '%' . $request->patient_name . '%');
                 });
             });
 
+            $stats = [
+                'total_visits' => (clone $query)->count(),
+                'billed' => (clone $query)->whereHas('bill')->count(),
+                'unbilled'       => (clone $query)->where('status', 'Completed')->doesntHave('bill')->count()
+            ];
+
             $visits = $query->latest('visit_date')->paginate(10);
 
-            return $this->success($visits, 'Visits list fetched successfully.');
+            return $this->success($visits, 'Visits list fetched successfully.', 200, $stats);
         } catch (Exception $e) {
             return $this->error('Unable to fetch visits list.');
         }
