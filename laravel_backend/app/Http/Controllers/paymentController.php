@@ -8,6 +8,8 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Bill;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Log;
+use App\Models\Document;
 
 class paymentController extends Controller
 {
@@ -24,22 +26,23 @@ class paymentController extends Controller
 
     
     public function store(Request $request)
-    {
-        
+    {    
             try {
                 
             $data= $request->all();
              $bill = Bill::findOrFail($data['bill_id']);
+            
             //if($data['payment_mode'] === 'Cheque' && $request->hasFile('cheque_file')) {
                 //$file = $request->file('cheque_file');
+               // $name = $file->getClientOriginalName();
+                //$type = $file->getClientOriginalExtension();
                 //$filePath = $file->store('cheque_files', 'public');
-                //$data['cheque_file_path'] = $filePath;
-            //}
+              // $data['cheque_file_path'] = $filePath;
+           // }
 
             if($data['amount_paid'] > $bill->outstanding_amount) {
                 return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
             }
-
             $payment = Payment::create([
                 'bill_id' => $data['bill_id'],
                 'received_by' => $data['received_by'],
@@ -53,9 +56,6 @@ class paymentController extends Controller
                 'cheque_file_path' => $data['cheque_file_path']?? null, 
                 'notes' => $data['notes'] ?? null,
             ]);
-
-        
-           
             $bill->paid_amount += $data['amount_paid'];
             $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
             $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
@@ -64,17 +64,31 @@ class paymentController extends Controller
             } elseif ($bill->outstanding_amount > 0) {
                 $bill->status = 'Partial';
             }
-
             $bill->save();
 
-                return $this->success($payment, 'Payment created and bill updated successfully');
+             //if ($request->hasFile('cheque_file')) {
+             //Document::create([
+            //'bill_id' => $bill->id,
+            //'payment_id' => $payment->id, 
+            //'document_type' => 'Payment Receipt',
+            //'file_name' => $name,
+            //'file_type' => $type,
+            //'file_path' => $data['cheque_file_path'],
+            //'file_size' => $request->file('cheque_file')->getSize(),
+            //'upload_date' => now(),
+            //'uploaded_by' => $data['created_by'],
+            //'version' => 1
+        //]);
+             //}
+
+            return $this->success($payment, 'Payment created and bill updated successfully');
             } catch (Exception $e) {
                
-                return $this->error('An error occurred while creating the payment');
+                  return $this->error($e->getMessage());
             }
     }
 
-   
+
     public function show($id)
     {
         try {
@@ -86,7 +100,6 @@ class paymentController extends Controller
         }
     }
 
-    
     
     public function update(Request $request, $id)
 {
@@ -112,7 +125,8 @@ class paymentController extends Controller
         ]));
         $payment->save();
         $difference = $newAmountPaid - $oldAmountPaid;
-        $bill->paid_amount += $difference;
+        $bill->increment('paid_amount', $difference);
+        $bill->refresh();
         $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
         if ($bill->outstanding_amount <= 0) {
