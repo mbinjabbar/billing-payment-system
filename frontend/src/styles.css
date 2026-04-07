@@ -100,3 +100,13 @@
 .bg-brand-gradient {
   background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);
 }
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
