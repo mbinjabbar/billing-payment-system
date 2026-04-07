@@ -9,10 +9,10 @@
       <!-- Page Title Row -->
       <section class="flex justify-between items-end">
         <div>
-          <h2 class="text-3xl font-extrabold text-on-surface tracking-tight font-headline">Financial Overview</h2>
-          <p class="text-on-surface-variant font-medium mt-1 font-body">Real-time billing performance and outstanding revenue metrics.</p>
+          <h2 class="text-4xl font-extrabold text-on-surface tracking-tight font-headline">Financial Overview</h2>
+          <p class="text-on-surface-variant mt-2 font-body">Real-time billing performance and outstanding revenue metrics.</p>
         </div>
-          <button class="text-white px-6 py-2.5 rounded-lg font-headline font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
+          <button class="text-white px-6 py-2.5 rounded-lg font-headline font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95 cursor-pointer"
             style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
             <span class="material-symbols-outlined icon-sm">add</span>
             Create New Bill
@@ -24,7 +24,7 @@
 
             <!-- Total Bill Amount -->
             <div class="col-span-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 relative overflow-hidden">
-              <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-3">Total Bill Amount</p>
+              <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label mb-3">Total Bill Amount</p>
               <div class="flex items-baseline gap-2 mb-6">
                 <span class="text-3xl font-extrabold text-on-surface font-headline tracking-tight">{{totalBillAmount() | currency}}</span>
               </div>
@@ -32,7 +32,7 @@
               <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
                 <div class="bg-primary h-full rounded-full" style="width: 72%"></div>
               </div>
-              <p class="text-[10px] text-on-surface-variant font-label mt-2 text-right">72% Goal</p>
+              <p class="text-xs text-on-surface-variant font-label mt-2 text-right">72% Goal</p>
             </div>
 
             <!-- Outstanding -->
@@ -41,7 +41,7 @@
                 <span class="material-symbols-outlined text-primary icon-md">account_balance</span>
               </div>
               <div>
-                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Outstanding</p>
+                <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Outstanding</p>
                 <p class="text-2xl font-extrabold text-on-surface font-headline mb-4">{{totalOutstandingAmount() | currency}}</p>
               </div>
             </div>
@@ -52,7 +52,7 @@
               <div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center mb-4">
                 <span class="material-symbols-outlined text-on-secondary-container icon-md">pending_actions</span>
               </div>
-              <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Pending Bills</p>
+              <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Pending Bills</p>
               <p class="text-2xl font-extrabold text-on-surface font-headline leading-none">{{ pendingBillsCount() }}<br/>Invoices</p>
             </div>
 
@@ -62,7 +62,7 @@
           <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
             <!-- Table Header -->
             <div class="flex justify-between items-center px-6 py-5 border-b border-outline-variant/10">
-              <h3 class="text-lg font-bold text-on-surface font-headline">Recent Billing Activity</h3>
+              <h3 class="text-xl font-bold text-on-surface font-headline">Recent Billing Activity</h3>
               <button class="text-primary text-sm font-bold font-label hover:underline flex items-center gap-1">
                 View All Bills
               </button>
@@ -73,10 +73,10 @@
               <table class="w-full text-left">
                 <thead>
                   <tr class="bg-surface-container-low">
-                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label">Bill ID</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label">Patient Name</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label">Status</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-label text-right">Amount</th>
+                    <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label">Bill ID</th>
+                    <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label">Patient Name</th>
+                    <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label">Status</th>
+                    <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label text-right">Amount</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant/10">
@@ -85,8 +85,8 @@
 
                       <!-- Bill ID -->
                       <td class="px-6 py-5">
-                        <p class="text-sm font-bold text-on-surface font-headline">{{ bill.bill_number }}</p>
-                        <p class="text-[10px] text-on-surface-variant font-label mt-0.5">{{ bill.bill_date | date }}</p>
+                        <p class="font-bold text-on-surface font-headline">{{ bill.bill_number }}</p>
+                        <p class="text-xs text-on-surface-variant font-label mt-0.5">{{ bill.bill_date | date }}</p>
                       </td>
 
                       <!-- Patient -->
@@ -96,7 +96,7 @@
                             [class]="bill.initialsColor">
                             {{ bill.initials }}
                           </div>
-                          <span class="text-sm font-semibold text-on-surface font-headline">{{ bill.visit.appointment.patient_case.patient.first_name }}</span>
+                          <span class="font-semibold text-on-surface font-headline">{{ bill.visit.appointment.patient_case.patient.first_name }}</span>
                         </div>
                       </td>
 
@@ -112,7 +112,6 @@
                       <td class="px-6 py-5 text-right font-bold text-sm text-on-surface font-headline">
                         {{ bill.bill_amount | currency}}
                       </td>
-
                     </tr>
                   }
                 </tbody>
