@@ -7,8 +7,7 @@
     <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
 
       <div>
-        <a
-          [routerLink]="['/biller/visits']"
+        <a [routerLink]="['/biller/visits']"
           class="inline-flex items-center text-primary text-sm font-semibold mb-4 hover:translate-x-1 transition-transform">
           <span class="material-symbols-outlined mr-1 text-lg">arrow_back</span>
           Back to Visits
@@ -20,18 +19,17 @@
       </div>
 
       <!-- Patient Card -->
-      <div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-4 border border-outline-variant/15 shadow-sm">
-
-
+      <div
+        class="bg-green-100 rounded-lg p-6 flex items-center gap-4 border border-green-200">
         <div>
-          <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Patient</div>
+          <div class="text-xs font-bold uppercase tracking-widest text-green-700">Patient</div>
           <div class="font-headline font-bold">{{ visit().patient_name }}</div>
         </div>
 
-        <div class="h-10 w-px bg-outline-variant/30"></div>
+        <div class="h-10 w-px bg-green-300"></div>
 
         <div>
-          <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Visit Date</div>
+          <div class="text-xs font-bold uppercase tracking-widest text-green-700">Visit Date</div>
           <div class="font-headline font-bold">{{ visit().date }}</div>
         </div>
 
@@ -48,44 +46,76 @@
         <div class="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/15">
 
           <!-- Header -->
-          <div class="flex justify-between items-center mb-8">
+          <div class="mb-8">
             <h2 class="text-xl font-headline font-bold">Procedure Details</h2>
+          </div>
+          <div class="relative w-full">
 
-            <button
-              (click)="addProcedure()"
-              class="bg-surface-container-high text-primary font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">add</span>
-              Add Procedure
-            </button>
+            <label class="block text-sm font-semibold mb-2">Procedure Codes</label>
+
+            <!-- Input that acts as select -->
+            <div (click)="dropdownOpen = !dropdownOpen" *ngIf="!dropdownOpen"
+              class="w-full bg-surface-container-low/50 rounded-lg p-4 cursor-pointer flex justify-between items-center">
+              <span>{{ selectedProceduresText }}</span>
+              <span class="material-symbols-outlined">arrow_drop_down</span>
+            </div>
+
+            <!-- Search box inside dropdown -->
+            <input *ngIf="dropdownOpen" type="text" placeholder="Search by code or name..."
+              [(ngModel)]="procedureSearch" class="w-full mt-1 bg-surface-container-low/50 rounded-lg p-4" />
+
+            <!-- Filtered list -->
+            <ul *ngIf="dropdownOpen"
+              class="absolute z-50 w-full max-h-60 overflow-auto bg-surface rounded-lg mt-1 shadow-lg">
+              @for (p of filteredProcedures; track p.code) {
+              <li class="p-3 hover:bg-primary/10 cursor-pointer"
+                (click)="addProcedure(p.code); dropdownOpen = false; procedureSearch = ''">
+                {{ p.code }} - {{ p.name }}
+              </li>
+              }
+            </ul>
+
+          </div>
+
+          <div class="text-xs text-on-surface-variant mt-1">
           </div>
 
           <!-- Table Head -->
+          @if (selectedProcedures().length === 0) {
+          <div class="text-center py-3 text-on-surface-variant">
+            <span class="material-symbols-outlined text-3xl block">info</span>
+            <p class="font-semibold">No procedures selected</p>
+            <p class="text-xs">Please select a procedure code to continue</p>
+          </div>
+          }
+          @else{
           <div class="grid grid-cols-12 px-4 py-2 text-xs font-bold uppercase text-on-surface-variant">
-            <div class="col-span-9">Procedure / Code</div>
+            <div class="col-span-8">Procedure / Code</div>
             <div class="col-span-3 text-right">Charge ($)</div>
           </div>
-
+          }
           <!-- Rows -->
           <div class="space-y-3 mb-10">
 
-            @for (p of procedures(); track $index) {
+            @for (p of selectedProcedures(); track p.code) {
             <div class="grid grid-cols-12 items-center px-4 py-4 bg-surface-container-low/50 rounded-lg">
-
               <!-- Name -->
-              <div class="col-span-9">
+              <div class="col-span-8">
                 <div class="font-semibold">
                   {{ p.code }} - {{ p.name }}
-                </div>
-                <div class="text-xs text-on-surface-variant">
-                  {{ p.description }}
                 </div>
               </div>
 
               <!-- Charge -->
               <div class="col-span-3 text-right font-bold font-headline">
-                ${{ (p.units * p.charge).toFixed(2) }}
+                ${{ p.standard_charge }}
               </div>
-
+              <!-- Delete -->
+              <div class="text-right col-span-1">
+                <button (click)="removeProcedure($index)" class="text-error-container cursor-pointer">
+                  ✕
+                </button>
+              </div>
             </div>
             }
 
@@ -98,20 +128,27 @@
               Billing Information
             </h2>
 
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="mb-6">
+              <label class="block text-sm font-semibold mb-2">
+                Insurance Provider
+              </label>
+
+              <select class="w-full bg-surface-container-low/50 rounded-lg p-4">
+                <option value="">Select Insurance</option>
+              </select>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-3">
 
               <!-- Insurance -->
               <div>
-                <label class="block text-sm font-semibold text-on-surface-variant mb-2">
+                <label class="block text-sm font-semibold mb-2">
                   Insurance Coverage (%)
                 </label>
 
                 <div class="relative">
-                  <input
-                    type="number"
-                    class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg"
-                    [ngModel]="billing().insurance"
-                    (ngModelChange)="updateBilling('insurance', $event)" />
+                  <input type="number" class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg"
+                    [ngModel]="billing().insurance" (ngModelChange)="updateBilling('insurance', $event)" />
 
                   <span class="absolute right-4 top-1/2 -translate-y-1/2">%</span>
                 </div>
@@ -119,17 +156,14 @@
 
               <!-- Discount -->
               <div>
-                <label class="block text-sm font-semibold text-on-surface-variant mb-2">
+                <label class="block text-sm font-semibold mb-2">
                   Discount Amount
                 </label>
 
                 <div class="relative">
-                  <input
-                    type="number"
+                  <input type="number"
                     class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg pl-6 ml-1"
-                    [ngModel]="billing().discount"
-                    (ngModelChange)="updateBilling('discount', $event)"
-                     />
+                    [ngModel]="billing().discount" (ngModelChange)="updateBilling('discount', $event)" />
 
                   <span class="absolute left-4 top-1/2 -translate-y-1/2">$</span>
                 </div>
@@ -137,16 +171,13 @@
 
               <!-- Tax -->
               <div>
-                <label class="block text-sm font-semibold text-on-surface-variant mb-2">
+                <label class="block text-sm font-semibold mb-2">
                   Tax (%)
                 </label>
 
                 <div class="relative">
-                  <input
-                    type="number"
-                    class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg"
-                    [ngModel]="billing().tax"
-                    (ngModelChange)="updateBilling('tax', $event)" />
+                  <input type="number" class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg"
+                    [ngModel]="billing().tax" (ngModelChange)="updateBilling('tax', $event)" />
 
                   <span class="absolute right-4 top-1/2 -translate-y-1/2">%</span>
                 </div>
@@ -154,12 +185,21 @@
 
             </div>
 
-            <!-- Info -->
-            <div class="mt-6 bg-primary/5 rounded-lg p-4 flex items-center gap-3">
-              <span class="material-symbols-outlined text-primary">info</span>
-              <p class="text-xs text-on-surface-variant">
-                Changes update patient responsibility automatically.
-              </p>
+            <div>
+              <label class="block text-sm font-semibold mb-2">
+                Due Date
+              </label>
+
+              <input type="date" class="w-full bg-surface-container-low/50 rounded-lg p-4" />
+            </div>
+
+            <div class="mt-6">
+              <label class="block text-sm font-semibold mb-2">
+                Notes
+              </label>
+
+              <textarea rows="4" class="w-full bg-surface-container-low/50 rounded-lg p-4"
+                placeholder="Add any additional notes..."></textarea>
             </div>
 
           </div>
@@ -192,6 +232,22 @@
               </span>
             </div>
 
+            <!-- Discount -->
+            <div class="flex justify-between border-b pb-4">
+              <span>Discount ({{ billing().discount }}$)</span>
+              <span class="text-secondary font-bold">
+                -${{ summary().discount }}
+              </span>
+            </div>
+
+            <!-- Discount -->
+            <div class="flex justify-between border-b pb-4">
+              <span>Tax ({{ billing().tax }}%)</span>
+              <span class="text-secondary font-bold">
+                +${{ summary().tax }}
+              </span>
+            </div>
+
             <!-- Final -->
             <div class="pt-4">
               <span class="text-primary text-xs font-bold uppercase">
@@ -206,15 +262,12 @@
             <!-- Buttons -->
             <div class="flex flex-col gap-3 mt-6">
 
-              <button
-                (click)="generateBill()"
+              <button (click)="generateBill()"
                 class="w-full bg-linear-to-br from-primary to-primary-container text-white font-bold py-4 rounded-lg shadow-lg">
                 Generate Bill
               </button>
 
-              <button
-                (click)="saveDraft()"
-                class="w-full bg-surface-container-high font-bold py-4 rounded-lg">
+              <button (click)="saveDraft()" class="w-full bg-surface-container-high font-bold py-4 rounded-lg">
                 Save as Draft
               </button>
 
@@ -222,7 +275,8 @@
 
             <!-- Status -->
             <div class="pt-6 border-t">
-              <div class="flex items-center gap-2 px-3 py-1 bg-secondary-container rounded-full text-[10px] font-bold w-fit">
+              <div
+                class="flex items-center gap-2 px-3 py-1 bg-secondary-container rounded-full text-[10px] font-bold w-fit">
                 <span class="w-1.5 h-1.5 rounded-full bg-on-secondary-container"></span>
                 DRAFT STATUS
               </div>

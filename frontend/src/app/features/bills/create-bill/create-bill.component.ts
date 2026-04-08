@@ -1,51 +1,38 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
-interface Procedure {
-  code: string;
-  name: string;
-  description: string;
-  units: number;
-  charge: number;
-}
+import { ProcedureCodesService } from '../../../core/services/procedure-codes.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-create-bill',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, CommonModule],
   templateUrl: './create-bill.component.html',
   styleUrl: './create-bill.component.css'
 })
 export class CreateBillComponent {
+  private procedureCodesSerivce = inject(ProcedureCodesService);
 
   visit = signal({
     patient_name: 'Sarah Mitchell',
     date: 'Oct 24, 2023'
   });
 
-  procedures = signal<Procedure[]>([
-    {
-      code: '99214',
-      name: 'Office Visit (Level 4)',
-      description: 'Outpatient medical visit',
-      units: 1,
-      charge: 185
-    },
-    {
-      code: '80053',
-      name: 'Comprehensive Metabolic Panel',
-      description: 'Laboratory screening',
-      units: 1,
-      charge: 72
-    },
-    {
-      code: '90658',
-      name: 'Flu Vaccine',
-      description: 'Immunization service',
-      units: 1,
-      charge: 45
-    }
-  ]);
+  procedures = signal<any>({ data: [] });
+  selectedProcedures = signal<any[]>([]);
+  dropdownOpen = false;
+procedureSearch = '';
+
+  ngOnInit(){
+    this.loadProcedureCodes()
+  }
+
+  loadProcedureCodes(){
+    this.procedureCodesSerivce.getProcedureCodes().subscribe((procedureCodes)=> {
+      this.procedures.set(procedureCodes)
+      console.log(procedureCodes)
+    })
+  }
 
   billing = signal({
     insurance: 80,
@@ -55,11 +42,10 @@ export class CreateBillComponent {
 
   summary = computed(() => {
 
-    const procedures = this.procedures();
     const billing = this.billing();
 
-    const total = procedures.reduce((sum, p) => {
-      return sum + (p.units * p.charge);
+    const total = this.selectedProcedures().reduce((sum, p) => {
+      return sum + Number(p.standard_charge);
     }, 0);
 
     const insuranceAmount = (billing.insurance / 100) * total;
@@ -75,7 +61,9 @@ export class CreateBillComponent {
     return {
       total: total.toFixed(2),
       insurance: insuranceAmount.toFixed(2),
-      final: final.toFixed(2)
+      final: final.toFixed(2),
+      discount: billing.discount.toFixed(2),
+      tax: taxAmount.toFixed(2),
     };
   });
 
@@ -94,24 +82,21 @@ export class CreateBillComponent {
     console.log('Saved as draft');
   }
 
-  updateUnits(index: number, value: number) {
-    const list = [...this.procedures()];
-    list[index].units = value;
-    this.procedures.set(list);
-  }
+addProcedure(code: string) {
+  const selected = this.procedures().data.find((p:any) => p.code === code);
+  if (!selected) return;
 
-  addProcedure() {
-    this.procedures.update(p => [
-      ...p,
-      {
-        code: '00000',
-        name: 'New Procedure',
-        description: '',
-        units: 1,
-        charge: 0
-      }
-    ]);
-  }
+  const exists = this.selectedProcedures().some(p => p.code === code);
+  if (exists) return;
+
+  this.selectedProcedures.update(list => [...list, selected]);
+}
+
+removeProcedure(index: number) {
+  this.selectedProcedures.update(list =>
+    list.filter((_, i) => i !== index)
+  );
+}
 
   updateBilling(field: string, value: number) {
     let val = Number(value);
@@ -125,4 +110,17 @@ export class CreateBillComponent {
       [field]: val
     }));
   }
+
+  get selectedProceduresText(): string {
+  const selected = this.selectedProcedures();
+  return selected.length ? selected.map(p => p.code).join(', ') : 'Select Procedure';
+}
+
+get filteredProcedures(): any[] {
+  const search = this.procedureSearch.toLowerCase();
+  return this.procedures().data.filter((p:any) =>
+    p.code.toLowerCase().includes(search) ||
+    p.name.toLowerCase().includes(search)
+  );
+}
 }
