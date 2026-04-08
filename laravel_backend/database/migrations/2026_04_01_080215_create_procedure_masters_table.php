@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique(); 
             $table->string('name'); 
-            $table->decimal('standard_charge', 10, 2); 
+            $table->decimal('standard_charge', 10, 2);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
         });

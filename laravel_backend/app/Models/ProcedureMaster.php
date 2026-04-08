@@ -13,9 +13,11 @@ class ProcedureMaster extends Model
         'code',
         'name',
         'standard_charge',
+        'is_active'
     ];
 
     protected $casts = [
         'standard_charge' => 'decimal:2',
+        'is_active' => 'boolean',
     ];
 }

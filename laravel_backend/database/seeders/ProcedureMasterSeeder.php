@@ -9,38 +9,41 @@ class ProcedureMasterSeeder extends Seeder
 {
     public function run(): void
     {
-$data = [
-    ['99213', 'Office Visit, (Mid-Level)', 125.50],
-    ['99214', 'Office Visit, (Extended)', 210.00],
-    ['71045', 'Chest X-Ray', 85.00],
-    ['73590', 'Lower Limb X-Ray', 115.00],
-    ['85025', 'Complete Blood Count (CBC) Automated', 45.00],
-    ['80048', 'Basic Metabolic Panel', 75.00],
-    ['70551', 'Brain MRI without Contrast', 1450.00],
-    ['72148', 'Lumbar Spine MRI without Contrast', 1200.00],
-    ['97161', 'Physical Therapy Evaluation', 185.00],
-    ['97110', 'Therapeutic Exercise', 95.00],
-    ['12001', 'Simple Laceration Repair', 350.00],
-    ['11400', 'Excision of Benign Lesion', 650.00],
-    ['99281', 'Emergency Dept', 250.00],
-    ['93000', 'Electrocardiogram (ECG/EKG) Routine', 145.00],
-    ['87804', 'Influenza Rapid Antigen Test', 35.00],
-    ['99203', 'Initial Injury Evaluation', 185.00],
-    ['72040', 'Cervical Spine X-Ray', 95.00],
-    ['72100', 'Lumbosacral Spine X-Ray', 110.00],
-    ['97140', 'Manual Therapy', 75.00],
-    ['98940', 'Chiropractic Manipulative Treatment', 65.00],
-    ['97112', 'Neuromuscular Reeducation', 85.00],
-    ['99215', 'High Complexity Injury Assessment', 275.00],
-    ['95811', 'Sleep Study / Polysomnography', 950.00],
-];
+        $data = [
+            ['code' => '99213', 'name' => 'Office Visit, (Mid-Level)', 'charge' => 125.50],
+            ['code' => '99214', 'name' => 'Office Visit, (Extended)', 'charge' => 210.00],
+            ['code' => '71045', 'name' => 'Chest X-Ray', 'charge' => 85.00],
+            ['code' => '73590', 'name' => 'Lower Limb X-Ray', 'charge' => 115.00],
+            ['code' => '85025', 'name' => 'Complete Blood Count (CBC) Automated', 'charge' => 45.00],
+            ['code' => '80048', 'name' => 'Basic Metabolic Panel', 'charge' => 75.00],
+            ['code' => '70551', 'name' => 'Brain MRI without Contrast', 'charge' => 1450.00],
+            ['code' => '72148', 'name' => 'Lumbar Spine MRI without Contrast', 'charge' => 1200.00],
+            ['code' => '97161', 'name' => 'Physical Therapy Evaluation', 'charge' => 185.00],
+            ['code' => '97110', 'name' => 'Therapeutic Exercise', 'charge' => 95.00],
+            ['code' => '12001', 'name' => 'Simple Laceration Repair', 'charge' => 350.00],
+            ['code' => '11400', 'name' => 'Excision of Benign Lesion', 'charge' => 650.00],
+            ['code' => '99281', 'name' => 'Emergency Dept', 'charge' => 250.00],
+            ['code' => '93000', 'name' => 'Electrocardiogram (ECG/EKG) Routine', 'charge' => 145.00],
+            ['code' => '87804', 'name' => 'Influenza Rapid Antigen Test', 'charge' => 35.00],
+            ['code' => '99203', 'name' => 'Initial Injury Evaluation', 'charge' => 185.00],
+            ['code' => '72040', 'name' => 'Cervical Spine X-Ray', 'charge' => 95.00],
+            ['code' => '72100', 'name' => 'Lumbosacral Spine X-Ray', 'charge' => 110.00],
+            ['code' => '97140', 'name' => 'Manual Therapy', 'charge' => 75.00],
+            ['code' => '98940', 'charge' => 65.00, 'name' => 'Chiropractic Manipulative Treatment'],
+            ['code' => '97112', 'charge' => 85.00, 'name' => 'Neuromuscular Reeducation'],
+            ['code' => '99215', 'charge' => 275.00, 'name' => 'High Complexity Injury Assessment'],
+            ['code' => '95811', 'charge' => 950.00, 'name' => 'Sleep Study / Polysomnography'],
+        ];
 
         foreach ($data as $p) {
-            ProcedureMaster::create([
-                'code'            => $p[0],
-                'name'            => $p[1],
-                'standard_charge' => $p[2],
-            ]);
+            ProcedureMaster::create(
+                [
+                    'code'            => $p['code'],
+                    'name'            => $p['name'],
+                    'standard_charge' => $p['charge'],
+                    'is_active'       => true
+                ]
+            );
         }
     }
 }
