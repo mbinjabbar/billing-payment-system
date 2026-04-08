@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Bill;
 use App\Models\Document;
+use App\Models\insuranceFirm;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
@@ -18,7 +19,7 @@ class billController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Bill::with(['visit.appointment.patientCase.patient']);
+            $query = Bill::with(['visit.appointment.patientCase.patient'], 'insurance_firm');
 
             $query->when($request->status, function ($q) use ($request) {
                 return $q->where('status', $request->status);
@@ -61,6 +62,7 @@ class billController extends Controller
             $bill = Bill::create([
                 'visit_id' => $data['visit_id'],
                 'bill_date' => now(),
+                'insurance_firm_id' => $data['insurance_firm_id'],
                 'created_by' => $data['created_by'],
                 'procedure_codes' => $data['procedure_codes'],
                 'charges' => $charges,
