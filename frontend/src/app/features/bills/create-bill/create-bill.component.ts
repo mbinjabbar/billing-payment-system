@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProcedureCodesService } from '../../../core/services/procedure-codes.service';
 import { CommonModule } from '@angular/common';
 import { VisitService } from '../../../core/services/visit.service';
+import { InsuranceFirmsService } from '../../../core/services/insurance-firms.service';
 
 @Component({
   selector: 'app-create-bill',
@@ -14,6 +15,7 @@ import { VisitService } from '../../../core/services/visit.service';
 export class CreateBillComponent {
   private route = inject(ActivatedRoute);
   private procedureCodesSerivce = inject(ProcedureCodesService);
+  private insuranceFirmsService = inject(InsuranceFirmsService);
   private visitService = inject(VisitService);
 
   visit = signal<any>({ data: [] });
@@ -23,21 +25,32 @@ export class CreateBillComponent {
   dropdownOpen = false;
   procedureSearch = '';
 
-  ngOnInit(){
+  insuranceFirms = signal<any>({ data: [] });
+  insuranceSearch = signal('');
+
+
+  ngOnInit() {
     const id = this.route.snapshot.paramMap.get('visitId');
     this.loadProcedureCodes()
+    this.loadInsuranceFirms()
     this.loadVisitById(Number(id))
   }
 
-  loadProcedureCodes(){
-    this.procedureCodesSerivce.getProcedureCodes().subscribe((procedureCodes)=> {
+  loadProcedureCodes() {
+    this.procedureCodesSerivce.getProcedureCodes().subscribe((procedureCodes) => {
       this.procedures.set(procedureCodes)
       console.log(procedureCodes)
     })
   }
 
-  loadVisitById(visitId: number){
-    return this.visitService.getVisitById(visitId).subscribe((visit)=> {
+  loadInsuranceFirms() {
+    this.insuranceFirmsService.getInsuranceFirms().subscribe((insuranceFirms) => {
+      this.insuranceFirms.set(insuranceFirms);
+    })
+  }
+
+  loadVisitById(visitId: number) {
+    return this.visitService.getVisitById(visitId).subscribe((visit) => {
       this.visit.set(visit)
       console.log(visit)
     })
@@ -91,21 +104,21 @@ export class CreateBillComponent {
     console.log('Saved as draft');
   }
 
-addProcedure(code: string) {
-  const selected = this.procedures().data.find((p:any) => p.code === code);
-  if (!selected) return;
+  addProcedure(code: string) {
+    const selected = this.procedures().data.find((p: any) => p.code === code);
+    if (!selected) return;
 
-  const exists = this.selectedProcedures().some(p => p.code === code);
-  if (exists) return;
+    const exists = this.selectedProcedures().some(p => p.code === code);
+    if (exists) return;
 
-  this.selectedProcedures.update(list => [...list, selected]);
-}
+    this.selectedProcedures.update(list => [...list, selected]);
+  }
 
-removeProcedure(index: number) {
-  this.selectedProcedures.update(list =>
-    list.filter((_, i) => i !== index)
-  );
-}
+  removeProcedure(index: number) {
+    this.selectedProcedures.update(list =>
+      list.filter((_, i) => i !== index)
+    );
+  }
 
   updateBilling(field: string, value: number) {
     let val = Number(value);
@@ -121,15 +134,25 @@ removeProcedure(index: number) {
   }
 
   get selectedProceduresText(): string {
-  const selected = this.selectedProcedures();
-  return selected.length ? selected.map(p => p.code).join(', ') : 'Select Procedure';
-}
+    const selected = this.selectedProcedures();
+    return selected.length ? selected.map(p => p.code).join(', ') : 'Select Procedure';
+  }
 
-get filteredProcedures(): any[] {
-  const search = this.procedureSearch.toLowerCase();
-  return this.procedures().data.filter((p:any) =>
-    p.code.toLowerCase().includes(search) ||
-    p.name.toLowerCase().includes(search)
-  );
-}
+  get filteredProcedures(): any[] {
+    const search = this.procedureSearch.toLowerCase();
+    return this.procedures().data.filter((p: any) =>
+      p.code.toLowerCase().includes(search) ||
+      p.name.toLowerCase().includes(search)
+    );
+  }
+
+  get filteredInsuranceFirms() {
+    const caseType = this.visit().data.appointment.patient_case.car_accident ? 'Auto' : 'Health';
+    console.log(caseType)
+    return this.insuranceFirms().data.filter((firm: any) => firm.firm_type === caseType);
+  }
+
+  selectInsurance(id: number) {
+    this.billing.update(b => ({ ...b, insurance: id }));
+  }
 }
