@@ -12,13 +12,21 @@ class InsuranceFirm extends Model
 
     protected $fillable = [
         'name',
+        'firm_type',
         'contact_person',
         'email',
         'phone',
+        'address',
+        'carrier_code',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function bills()
     {
-        return $this->hasMany(Bill::class);
+        return $this->hasMany(Bill::class, 'insurance_firm_id');
     }
 }

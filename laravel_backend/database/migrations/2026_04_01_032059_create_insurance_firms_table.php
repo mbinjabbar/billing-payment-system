@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('insurance_firms', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->enum('firm_type', ['Auto', 'Health'])->default('Health');
             $table->string('contact_person')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->string('carrier_code')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
         });

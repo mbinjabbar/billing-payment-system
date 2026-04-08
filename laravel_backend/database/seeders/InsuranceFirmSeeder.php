@@ -11,15 +11,32 @@ class InsuranceFirmSeeder extends Seeder
     public function run(): void
     {
         $faker = Factory::create();
-        $firms = ['Aetna', 'BlueCross', 'Cigna', 'UnitedHealth', 'Medicare', 'Kaiser', 'MetLife', 'Geico'];
 
-        foreach ($firms as $name) {
-            InsuranceFirm::create([
-                'name'           => $name . ' ' . $faker->companySuffix,
-                'contact_person' => $faker->name,
-                'email'          => $faker->companyEmail,
-                'phone'          => $faker->phoneNumber,
-            ]);
+        $firms = [
+            ['name' => 'Aetna Health', 'type' => 'Health', 'code' => 'AET001'],
+            ['name' => 'BlueCross BlueShield', 'type' => 'Health', 'code' => 'BCBS02'],
+            ['name' => 'Cigna Medical', 'type' => 'Health', 'code' => 'CIG99'],
+            ['name' => 'UnitedHealthcare', 'type' => 'Health', 'code' => 'UHC11'],
+            ['name' => 'Medicare', 'type' => 'Health', 'code' => 'MEDICARE'],
+            ['name' => 'Kaiser Permanente', 'type' => 'Health', 'code' => 'KP77'],
+            ['name' => 'GEICO Auto Insurance', 'type' => 'Auto', 'code' => 'GEICO-NF'],
+            ['name' => 'State Farm Mutual', 'type' => 'Auto', 'code' => 'SF-NF'],
+            ['name' => 'Progressive Casualty', 'type' => 'Auto', 'code' => 'PROG-NF'],
+        ];
+
+        foreach ($firms as $firm) {
+            InsuranceFirm::create(
+                [
+                    'carrier_code' => $firm['code'],
+                    'name'           => $firm['name'],
+                    'firm_type'      => $firm['type'],
+                    'contact_person' => $faker->name,
+                    'email'          => $faker->unique()->safeEmail,
+                    'phone'          => $faker->phoneNumber,
+                    'address'        => $faker->streetAddress . ', ' . $faker->city . ', ' . $faker->stateAbbr . ' ' . $faker->postcode,
+                    'is_active'      => true,
+                ]
+            );
         }
     }
 }
