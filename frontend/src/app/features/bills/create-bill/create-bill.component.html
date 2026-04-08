@@ -23,14 +23,14 @@
         class="bg-green-100 rounded-lg p-6 flex items-center gap-4 border border-green-200">
         <div>
           <div class="text-xs font-bold uppercase tracking-widest text-green-700">Patient</div>
-          <div class="font-headline font-bold">{{ visit().patient_name }}</div>
+          <div class="font-headline font-bold">{{ visit().data.appointment.patient_case.patient.full_name }}</div>
         </div>
 
         <div class="h-10 w-px bg-green-300"></div>
 
         <div>
           <div class="text-xs font-bold uppercase tracking-widest text-green-700">Visit Date</div>
-          <div class="font-headline font-bold">{{ visit().date }}</div>
+          <div class="font-headline font-bold">{{ visit().data.visit_date }}</div>
         </div>
 
       </div>
