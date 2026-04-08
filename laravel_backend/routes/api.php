@@ -11,3 +11,4 @@ Route::apiResource('/bills', billController::class);
 
 Route::get('/bills/pdf/{id}', [billController::class, 'generatePDF']);
 Route::apiResource('/payments', paymentController::class);
+Route::get('/procedure-codes', [App\Http\Controllers\procedurecodesController::class, 'index']);
