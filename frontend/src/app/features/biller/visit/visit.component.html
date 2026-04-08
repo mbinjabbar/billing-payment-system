@@ -70,7 +70,7 @@
                 Doctor</th>
               <th
                 class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label whitespace-nowrap">
-                Diagnosis</th>
+                Insurance Type</th>
               <th
                 class="px-5 py-3.5 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label text-center whitespace-nowrap">
                 Visit Status</th>
@@ -115,10 +115,11 @@
 
               <!-- Diagnosis -->
               <td class="px-5 py-4 max-w-40">
-                <p class="text-on-surface font-body truncate" [title]="visit.diagnosis">
-                  {{ visit.diagnosis }}
-                </p>
-                <p class="text-[10px] text-primary font-semibold font-label mt-0.5">{{ visit.icd }}</p>
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-wide text-white"
+                  [ngClass]="visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
+                  {{ visit.appointment.patient_case.car_accident ? 'NF2-FORM' : 'Standard' }}
+                </span>
               </td>
 
               <!-- Visit Status -->
@@ -145,9 +146,8 @@
                   Cancelled
                 </span>
                 } @else if (isReadyForBilling(visit)) {
-                <button
-                  [routerLink]="['/bills/create', visit.id]"
-                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary-container text-white shadow-md shadow-primary/20 hover:bg-primary active:scale-98 transition-all font-headline cursor-pointer">
+                <button [routerLink]="['/bills/create', visit.id]"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary-container text-white  hover:bg-primary active:scale-98 transition-all font-headline cursor-pointer">
                   <span class="material-symbols-outlined icon-sm">add</span>
                   Create Bill
                 </button>
