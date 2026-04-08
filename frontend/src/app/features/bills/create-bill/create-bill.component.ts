@@ -5,6 +5,7 @@ import { ProcedureCodesService } from '../../../core/services/procedure-codes.se
 import { CommonModule } from '@angular/common';
 import { VisitService } from '../../../core/services/visit.service';
 import { InsuranceFirmsService } from '../../../core/services/insurance-firms.service';
+import { BillService } from '../../../core/services/bill.service';
 
 @Component({
   selector: 'app-create-bill',
@@ -17,6 +18,7 @@ export class CreateBillComponent {
   private procedureCodesSerivce = inject(ProcedureCodesService);
   private insuranceFirmsService = inject(InsuranceFirmsService);
   private visitService = inject(VisitService);
+  private billService = inject(BillService);
 
   visit = signal<any>({ data: [] });
 
@@ -27,6 +29,7 @@ export class CreateBillComponent {
 
   insuranceFirms = signal<any>({ data: [] });
   insuranceSearch = signal('');
+  selectedInsuranceId: number | null = null;
 
 
   ngOnInit() {
@@ -89,16 +92,30 @@ export class CreateBillComponent {
     };
   });
 
-  generateBill() {
-    const payload = {
-      visit: this.visit(),
-      procedures: this.procedures(),
-      billing: this.billing(),
-      summary: this.summary()
-    };
+generateBill() {
+  const summary = this.summary();
 
-    console.log('Generate Bill Payload:', payload);
-  }
+  const payload = {
+    visit_id: this.visit().data.id,
+    insurance_firm_id: this.selectedInsuranceId,
+    created_by:  1,
+    procedure_codes: this.selectedProcedures().map(p => p.code),
+    charges: Number(summary.total),
+    insurance_coverage: Number(this.billing().insurance),
+    discount_amount: Number(this.billing().discount),
+    tax_amount: Number(this.billing().tax),
+    bill_amount: Number(summary.final),
+    due_date: null,
+    status: 'Pending',
+    paid_amount: 0,
+    notes: null
+  };
+
+  this.billService.createBill(payload).subscribe({
+    next: res => console.log(res),
+    error: err => console.error(err)
+  });
+}
 
   saveDraft() {
     console.log('Saved as draft');
@@ -146,13 +163,21 @@ export class CreateBillComponent {
     );
   }
 
-  get filteredInsuranceFirms() {
-    const caseType = this.visit().data.appointment.patient_case.car_accident ? 'Auto' : 'Health';
-    console.log(caseType)
-    return this.insuranceFirms().data.filter((firm: any) => firm.firm_type === caseType);
-  }
+get filteredInsuranceFirms() {
+  const visit = this.visit();
+
+  if (!visit?.data?.appointment?.patient_case) return [];
+
+  const caseType = visit.data.appointment.patient_case.car_accident
+    ? 'auto'
+    : 'health';
+
+  return this.insuranceFirms().data.filter(
+    (firm: any) => firm.firm_type.toLowerCase() === caseType
+  );
+}
 
   selectInsurance(id: number) {
-    this.billing.update(b => ({ ...b, insurance: id }));
-  }
+  this.selectedInsuranceId = id;
+}
 }
