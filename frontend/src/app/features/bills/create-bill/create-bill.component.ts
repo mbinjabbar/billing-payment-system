@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProcedureCodesService } from '../../../core/services/procedure-codes.service';
 import { CommonModule } from '@angular/common';
+import { VisitService } from '../../../core/services/visit.service';
 
 @Component({
   selector: 'app-create-bill',
@@ -11,26 +12,34 @@ import { CommonModule } from '@angular/common';
   styleUrl: './create-bill.component.css'
 })
 export class CreateBillComponent {
+  private route = inject(ActivatedRoute);
   private procedureCodesSerivce = inject(ProcedureCodesService);
+  private visitService = inject(VisitService);
 
-  visit = signal({
-    patient_name: 'Sarah Mitchell',
-    date: 'Oct 24, 2023'
-  });
+  visit = signal<any>({ data: [] });
 
   procedures = signal<any>({ data: [] });
   selectedProcedures = signal<any[]>([]);
   dropdownOpen = false;
-procedureSearch = '';
+  procedureSearch = '';
 
   ngOnInit(){
+    const id = this.route.snapshot.paramMap.get('visitId');
     this.loadProcedureCodes()
+    this.loadVisitById(Number(id))
   }
 
   loadProcedureCodes(){
     this.procedureCodesSerivce.getProcedureCodes().subscribe((procedureCodes)=> {
       this.procedures.set(procedureCodes)
       console.log(procedureCodes)
+    })
+  }
+
+  loadVisitById(visitId: number){
+    return this.visitService.getVisitById(visitId).subscribe((visit)=> {
+      this.visit.set(visit)
+      console.log(visit)
     })
   }
 

@@ -11,4 +11,8 @@ export class VisitService {
   getVisits(page: number = 1){
     return this.http.get(`${this.apiUrl}/visits?page=${page}`)
   }
+
+  getVisitById(visitId: number){
+    return this.http.get(`${this.apiUrl}/visits/${visitId}`)
+  }
 }
