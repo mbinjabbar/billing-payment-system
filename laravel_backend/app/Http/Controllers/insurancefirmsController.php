@@ -9,9 +9,7 @@ use App\Traits\ApiResponse;
 class insurancefirmsController extends Controller
 {
     use ApiResponse;
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
         try {
@@ -22,35 +20,72 @@ class insurancefirmsController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        //
+        
+        try {
+            $data = $request->validate([
+                'name' => 'required|unique:insurance_firms,name',
+                'firm_type' => 'required|in:Auto,Health',
+                'contact_person' => 'nullable|string',
+                'email' => 'nullable|email',
+                'phone' => 'nullable|string',
+                'address' => 'nullable|string',
+                'carrier_code' => 'nullable|string',
+                'is_active' => 'boolean',
+            ]);
+
+            $insuranceFirm = InsuranceFirm::create($data);
+            return $this->success($insuranceFirm, 'Insurance firm created successfully', 201);
+        } catch (Exception $e) {
+            return $this->error('Unable to create insurance firm.');
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+   
+    public function show($id)
     {
-        //
+        try {
+            $insuranceFirm = InsuranceFirm::findOrFail($id);
+            return $this->success($insuranceFirm, 'Insurance firm retrieved successfully');
+        } catch (Exception $e) {
+            return $this->error('Unable to fetch insurance firm.');
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    
+    public function update(Request $request,$id)
     {
-        //
+        try {
+            $data = $request->validate([
+                'name' => 'required|unique:insurance_firms,name,' . $id,
+                'firm_type' => 'required|in:Auto,Health',
+                'contact_person' => 'nullable|string',
+                'email' => 'nullable|email',
+                'phone' => 'nullable|string',
+                'address' => 'nullable|string',
+                'carrier_code' => 'nullable|string',
+                'is_active' => 'boolean',
+            ]);
+
+            $insuranceFirm = InsuranceFirm::findOrFail($id);
+            $insuranceFirm->update($data);
+            return $this->success($insuranceFirm, 'Insurance firm updated successfully');
+        } catch (Exception $e) {
+            return $this->error('Unable to update insurance firm.');
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+   
+    public function destroy($id)
     {
-        //
+        try {
+            $insuranceFirm = InsuranceFirm::findOrFail($id);
+            $insuranceFirm->delete();
+            return $this->success(null, 'Insurance firm deleted successfully');
+        } catch (Exception $e) {
+            return $this->error('Unable to delete insurance firm.');
+        }
     }
 }

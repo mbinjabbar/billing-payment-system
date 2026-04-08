@@ -10,9 +10,8 @@ use App\Http\Controllers\insurancefirmsController;
 
 Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
 Route::apiResource('/bills', billController::class);
-
 Route::get('/bills/pdf/{id}', [billController::class, 'generatePDF']);
 Route::apiResource('/payments', paymentController::class);
-Route::get('/procedurecodes', [procedurecodesController::class, 'index']);
-Route::get('/insurancefirms', [insurancefirmsController::class, 'index']);
+Route::apiResource('/procedurecodes', procedurecodesController::class);
+Route::apiResource('/insurancefirms', insurancefirmsController::class);
 

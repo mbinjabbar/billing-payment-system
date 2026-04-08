@@ -9,9 +9,7 @@ use App\Traits\ApiResponse;
 class procedurecodesController extends Controller
 {
     use ApiResponse;
-    /**
-     * Display a listing of the resource.
-     */
+  
     public function index()
     {
         try {
@@ -23,35 +21,64 @@ class procedurecodesController extends Controller
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(Request $request)
     {
-        //
+            try {
+               
+                $data= $request->validate([
+                    'code' => 'required|unique:procedure_masters,code',
+                    'name' => 'required',
+                    'standard_charge' => 'required|numeric|decimal:2|between:0,99999999.99',
+                    'is_active' => 'boolean'
+                ]);
+
+
+                $procedureCode = ProcedureMaster::create($data);
+                return $this->success($procedureCode, 'Procedure code created successfully', 201);
+            } catch (Exception $e) {
+                return $this->error($e->getMessage());
+            }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    
+    public function show($id)
     {
-        //
+        try {
+            $procedureCode = ProcedureMaster::findOrFail($id);
+            return $this->success($procedureCode, 'Procedure code retrieved successfully');
+        } catch (Exception $e) {
+            return $this->error('Unable to fetch procedure code.');
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    
+    public function update(Request $request,$id)
     {
-        //
+        try {
+            $data = $request->validate([
+                'code' => 'unique:procedure_masters,code,' . $id,
+                'standard_charge' => 'numeric|decimal:2|between:0,99999999.99',
+                'is_active' => 'boolean'
+            ]);
+
+            $procedureCode = ProcedureMaster::findOrFail($id);
+            $procedureCode->update($data);
+            return $this->success($procedureCode, 'Procedure code updated successfully');
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+  
+    public function destroy($id)
     {
-        //
+        try {
+            $procedureCode = ProcedureMaster::findOrFail($id);
+            $procedureCode->delete();
+            return $this->success(null, 'Procedure code deleted successfully');
+        } catch (Exception $e) {
+            return $this->error('Unable to delete procedure code.');
+        }
     }
 }
