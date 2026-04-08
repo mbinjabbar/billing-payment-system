@@ -39,7 +39,7 @@ class insurancefirmsController extends Controller
             $insuranceFirm = InsuranceFirm::create($data);
             return $this->success($insuranceFirm, 'Insurance firm created successfully', 201);
         } catch (Exception $e) {
-            return $this->error('Unable to create insurance firm.');
+            return $this->error($e->getMessage());
         }
     }
 

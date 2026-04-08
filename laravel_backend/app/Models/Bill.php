@@ -21,7 +21,6 @@ class Bill extends Model
         'discount_amount',
         'tax_amount',
         'outstanding_amount',
-        'paid_amount',
         'status',
         'generated_document_path',
         'notes',

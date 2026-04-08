@@ -76,8 +76,9 @@ class billController extends Controller
                 'due_date' => $data['due_date'],
                 'notes' => $data['notes']
             ]);
+            
 
-            $bill->load('visit.appointment.patientCase.patient');
+            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
 
             $pdf = PDF::loadView('NF2_pdf', compact('bill'));
 
