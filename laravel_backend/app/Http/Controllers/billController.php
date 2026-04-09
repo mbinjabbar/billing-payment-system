@@ -121,7 +121,7 @@ class billController extends Controller
     public function show($id)
     {
         try {
-            $bill = Bill::with(['visit.appointment.patientCase.patient'])->findOrFail($id);
+            $bill = Bill::with(['visit.appointment.patientCase.patient', 'insurance_firm'])->findOrFail($id);
             return $this->success($bill, 'Bill detail fetched successfully.');
         } catch (Exception $e) {
             return $this->error('Bill data not found.');
