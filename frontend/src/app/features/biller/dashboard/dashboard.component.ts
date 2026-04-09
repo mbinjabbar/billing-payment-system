@@ -11,6 +11,9 @@ export class DashboardComponent {
   private billService = inject(BillService);
 
   bills = signal<any>({ data: [] });
+
+  billingGoal = 1000;
+
   ngOnInit() {
     this.billService.getBills().subscribe((data) => {
       this.bills.set(data);
@@ -31,6 +34,11 @@ export class DashboardComponent {
     this.bills().data.filter((bill: any) =>
       bill.status === 'Pending').length
   );
+
+  totalBillProgress = computed(() => {
+    const progress = (this.totalBillAmount() / this.billingGoal) * 100;
+    return progress > 100 ? 100 : progress;
+  });
 
   getStatusClass(status: string): string {
     switch (status) {

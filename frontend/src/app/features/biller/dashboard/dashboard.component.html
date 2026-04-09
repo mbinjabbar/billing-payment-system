@@ -24,10 +24,14 @@
                 <span class="text-3xl font-extrabold text-on-surface font-headline tracking-tight">{{totalBillAmount() | currency}}</span>
               </div>
               <!-- Progress Bar -->
-              <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
-                <div class="bg-primary h-full rounded-full" style="width: 72%"></div>
-              </div>
-              <p class="text-xs text-on-surface-variant font-label mt-2 text-right">72% Goal</p>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+  <div class="bg-primary h-full rounded-full"
+       [style.width.%]="totalBillProgress()">
+  </div>
+</div>
+<p class="text-xs text-on-surface-variant font-label mt-2 text-right">
+  {{ totalBillProgress() | number:'1.0-0' }}% Goal
+</p>
             </div>
 
             <!-- Outstanding -->
