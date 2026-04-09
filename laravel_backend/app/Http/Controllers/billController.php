@@ -62,6 +62,13 @@ class billController extends Controller
             $insurance = $data['insurance_coverage'];
             $billAmount = ($charges - $insurance - $discount) + $tax;
 
+             $exists= Bill::where('visit_id', $request->visit_id)->exists();
+             if ($exists) { 
+            return response()->json([
+            'success' => false,
+            'message' => 'A bill has already been generated for this visit.'], 422); }
+ 
+
             $bill = Bill::create([
                 'visit_id' => $data['visit_id'],
                 'bill_date' => now(),
@@ -121,7 +128,7 @@ class billController extends Controller
         } catch (Exception $e) {
               DB::rollBack();
             Log::error('Error generating bill: ' . $e->getMessage());
-            return $this->error($e-getMessage());
+            return $this->error('bill data not found');
         }
     }
 
