@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProcedureCodesService } from '../../../core/services/procedure-codes.service';
 import { VisitService } from '../../../core/services/visit.service';
@@ -14,6 +14,7 @@ import { BillService } from '../../../core/services/bill.service';
 })
 export class CreateBillComponent {
   private route                = inject(ActivatedRoute);
+  private router                = inject(Router);
   private procedureCodesService = inject(ProcedureCodesService);
   private insuranceFirmsService = inject(InsuranceFirmsService);
   private visitService          = inject(VisitService);
@@ -192,7 +193,11 @@ export class CreateBillComponent {
     };
 
     this.billService.createBill(payload).subscribe({
-      next:  (res) => console.log('Bill created:', res),
+      next: (res: any) => {
+      console.log('Bill created:', res);
+      const billId = res.data.id;
+      this.router.navigate(['bills/invoice', billId]);
+    },
       error: (err) => console.error('Error:', err),
     });
   }
