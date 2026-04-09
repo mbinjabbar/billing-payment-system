@@ -39,17 +39,10 @@
             Back to Visits
           </a>
 
-          <div class="flex items-center gap-3">
-            <!-- Print Button -->
-            <button
-              (click)="printInvoice()"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-container-highest transition-colors font-headline">
-              <span class="material-symbols-outlined icon-sm">print</span>
-              Print
-            </button>
-
+          <div>
             <!-- Download placeholder -->
             <button
+            (click)="downloadPdf(bill().id)"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary cursor-pointer">
               <span class="material-symbols-outlined icon-sm">download</span>
               Download PDF
@@ -210,7 +203,7 @@
                     Insurance ({{ bill().insurance_coverage ?? 0 }}%)
                   </span>
                   <span class="font-bold font-headline text-primary">
-                    -${{ (bill().charges * (bill().insurance_coverage / 100)) }}
+                    -${{ (bill().charges * (bill().insurance_coverage / 100)) | number:'1.2-2' }}
                   </span>
                 </div>
 

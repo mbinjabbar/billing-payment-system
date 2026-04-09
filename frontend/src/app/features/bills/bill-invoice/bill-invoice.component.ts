@@ -51,6 +51,13 @@ export class BillInvoiceComponent {
     }
   }
 
+  downloadPdf(billId: number){
+  const url = `http://localhost:8000/api/bills/pdf/${billId}`;
+  const link = document.createElement('a');
+  link.href = url;
+  link.click();
+  }
+
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('billId');
     this.billService.getBillById(Number(id)).subscribe({
@@ -63,9 +70,5 @@ export class BillInvoiceComponent {
         this.loading.set(false);
       }
     });
-  }
-
-  printInvoice() {
-    window.print();
   }
 }
