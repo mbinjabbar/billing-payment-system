@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component,inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
+import { Router} from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -9,9 +11,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
   loginForm: FormGroup;
   showPassword = false;
   isLoading = false;
+  loginError = '';
 
   constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
@@ -37,10 +42,25 @@ export class LoginComponent {
       this.loginForm.markAllAsTouched();
       return;
     }
+    const { email, password} = this.loginForm.value;
+    this.authService.login(email, password).subscribe({
+      next: (res) => {
+        this.authService.setToken(res.data.token);
+        this.router.navigate(['/biller']);
+      },
+      error: (err) => {
+        this.loginError = err.error?.message || 'Invalid email or password';
+        setTimeout(() => (this.loginError = ''), 2500);
+      },
+    });
     this.isLoading = true;
     setTimeout(() => {
       this.isLoading = false;
       console.log('Form submitted:', this.loginForm.value);
     }, 2000);
+  }
+
+   onCancel(): void {
+    this.loginError = '';
   }
 }
