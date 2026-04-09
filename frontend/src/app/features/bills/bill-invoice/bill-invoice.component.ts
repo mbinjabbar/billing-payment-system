@@ -25,21 +25,25 @@ export class BillInvoiceComponent {
     return p ? `${p.first_name} ${p.last_name}` : '—';
   });
 
-  doctorName = computed(() =>
-    this.bill()?.visit?.appointment?.doctor_name ?? '—'
-  );
+  patientPhone = computed(() => this.bill()?.visit?.appointment?.patient_case?.patient?.phone ?? '—');
+  patientEmail = computed(() => this.bill()?.visit?.appointment?.patient_case?.patient?.email ?? '—');
+  patientAddress = computed(() => this.bill()?.visit?.appointment?.patient_case?.patient?.address ?? '—');
 
-  caseNumber = computed(() =>
-    this.bill()?.visit?.appointment?.patient_case?.case_number ?? '—'
-  );
+  doctorName = computed(() => this.bill()?.visit?.appointment?.doctor_name ?? '—');
+  caseNumber = computed(() => this.bill()?.visit?.appointment?.patient_case?.case_number ?? '—');
+  caseType = computed(() => this.bill()?.visit?.appointment?.patient_case?.case_type ?? '—');
+  caseCategory = computed(() => this.bill()?.visit?.appointment?.patient_case?.case_category ?? '—');
 
-  insuranceName = computed(() =>
-    this.bill()?.insurance_firm?.name ?? 'No Insurance'
-  );
 
-  procedureCodes = computed(() =>
-    this.bill()?.procedure_codes ?? []
-  );
+  insuranceName = computed(() => this.bill()?.insurance_firm?.name ?? 'No Insurance');
+  insuranceCarrierCode = computed(() => this.bill()?.insurance_firm?.carrier_code ?? '-')
+  insuranceFirmType = computed(() => this.bill()?.insurance_firm?.firm_type ?? '-')
+  insuranceContactPerson = computed(() => this.bill()?.insurance_firm?.contact_person ?? '—');
+  insurancePhone = computed(() => this.bill()?.insurance_firm?.phone ?? '—');
+  insuranceEmail = computed(() => this.bill()?.insurance_firm?.email ?? '—');
+  insuranceAddress = computed(() => this.bill()?.insurance_firm?.address ?? '—');
+
+  procedureCodes = computed(() => this.bill()?.procedure_codes ?? []);
 
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
@@ -51,11 +55,11 @@ export class BillInvoiceComponent {
     }
   }
 
-  downloadPdf(billId: number){
-  const url = `http://localhost:8000/api/bills/pdf/${billId}`;
-  const link = document.createElement('a');
-  link.href = url;
-  link.click();
+  downloadPdf(billId: number) {
+    const url = `http://localhost:8000/api/bills/pdf/${billId}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.click();
   }
 
   ngOnInit() {

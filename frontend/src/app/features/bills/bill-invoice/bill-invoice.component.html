@@ -3,260 +3,296 @@
 
     <!-- Loading -->
     @if (loading()) {
-      <div class="flex items-center justify-center min-h-[60vh]">
-        <div class="flex flex-col items-center gap-4">
-          <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-          <p class="text-sm text-on-surface-variant font-label">Loading invoice...</p>
-        </div>
+    <div class="flex items-center justify-center min-h-[60vh]">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p class="text-sm text-on-surface-variant font-label">Loading invoice...</p>
       </div>
+    </div>
     }
 
     <!-- Error -->
     @if (error()) {
-      <div class="flex items-center justify-center min-h-[60vh]">
-        <div class="text-center">
-          <span class="material-symbols-outlined text-error icon-2xl mb-4">error_outline</span>
-          <p class="text-lg font-bold font-headline">Invoice not found</p>
-          <p class="text-sm text-on-surface-variant font-label mt-2">Could not load bill details.</p>
-          <a [routerLink]="['/biller/visits']"
-            class="inline-flex items-center gap-2 mt-6 text-primary font-bold text-sm hover:underline font-label">
-            <span class="material-symbols-outlined icon-sm">arrow_back</span>
-            Back to Visits
-          </a>
-        </div>
+    <div class="flex items-center justify-center min-h-[60vh]">
+      <div class="text-center">
+        <span class="material-symbols-outlined text-error icon-2xl mb-4">error_outline</span>
+        <p class="text-lg font-bold font-headline">Invoice not found</p>
+        <p class="text-sm text-on-surface-variant font-label mt-2">Could not load bill details.</p>
+        <a [routerLink]="['/biller/visits']"
+          class="inline-flex items-center gap-2 mt-6 text-primary font-bold text-sm hover:underline font-label">
+          <span class="material-symbols-outlined icon-sm">arrow_back</span>
+          Back to Visits
+        </a>
       </div>
+    </div>
     }
 
     <!-- Invoice -->
     @if (!loading() && !error() && bill()) {
-      <div class="max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto">
 
-        <!-- Top Actions Bar -->
-        <div class="flex items-center justify-between mb-8 print:hidden">
-          <a [routerLink]="['/biller/visits']"
-            class="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline font-label">
-            <span class="material-symbols-outlined icon-sm">arrow_back</span>
-            Back to Visits
-          </a>
+      <!-- Top Actions Bar -->
+      <div class="flex items-center justify-between mb-8 print:hidden">
+        <a [routerLink]="['/biller/visits']"
+          class="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline font-label">
+          <span class="material-symbols-outlined icon-sm">arrow_back</span>
+          Back to Visits
+        </a>
 
-          <div>
-            <!-- Download placeholder -->
-            <button
-            (click)="downloadPdf(bill().id)"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary cursor-pointer">
-              <span class="material-symbols-outlined icon-sm">download</span>
-              Download PDF
-            </button>
-          </div>
+        <div>
+          <!-- Download placeholder -->
+          <button (click)="downloadPdf(bill().id)"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary cursor-pointer">
+            <span class="material-symbols-outlined icon-sm">download</span>
+            Download PDF
+          </button>
         </div>
+      </div>
 
-        <!-- INVOICE CARD -->
-        <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
+      <!-- INVOICE CARD -->
+      <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
-          <!-- Invoice Header -->
-          <div class="p-8 md:p-10"
-            style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
-            <div class="flex justify-between items-start">
+        <!-- Invoice Header -->
+        <div class="p-8 md:p-10" style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+          <div class="flex justify-between items-start">
 
-              <!-- Brand -->
-              <div>
-                <h1 class="text-3xl font-extrabold text-white font-headline tracking-tight">MedBilling</h1>
-                <p class="text-blue-100 text-sm font-label mt-1">Medical Billing Solutions</p>
-              </div>
-
-              <!-- Invoice Meta -->
-              <div class="text-right">
-                <p class="text-blue-100 text-xs font-label uppercase tracking-widest mb-1">Invoice</p>
-                <p class="text-white text-2xl font-extrabold font-headline">{{ bill().bill_number }}</p>
-                <div class="mt-3 space-y-1">
-                  <p class="text-blue-100 text-xs font-label">
-                    Issued: <span class="text-white font-semibold">{{ bill().bill_date | date:'MMM d, y' }}</span>
-                  </p>
-                  @if (bill().due_date) {
-                    <p class="text-blue-100 text-xs font-label">
-                      Due: <span class="text-white font-semibold">{{ bill().due_date | date:'MMM d, y' }}</span>
-                    </p>
-                  }
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Patient & Visit Info -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-0 border-b border-outline-variant/10">
-
-            <div class="p-6 border-r border-outline-variant/10">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Patient</p>
-              <p class="font-bold font-headline text-on-surface">{{ patientName() }}</p>
+            <!-- Brand -->
+            <div>
+              <h1 class="text-3xl font-extrabold text-white font-headline tracking-tight">MedBilling</h1>
+              <p class="text-blue-100 text-sm font-label mt-1">Medical Billing Solutions</p>
             </div>
 
-            <div class="p-6 border-r border-outline-variant/10">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Case No.</p>
-              <p class="font-bold font-headline text-on-surface">{{ caseNumber() }}</p>
-            </div>
-
-            <div class="p-6 border-r border-outline-variant/10">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Doctor</p>
-              <p class="font-bold font-headline text-on-surface">{{ doctorName() }}</p>
-            </div>
-
-            <div class="p-6">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Visit Date</p>
-              <p class="font-bold font-headline text-on-surface">
-                {{ bill().visit?.visit_date | date:'MMM d, y' }}
-              </p>
-            </div>
-
-          </div>
-
-          <!-- Insurance Row -->
-          <div class="px-8 py-4 bg-surface-container-low border-b border-outline-variant/10 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-on-surface-variant icon-md">business</span>
-              <div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Insurance Provider</p>
-                <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceName() }}</p>
-              </div>
-            </div>
+            <!-- Invoice Meta -->
             <div class="text-right">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Coverage</p>
-              <p class="font-bold text-sm font-headline text-primary">{{ bill().insurance_coverage ?? 0 }}%</p>
-            </div>
-          </div>
-
-          <!-- Procedure Codes Table -->
-          <div class="p-8 md:p-10">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">
-              Procedure Details
-            </h3>
-
-            <div class="rounded-xl border border-outline-variant/10 overflow-hidden">
-              <!-- Table Head -->
-              <div class="grid grid-cols-12 px-5 py-3 bg-surface-container-low">
-                <div class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Code</div>
-                <div class="col-span-7 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Description</div>
-                <div class="col-span-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label text-right">Charge</div>
-              </div>
-
-              <!-- Procedure Rows -->
-              <div class="divide-y divide-outline-variant/10">
-                @for (code of procedureCodes(); track $index) {
-                  <div class="grid grid-cols-12 items-center px-5 py-4">
-                    <div class="col-span-2">
-                      <span class="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-bold font-headline">
-                        {{ code.code ?? code }}
-                      </span>
-                    </div>
-                    <div class="col-span-7">
-                      <p class="font-semibold text-sm font-body text-on-surface">{{ code.name ?? '—' }}</p>
-                      <p class="text-xs text-on-surface-variant font-label mt-0.5">{{ code.description ?? '' }}</p>
-                    </div>
-                    <div class="col-span-3 text-right">
-                      <span class="font-bold font-headline text-on-surface">
-                        ${{ (code.standard_charge ?? 0) }}
-                      </span>
-                    </div>
-                  </div>
+              <p class="text-blue-100 text-xs font-label uppercase tracking-widest mb-1">Invoice</p>
+              <p class="text-white text-2xl font-extrabold font-headline">{{ bill().bill_number }}</p>
+              <div class="mt-3 space-y-1">
+                <p class="text-blue-100 text-xs font-label">
+                  Issued: <span class="text-white font-semibold">{{ bill().bill_date | date:'MMM d, y' }}</span>
+                </p>
+                @if (bill().due_date) {
+                <p class="text-blue-100 text-xs font-label">
+                  Due: <span class="text-white font-semibold">{{ bill().due_date | date:'MMM d, y' }}</span>
+                </p>
                 }
               </div>
             </div>
 
           </div>
+        </div>
 
-          <!-- Calculation Summary -->
-          <div class="grid md:grid-cols-2 gap-0 border-t border-outline-variant/10">
+        <!-- Patient & Visit Info -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-0 border-b border-outline-variant/10">
 
-            <!-- Notes -->
-            <div class="p-8 border-r border-outline-variant/10">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-4">Notes</p>
-              @if (bill().notes) {
-                <p class="text-sm text-on-surface font-body leading-relaxed">{{ bill().notes }}</p>
-              } @else {
-                <p class="text-sm text-on-surface-variant/50 font-label italic">No notes added</p>
-              }
-
-              <!-- Paid Amount if any -->
-              @if (bill().paid_amount > 0) {
-                <div class="mt-6 p-4 bg-secondary-container/30 rounded-lg border border-secondary-container">
-                  <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Amount Paid</p>
-                  <p class="text-xl font-extrabold font-headline text-on-secondary-container">
-                    ${{ bill().paid_amount }}
-                  </p>
-                </div>
-              }
-            </div>
-
-            <!-- Totals -->
-            <div class="p-8">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">Summary</p>
-
-              <div class="space-y-4">
-
-                <div class="flex justify-between text-sm">
-                  <span class="text-on-surface-variant font-body">Gross Charges</span>
-                  <span class="font-bold font-headline">${{ bill().charges }}</span>
-                </div>
-
-                <div class="flex justify-between text-sm">
-                  <span class="text-on-surface-variant font-body">
-                    Insurance ({{ bill().insurance_coverage ?? 0 }}%)
-                  </span>
-                  <span class="font-bold font-headline text-primary">
-                    -${{ (bill().charges * (bill().insurance_coverage / 100)) | number:'1.2-2' }}
-                  </span>
-                </div>
-
-                <div class="flex justify-between text-sm">
-                  <span class="text-on-surface-variant font-body">Discount</span>
-                  <span class="font-bold font-headline text-secondary">
-                    -${{ (bill().discount_amount ?? 0) }}
-                  </span>
-                </div>
-
-                <div class="flex justify-between text-sm">
-                  <span class="text-on-surface-variant font-body">Tax ({{ bill().tax_amount ?? 0 }}%)</span>
-                  <span class="font-bold font-headline">
-                    +${{ (bill().tax_amount ?? 0) }}
-                  </span>
-                </div>
-
-                <!-- Divider -->
-                <div class="border-t border-outline-variant/20 pt-4">
-                  <div class="flex justify-between items-end">
-                    <div>
-                      <p class="text-xs font-bold uppercase tracking-widest text-primary font-label">Patient Responsibility</p>
-                      @if (bill().due_date) {
-                        <p class="text-xs text-on-surface-variant font-label mt-1">
-                          Due by {{ bill().due_date | date:'MMM d, y' }}
-                        </p>
-                      }
-                    </div>
-                    <span class="text-4xl font-extrabold font-headline text-on-surface">
-                      ${{ bill().bill_amount }}
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
+          <!-- Patient Name -->
+          <div class="p-6 border-r border-outline-variant/10">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Patient
+            </p>
+            <p class="font-bold font-headline text-on-surface mb-2">{{ patientName() }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Email
+            </p>
+            <p class="font-bold font-headline text-on-surface">{{ patientEmail() }}</p>
           </div>
 
-          <!-- Invoice Footer -->
-          <div class="px-8 py-5 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
-            <p class="text-xs text-on-surface-variant font-label">
-              Generated by MedBilling • {{ bill().bill_date | date:'MMMM d, y' }}
+          <!-- Case Number -->
+          <div class="p-6 border-r border-outline-variant/10">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Case No.
             </p>
-            <span class="px-3 py-1.5 rounded-full text-[10px] font-bold font-label uppercase tracking-wide"
-              [class]="getStatusClass(bill().status)">
-              {{ bill().status }}
-            </span>
+            <p class="font-bold font-headline text-on-surface mb-2">{{ caseNumber() }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Case Type - Case Category
+            </p>
+            <p class="font-bold font-headline text-on-surface">{{ caseType() }} - {{ caseCategory()}}</p>
+          </div>
+
+          <!-- Doctor & Visit Date -->
+          <div class="p-6">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Doctor
+            </p>
+            <p class="font-bold font-headline text-on-surface">{{ doctorName() }}</p>
+            <p class="text-[10px] text-on-surface-variant mt-1 font-label">Visit: {{ bill().visit?.visit_date |
+              date:'MMM d, y' }}</p>
+          </div>
+        </div>
+
+        <!-- Insurance & Contact Info -->
+        <div
+          class="px-8 py-4 bg-surface-container-low border-b border-outline-variant/10 grid grid-cols-1 md:grid-cols-4 gap-6">
+
+          <div class="flex flex-col gap-2">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Insurance
+              Provider</p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceName() }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Coverage</p>
+            <p class="font-bold text-sm font-headline text-primary">{{ bill().insurance_coverage ?? 0 }}%</p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Carrier Code
+            </p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceCarrierCode() }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Firm Type</p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceFirmType() }}</p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Contact Person
+            </p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceContactPerson() }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Phone</p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insurancePhone() }}</p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Email</p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceEmail() }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Address</p>
+            <p class="font-bold text-sm font-headline text-on-surface">{{ insuranceAddress() }}</p>
           </div>
 
         </div>
 
+        <!-- Procedure Codes Table -->
+        <div class="p-8 md:p-10">
+          <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">
+            Procedure Details
+          </h3>
+
+          <div class="rounded-xl border border-outline-variant/10 overflow-hidden">
+            <!-- Table Head -->
+            <div class="grid grid-cols-12 px-5 py-3 bg-surface-container-low">
+              <div
+                class="col-span-2 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">
+                Code</div>
+              <div
+                class="col-span-7 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">
+                Description</div>
+              <div
+                class="col-span-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label text-right">
+                Charge</div>
+            </div>
+
+            <!-- Procedure Rows -->
+            <div class="divide-y divide-outline-variant/10">
+              @for (code of procedureCodes(); track $index) {
+              <div class="grid grid-cols-12 items-center px-5 py-4">
+                <div class="col-span-2">
+                  <span class="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-bold font-headline">
+                    {{ code.code ?? code }}
+                  </span>
+                </div>
+                <div class="col-span-7">
+                  <p class="font-semibold text-sm font-body text-on-surface">{{ code.name ?? '—' }}</p>
+                  <p class="text-xs text-on-surface-variant font-label mt-0.5">{{ code.description ?? '' }}</p>
+                </div>
+                <div class="col-span-3 text-right">
+                  <span class="font-bold font-headline text-on-surface">
+                    ${{ (code.standard_charge ?? 0) }}
+                  </span>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Calculation Summary -->
+        <div class="grid md:grid-cols-2 gap-0 border-t border-outline-variant/10">
+
+          <!-- Notes -->
+          <div class="p-8 border-r border-outline-variant/10">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-4">Notes</p>
+            @if (bill().notes) {
+            <p class="text-sm text-on-surface font-body leading-relaxed">{{ bill().notes }}</p>
+            } @else {
+            <p class="text-sm text-on-surface-variant/50 font-label italic">No notes added</p>
+            }
+
+            <!-- Paid Amount if any -->
+            @if (bill().paid_amount > 0) {
+            <div class="mt-6 p-4 bg-secondary-container/30 rounded-lg border border-secondary-container">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Amount
+                Paid</p>
+              <p class="text-xl font-extrabold font-headline text-on-secondary-container">
+                ${{ bill().paid_amount }}
+              </p>
+            </div>
+            }
+          </div>
+
+          <!-- Totals -->
+          <div class="p-8">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">Summary
+            </p>
+
+            <div class="space-y-4">
+
+              <div class="flex justify-between text-sm">
+                <span class="text-on-surface-variant font-body">Gross Charges</span>
+                <span class="font-bold font-headline">${{ bill().charges }}</span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-on-surface-variant font-body">
+                  Insurance ({{ bill().insurance_coverage ?? 0 }}%)
+                </span>
+                <span class="font-bold font-headline text-primary">
+                  -${{ (bill().charges * (bill().insurance_coverage / 100)) | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-on-surface-variant font-body">Discount</span>
+                <span class="font-bold font-headline text-secondary">
+                  -${{ (bill().discount_amount ?? 0) }}
+                </span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-on-surface-variant font-body">Tax ({{ bill().tax_amount ?? 0 }}%)</span>
+                <span class="font-bold font-headline">
+                  +${{ (bill().tax_amount ?? 0) }}
+                </span>
+              </div>
+
+              <!-- Divider -->
+              <div class="border-t border-outline-variant/20 pt-4">
+                <div class="flex justify-between items-end">
+                  <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-primary font-label">Patient
+                      Responsibility</p>
+                    @if (bill().due_date) {
+                    <p class="text-xs text-on-surface-variant font-label mt-1">
+                      Due by {{ bill().due_date | date:'MMM d, y' }}
+                    </p>
+                    }
+                  </div>
+                  <span class="text-4xl font-extrabold font-headline text-on-surface">
+                    ${{ bill().bill_amount }}
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Invoice Footer -->
+        <div
+          class="px-8 py-5 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
+          <p class="text-xs text-on-surface-variant font-label">
+            Generated by MedBilling • {{ bill().bill_date | date:'MMMM d, y' }}
+          </p>
+          <span class="px-3 py-1.5 rounded-full text-[10px] font-bold font-label uppercase tracking-wide"
+            [class]="getStatusClass(bill().status)">
+            {{ bill().status }}
+          </span>
+        </div>
+
       </div>
+
+    </div>
     }
 
   </div>
