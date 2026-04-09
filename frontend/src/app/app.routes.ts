@@ -23,6 +23,7 @@ export const routes: Routes = [
   },
     { path: 'bills/create/:visitId', loadComponent: () => import('./features/bills/create-bill/create-bill.component').then(m => m.CreateBillComponent)},
     { path: 'bills/invoice/:billId', loadComponent: () => import('./features/bills/bill-invoice/bill-invoice.component').then(m => m.BillInvoiceComponent)},
+    { path: 'bills/bill-list', loadComponent: () => import('./features/bills/bill-list/bill-list.component').then(m => m.BillListComponent)},
     { path: 'payment-poster', loadComponent: () => import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent) },
     { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];

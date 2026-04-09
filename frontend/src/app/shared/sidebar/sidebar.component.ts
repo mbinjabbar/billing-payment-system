@@ -17,7 +17,7 @@ export class SidebarComponent {
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/biller' },
     { label: 'Visits', icon: 'calendar_today', route: '/biller/visits' },
-    { label: 'Bills', icon: 'receipt_long', route: '/biller/bills' },
+    { label: 'Bills', icon: 'receipt_long', route: 'bills/bill-list' },
     { label: 'Documents', icon: 'description', route: '/biller/documents' },
   ];
 }
