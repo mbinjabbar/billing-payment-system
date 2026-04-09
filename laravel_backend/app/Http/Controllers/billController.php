@@ -174,7 +174,7 @@ class billController extends Controller
             return $this->error('Failed to delete the bill.');
         }
     }
-        public function generatePDF($id)
+        public function downloadPDF($id)
 {
     try {
         $bill = Bill::with(['visit.appointment.patientCase.patient'])->findOrFail($id);
