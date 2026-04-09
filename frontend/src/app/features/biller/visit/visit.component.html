@@ -153,6 +153,7 @@
                 </button>
                 } @else if (isBilled(visit)) {
                 <button
+                  [routerLink]="['/bills/invoice', visit.bill.id]"
                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container hover:text-on-primary active:scale-98 transition-all font-headline cursor-pointer">
                   <span class="material-symbols-outlined icon-sm">visibility</span>
                   View Bill

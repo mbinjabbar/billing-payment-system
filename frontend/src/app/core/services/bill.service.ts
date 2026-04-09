@@ -12,6 +12,10 @@ export class BillService {
     return this.http.get(`${this.apiUrl}/bills`);
   }
 
+  getBillById(id: number) {
+    return this.http.get(`${this.apiUrl}/bills/${id}`);
+  }
+
   createBill(payload: any) {
     return this.http.post(`${this.apiUrl}/bills`, payload);
   }

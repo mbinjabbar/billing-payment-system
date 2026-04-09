@@ -1,0 +1,71 @@
+import { Component, inject, signal, computed } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { BillService } from '../../../core/services/bill.service';
+
+@Component({
+  selector: 'app-bill-invoice',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  templateUrl: './bill-invoice.component.html',
+})
+export class BillInvoiceComponent {
+  private route       = inject(ActivatedRoute);
+  private billService = inject(BillService);
+
+  bill    = signal<any>(null);
+  loading = signal(true);
+  error   = signal(false);
+
+  // Computed helpers
+  patientName = computed(() => {
+    const b = this.bill();
+    if (!b) return '—';
+    const p = b?.visit?.appointment?.patient_case?.patient;
+    return p ? `${p.first_name} ${p.last_name}` : '—';
+  });
+
+  doctorName = computed(() =>
+    this.bill()?.visit?.appointment?.doctor_name ?? '—'
+  );
+
+  caseNumber = computed(() =>
+    this.bill()?.visit?.appointment?.patient_case?.case_number ?? '—'
+  );
+
+  insuranceName = computed(() =>
+    this.bill()?.insurance_firm?.name ?? 'No Insurance'
+  );
+
+  procedureCodes = computed(() =>
+    this.bill()?.procedure_codes ?? []
+  );
+
+  getStatusClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'paid':      return 'bg-secondary-container text-on-secondary-container';
+      case 'pending':   return 'bg-error-container/20 text-error';
+      case 'draft':     return 'bg-primary-container text-on-primary-container';
+      case 'submitted': return 'bg-tertiary-container text-on-tertiary-container';
+      default:          return 'bg-surface-container-high text-on-surface-variant';
+    }
+  }
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('billId');
+    this.billService.getBillById(Number(id)).subscribe({
+      next: (res: any) => {
+        this.bill.set(res.data ?? res);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set(true);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  printInvoice() {
+    window.print();
+  }
+}
