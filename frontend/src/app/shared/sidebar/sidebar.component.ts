@@ -18,6 +18,6 @@ export class SidebarComponent {
     { label: 'Dashboard', icon: 'dashboard', route: '/biller' },
     { label: 'Visits', icon: 'calendar_today', route: '/biller/visits' },
     { label: 'Bills', icon: 'receipt_long', route: 'bills/bill-list' },
-    { label: 'Documents', icon: 'description', route: '/biller/documents' },
+    { label: 'Documents', icon: 'description', route: '/documents' },
   ];
 }

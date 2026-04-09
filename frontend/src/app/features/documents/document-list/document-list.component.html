@@ -1,0 +1,144 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <div class="pt-10 px-10 pb-12 space-y-8 w-full">
+
+    <!-- Header -->
+    <section class="flex justify-between items-end">
+      <div>
+        <h2 class="text-4xl font-extrabold tracking-tight font-headline">
+          Documents
+        </h2>
+        <p class="text-on-surface-variant mt-2 max-w-2xl font-body">
+          Access all uploaded files including NF2 forms, invoices, and receipts.
+        </p>
+      </div>
+
+      <!-- Filter -->
+      <select
+        class="bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-2 text-sm font-bold text-on-surface outline-none">
+        <option>All Types</option>
+        <option>NF2 Form</option>
+        <option>Invoice</option>
+        <option>Receipt</option>
+        <option>Cheque Image</option>
+      </select>
+    </section>
+
+    <!-- Table -->
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+
+      <!-- Table Header -->
+      <div class="px-6 py-5 border-b border-outline-variant/10">
+        <h3 class="text-xl font-bold font-headline">
+          Document Records
+        </h3>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+
+          <!-- Head -->
+          <thead>
+            <tr class="bg-surface-container-low">
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Document</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Type</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Uploaded</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Version</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Action</th>
+            </tr>
+          </thead>
+
+          <!-- Body -->
+          <tbody class="divide-y divide-outline-variant/10">
+            @for (doc of documents(); track doc.id) {
+            <tr class="hover:bg-surface-container-low transition">
+
+              <!-- Document -->
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-red-500 text-[20px]">
+                    picture_as_pdf
+                  </span>
+
+                  <div>
+                    <p class="font-bold">
+                      {{ doc.file_name }}
+                    </p>
+                    <p class="text-xs text-on-surface-variant">
+                      {{ doc.file_size / 1024 | number:'1.0-0' }} KB
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Patient -->
+              <td class="px-5 py-4">
+                <p class="font-bold">
+                  {{ doc.bill?.visit?.appointment?.patient_case?.patient?.full_name }}
+                </p>
+              </td>
+
+              <!-- Type -->
+              <td class="px-5 py-4">
+                <span
+                  class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
+                  [ngClass]="{
+                    'bg-orange-700': doc.document_type === 'NF2 Form',
+                    'bg-cyan-700': doc.document_type === 'Invoice',
+                    'bg-green-700': doc.document_type === 'Receipt',
+                    'bg-purple-700': doc.document_type === 'Cheque Image',
+                    'bg-gray-600': doc.document_type === 'Supporting Document'
+                  }">
+                  {{ doc.document_type }}
+                </span>
+              </td>
+
+              <!-- Bill -->
+              <td class="px-5 py-4">
+                <p class="font-bold">
+                  {{ doc.bill?.bill_number || '—' }}
+                </p>
+              </td>
+
+              <!-- Upload Date -->
+              <td class="px-5 py-4 whitespace-nowrap">
+                {{ doc.upload_date | date }}
+              </td>
+
+              <!-- Version -->
+              <td class="px-5 py-4 text-center font-semibold">
+                v{{ doc.version }}
+              </td>
+
+              <!-- Actions -->
+              <td class="px-5 py-4 text-right space-x-2">
+
+                <!-- View -->
+                <a
+                  [href]="doc.file_path"
+                  target="_blank"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container">
+                  View
+                </a>
+
+                <!-- Download -->
+                <a
+                  [href]="doc.file_path"
+                  download
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary-container text-on-secondary-container hover:opacity-80">
+                  Download
+                </a>
+
+              </td>
+
+            </tr>
+            }
+          </tbody>
+
+        </table>
+      </div>
+
+    </section>
+  </div>
+</div>
