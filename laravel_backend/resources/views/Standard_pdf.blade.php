@@ -28,9 +28,23 @@
         <div style="margin-bottom:20px; border-top:1px solid #ccc; border-bottom:1px solid #ccc; padding:10px 0;">
             <h3 style="margin:0 0 10px 0; font-size:14px; font-weight:bold;">Patient Information</h3>
             <p><strong>Name: </strong>{{ $bill->visit->appointment->patientCase->patient->full_name }}</p>
+            <p><strong>Email:</strong>{{$bill->visit->appointment->patientCase->patient->email}}
             <p><strong>Gender: </strong>{{ $bill->visit->appointment->patientCase->patient->gender }}</p>
+            <p><strong>Doctor:</strong>{{$bill->visit->appointment->doctor_name}}
             <p><strong>Case #: </strong>{{ $bill->visit->appointment->patientCase->case_number }}</p>
             <p><strong>Case Type: </strong>{{ $bill->visit->appointment->patientCase->case_type }}</p>
+        </div>
+
+        <!--Insuranceinformation-->
+        <div style="margin-bottom:20px; border-top:1px solid #ccc; border-bottom:1px solid #ccc; padding:10px 0;">
+            <h3 style="margin:0 0 10px 0; font-size:14px; font-weight:bold;">Insurance Information</h3>
+            <p><strong>Insurance Provider: </strong>{{$bill->insurance_firm->name}}</p>
+            <p><strong>Carrier Code:</strong>{{$bill->insurance_firm->carrier_code}}</p>
+            <p><strong>Firm_type: </strong>{{$bill->insurance_firm->firm_type}}</p>
+            <p><strong>Contact Person: </strong>{{$bill->insurance_firm->contact_person}}</p>
+            <p><strong>Phone: </strong>{{$bill->insurance_firm->phone}}</p>
+            <p><strong>Email: </strong>{{$bill->insurance_firm->email}}</p>
+            <p><strong>Address: </strong>{{$bill->insurance_firm->address}}</p>
         </div>
 
         <!-- Procedure Table -->
