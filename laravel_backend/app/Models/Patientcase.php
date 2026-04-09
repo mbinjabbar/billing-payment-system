@@ -37,6 +37,6 @@ class PatientCase extends Model
 
     public function nf2Detail()
     {
-        return $this->hasOne(Nf2Detail::class);
+        return $this->hasOne(Nf2Detail::class, 'case_id');
     }
 }

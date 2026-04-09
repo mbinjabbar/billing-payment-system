@@ -20,6 +20,6 @@ class Nf2Detail extends Model
 
     public function patientCase()
     {
-        return $this->belongsTo(PatientCase::class);
+        return $this->belongsTo(PatientCase::class, 'case_id');
     }
 }
