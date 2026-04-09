@@ -40,12 +40,6 @@
           </a>
 
           <div class="flex items-center gap-3">
-            <!-- Status Badge -->
-            <span class="px-3 py-1.5 rounded-full text-xs font-bold font-label uppercase tracking-wide"
-              [class]="getStatusClass(bill().status)">
-              {{ bill().status }}
-            </span>
-
             <!-- Print Button -->
             <button
               (click)="printInvoice()"
@@ -167,7 +161,7 @@
                     </div>
                     <div class="col-span-3 text-right">
                       <span class="font-bold font-headline text-on-surface">
-                        ${{ (code.standard_charge ?? 0).toFixed(2) }}
+                        ${{ (code.standard_charge ?? 0) }}
                       </span>
                     </div>
                   </div>
@@ -194,7 +188,7 @@
                 <div class="mt-6 p-4 bg-secondary-container/30 rounded-lg border border-secondary-container">
                   <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Amount Paid</p>
                   <p class="text-xl font-extrabold font-headline text-on-secondary-container">
-                    ${{ bill().paid_amount.toFixed(2) }}
+                    ${{ bill().paid_amount }}
                   </p>
                 </div>
               }
@@ -208,7 +202,7 @@
 
                 <div class="flex justify-between text-sm">
                   <span class="text-on-surface-variant font-body">Gross Charges</span>
-                  <span class="font-bold font-headline">${{ bill().charges.toFixed(2) }}</span>
+                  <span class="font-bold font-headline">${{ bill().charges }}</span>
                 </div>
 
                 <div class="flex justify-between text-sm">
@@ -216,21 +210,21 @@
                     Insurance ({{ bill().insurance_coverage ?? 0 }}%)
                   </span>
                   <span class="font-bold font-headline text-primary">
-                    -${{ (bill().charges * (bill().insurance_coverage / 100)).toFixed(2) }}
+                    -${{ (bill().charges * (bill().insurance_coverage / 100)) }}
                   </span>
                 </div>
 
                 <div class="flex justify-between text-sm">
                   <span class="text-on-surface-variant font-body">Discount</span>
                   <span class="font-bold font-headline text-secondary">
-                    -${{ (bill().discount_amount ?? 0).toFixed(2) }}
+                    -${{ (bill().discount_amount ?? 0) }}
                   </span>
                 </div>
 
                 <div class="flex justify-between text-sm">
                   <span class="text-on-surface-variant font-body">Tax ({{ bill().tax_amount ?? 0 }}%)</span>
                   <span class="font-bold font-headline">
-                    +${{ (bill().tax_amount ?? 0).toFixed(2) }}
+                    +${{ (bill().tax_amount ?? 0) }}
                   </span>
                 </div>
 
@@ -246,7 +240,7 @@
                       }
                     </div>
                     <span class="text-4xl font-extrabold font-headline text-on-surface">
-                      ${{ bill().bill_amount.toFixed(2) }}
+                      ${{ bill().bill_amount }}
                     </span>
                   </div>
                 </div>

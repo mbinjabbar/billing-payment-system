@@ -179,7 +179,7 @@ export class CreateBillComponent {
       visit_id:          this.visit().data?.id,
       insurance_firm_id: this.selectedInsuranceId(),
       created_by:        1,
-      procedure_codes:   this.selectedProcedures().map((p) => p.code),
+      procedure_codes:   this.selectedProcedures().map((p) => ({ code: p.code, name: p.name, standard_charge: p.standard_charge})),
       charges:           Number(summary.total),
       insurance_coverage: Number(this.billing().insurance),
       discount_amount:   Number(this.billing().discount),
