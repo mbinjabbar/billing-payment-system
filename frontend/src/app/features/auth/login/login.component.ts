@@ -60,7 +60,5 @@ export class LoginComponent {
     }, 2000);
   }
 
-   onCancel(): void {
-    this.loginError = '';
-  }
+   
 }
