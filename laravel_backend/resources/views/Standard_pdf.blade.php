@@ -59,12 +59,19 @@
         <p><strong>Gender:</strong> {{ $bill->visit->appointment->patientCase->patient->gender }}</p>
         <p><strong>Case No:</strong> {{ $bill->visit->appointment->patientCase->case_number}}</p>
         <p><strong>Case Type:</strong> {{ $bill->visit->appointment->patientCase->case_type}}</p>
-        <p><strong>Procedures code:</strong>
+        <strong>Procedures code:</strong>
+    @if(!empty($bill->procedure_codes))
         @foreach($bill->procedure_codes as $item)
             <span class="text-dark">
-                {{ $item }}
+                <strong>{{ $item['code'] ?? '' }}</strong> - 
+                {{ $item['name'] ?? '' }} 
+               <strong> (Standard Charge: {{ $item['standard_charge'] ?? '0' }}) </strong>
             </span>
+            <br> 
         @endforeach
+    @else
+        <span class="text-muted">N/A</span>
+    @endif
 </p>
 
     </div>

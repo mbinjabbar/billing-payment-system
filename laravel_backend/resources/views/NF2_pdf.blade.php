@@ -70,13 +70,22 @@
         <h4>Clinical Information</h4>
         <p><strong>Visit Date:</strong> {{ \Carbon\Carbon::parse($bill->visit->visit_date)->format('d-m-Y') }}</p>
         <p><strong>Diagnosis:</strong> {{ $bill->visit->diagnosis }}</p>
-        <p><strong>Procedures code:</strong>
+        
+    <strong>Procedures code:</strong>
+    @if(!empty($bill->procedure_codes))
         @foreach($bill->procedure_codes as $item)
             <span class="text-dark">
-                {{ $item }}
+                <strong>{{ $item['code'] ?? '' }}</strong> - 
+                {{ $item['name'] ?? '' }} 
+               <strong> (Standard Charge: {{ $item['standard_charge'] ?? '0' }}) </strong>
             </span>
+            <br> 
         @endforeach
+    @else
+        <span class="text-muted">N/A</span>
+    @endif
 </p>
+
       
 </div>
     <div class="section">
