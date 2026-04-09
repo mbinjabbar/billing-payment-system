@@ -34,4 +34,9 @@ class PatientCase extends Model
     {
         return $this->hasManyThrough(Visit::class, Appointment::class);
     }
+
+    public function nf2Detail()
+    {
+        return $this->hasOne(Nf2Detail::class);
+    }
 }

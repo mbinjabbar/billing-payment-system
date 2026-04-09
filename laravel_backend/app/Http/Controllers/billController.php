@@ -21,7 +21,7 @@ class billController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Bill::with(['visit.appointment.patientCase.patient'], 'insurance_firm');
+            $query = Bill::with('visit.appointment.patientCase.patient', 'insurance_firm');
 
             $query->when($request->status, function ($q) use ($request) {
                 return $q->where('status', $request->status);
@@ -91,7 +91,7 @@ class billController extends Controller
              $view = $isCarAccident ? 'NF2_pdf' : 'Standard_pdf';
              $prefix = $isCarAccident ? 'NF2_' : 'Standard_';
 
-            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
+            $bill->load('visit.appointment.patientCase.patient', 'visit.appointment.patientCase.nf2Detail', 'insurance_firm');
 
             $pdf = PDF::loadView($view, compact('bill'));
 

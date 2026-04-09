@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PatientCaseSeeder::class,
             AppointmentSeeder::class,
             VisitSeeder::class,
+            Nf2DetailSeeder::class,
         ]);
     }
 }
