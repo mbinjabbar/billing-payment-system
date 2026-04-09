@@ -82,7 +82,7 @@ class billController extends Controller
 
             $pdf = PDF::loadView('NF2_pdf', compact('bill'));
 
-            $fileName = 'nf2_bill_' . $bill->id . '.pdf';
+            $fileName = 'NF2_' . $bill->bill_number . '.pdf';
             $path = 'bills/' . $fileName;
         
             Storage::put($path, $pdf->output());

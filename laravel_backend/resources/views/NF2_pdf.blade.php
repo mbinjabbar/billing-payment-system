@@ -56,11 +56,29 @@
     <div class="section">
         <h4>Patient Information</h4>
         <p><strong>Name:</strong> {{ $bill->visit->appointment->patientCase->patient->full_name }}</p>
+        <p><strong>City:</strong> {{ $bill->visit->appointment->patientCase->patient->city }}</p>
+        <p><strong>Address:</strong> {{ $bill->visit->appointment->patientCase->patient->address }}</p>
+        <p><strong>Phone:</strong> {{ $bill->visit->appointment->patientCase->patient->phone }}</p>
         <p><strong>Gender:</strong> {{ $bill->visit->appointment->patientCase->patient->gender }}</p>
-        <p><strong>Case #:</strong> {{ $bill->visit->appointment->patientCase->id }}</p>
+        <p><strong>Date of Birth:</strong> {{ \Carbon\Carbon::parse($bill->visit->appointment->patientCase->patient->date_of_birth)->format('d-m-Y') }}</p>
+        <p><strong>Case No:</strong> {{ $bill->visit->appointment->patientCase->case_number}}</p>
         <p><strong>Case Type:</strong> {{ $bill->visit->appointment->patientCase->case_type}}</p>
+        <p><strong>Case_Category:</strong> {{ $bill->visit->appointment->patientCase->case_category}}</p>
     </div>
 
+    <div class="section">
+        <h4>Clinical Information</h4>
+        <p><strong>Visit Date:</strong> {{ \Carbon\Carbon::parse($bill->visit->visit_date)->format('d-m-Y') }}</p>
+        <p><strong>Diagnosis:</strong> {{ $bill->visit->diagnosis }}</p>
+        <p><strong>Procedures code:</strong>
+        @foreach($bill->procedure_codes as $item)
+            <span class="text-dark">
+                {{ $item }}
+            </span>
+        @endforeach
+</p>
+      
+</div>
     <div class="section">
         <h4>Charges</h4>
         <table>
