@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
 use PDF;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 
 class billController extends Controller
 {
@@ -51,6 +53,7 @@ class billController extends Controller
 
     public function store(Request $request)
     {
+         DB::beginTransaction();
         try {
             $data = $request->all();
             $charges = $data['charges'];
@@ -77,12 +80,15 @@ class billController extends Controller
                 'notes' => $data['notes']
             ]);
             
+             $isCarAccident = $bill->visit->appointment->patientCase->car_accident;
+             $view = $isCarAccident ? 'NF2_pdf' : 'Standard_pdf';
+             $prefix = $isCarAccident ? 'NF2_' : 'Standard_';
 
             $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
 
-            $pdf = PDF::loadView('NF2_pdf', compact('bill'));
+            $pdf = PDF::loadView($view, compact('bill'));
 
-            $fileName = 'NF2_' . $bill->bill_number . '.pdf';
+            $fileName = $prefix . $bill->bill_number . '.pdf';
             $path = 'bills/' . $fileName;
         
             Storage::put($path, $pdf->output());
@@ -109,12 +115,13 @@ class billController extends Controller
             'upload_date' => now(),
             'uploaded_by' => $data['created_by'],
             'version' => 1
-        ]);
-
-            return $this->success($bill, 'Bill generated successfully.');
+        ]);        
+        DB::commit();
+        return $this->success($bill, ($isCarAccident ? 'NF2' : 'Standard') . ' Bill generated successfully.');
         } catch (Exception $e) {
+              DB::rollBack();
             Log::error('Error generating bill: ' . $e->getMessage());
-            return $this->error('Bill data not found.');
+            return $this->error($e-getMessage());
         }
     }
 
