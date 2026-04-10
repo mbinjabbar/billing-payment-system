@@ -26,10 +26,9 @@ export class CreatePaymentComponent {
     bank_name:new FormControl('',Validators.required),
     payment_date:new FormControl('',Validators.required),
     payment_status: new FormControl('', Validators.required),
+    transaction_reference:new FormControl('',Validators.required),
     notes:new FormControl('')
   });
-
-
 
 
   ngOnInit() {
@@ -54,10 +53,18 @@ export class CreatePaymentComponent {
 
     const paymentdata = new FormData();
     paymentdata.append('amount_paid', this.paymentForm.get('amount_paid')?.value ?? '');
+    paymentdata.append('payment_mode', this.paymentForm.get('payment_mode')?.value ?? '');
+    paymentdata.append('check_number', this.paymentForm.get('check_number')?.value ?? '');
+    paymentdata.append('bank_name', this.paymentForm.get('bank_name')?.value ?? '');
+    paymentdata.append('payment_date', this.paymentForm.get('payment_date')?.value ?? '');
+    paymentdata.append('payment_status', this.paymentForm.get('payment_status')?.value ?? '');
+    paymentdata.append('notes', this.paymentForm.get('notes')?.value ?? '');
     if (this.selectedfile) paymentdata.append('payment', this.selectedfile);
-  
+
       this.paymentposterService.createPayment(paymentdata).subscribe({
-      next:  (response: any) => {response.data},
+      next:  (response: any) => {
+        console.log(response.data);
+      },
         error: (err) => console.log(err)
       });
     }
