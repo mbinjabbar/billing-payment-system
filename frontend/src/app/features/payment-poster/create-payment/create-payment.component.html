@@ -1,0 +1,213 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <main class="flex-1 p-8 md:p-12 mx-auto w-full">
+
+    <!-- HEADER -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <a [routerLink]="['/bills/bill-list']"
+          class="inline-flex items-center text-primary text-sm font-semibold mb-4 hover:translate-x-1 transition-transform">
+          <span class="material-symbols-outlined mr-1 icon-md">arrow_back</span>
+          Back to Bills
+        </a>
+
+        <h1 class="text-4xl font-headline font-extrabold tracking-tight">
+          Post Payment
+        </h1>
+      </div>
+
+      <!-- Bill Summary -->
+      <div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-6 border border-outline-variant/15 shadow-sm">
+        <div>
+          <p class="text-xs font-label text-on-surface-variant uppercase">Bill #</p>
+          <p class="font-headline font-bold"></p>
+        </div>
+        <div class="h-10 w-px bg-outline-variant/30"></div>
+        <div>
+          <p class="text-xs font-label text-on-surface-variant uppercase">Outstanding</p>
+          <p class="font-headline font-bold text-error"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- LEFT -->
+      <div class="lg:col-span-8 space-y-8">
+
+        <!-- PAYMENT DETAILS -->
+        <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 shadow-sm">
+
+          <h2 class="text-xl font-headline font-bold mb-6">Payment Details</h2>
+
+          <!-- AMOUNT + MODE -->
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+
+            <!-- Amount -->
+            <div>
+              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                Amount Paid <span class="text-error">*</span>
+              </label>
+
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
+                <input
+                  type="number"
+                  class="w-full bg-surface-container-low rounded-lg p-4 pl-8 text-lg font-bold border border-outline-variant/20 focus:border-primary outline-none transition-colors" />
+              </div>
+            </div>
+
+            <!-- Payment Mode -->
+            <div>
+              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                Payment Mode <span class="text-error">*</span>
+              </label>
+
+              <select
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none">
+                <option value="">Select payment mode</option>
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="check">Check</option>
+                <option value="bank_transfer">Bank Transfer</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- CONDITIONAL CHECK FIELDS -->
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+
+            <div>
+              <label class="block text-sm font-label text-on-surface-variant mb-2">
+                Check Number
+              </label>
+              <input type="text"
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-label text-on-surface-variant mb-2">
+                Bank Name
+              </label>
+              <input type="text"
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
+            </div>
+
+          </div>
+
+          <!-- TRANSACTION + FILE UPLOAD -->
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+
+            <!-- Transaction Reference -->
+            <div>
+              <label class="block text-sm font-label text-on-surface-variant mb-2">
+                Transaction Reference
+              </label>
+              <input type="text"
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
+            </div>
+
+            <!-- File Upload -->
+            <div>
+              <label class="block text-sm font-label text-on-surface-variant mb-2">
+                Upload Receipt / Check
+              </label>
+
+              <input type="file"
+                class="w-full bg-surface-container-low rounded-lg p-3 border border-outline-variant/20 focus:border-primary outline-none text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:font-semibold hover:file:bg-primary/20 transition-all" />
+
+              <p class="text-[10px] text-on-surface-variant font-label mt-1">
+                Accepted: PDF, JPG, PNG
+              </p>
+            </div>
+
+          </div>
+
+          <!-- DATE + STATUS -->
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+
+            <!-- Date -->
+            <div>
+              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                Payment Date <span class="text-error">*</span>
+              </label>
+
+              <input type="date"
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
+            </div>
+
+            <!-- Status -->
+            <div>
+              <label class="block text-sm font-label text-on-surface-variant mb-2">
+                Payment Status
+              </label>
+
+              <select
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none">
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- NOTES -->
+          <div>
+            <label class="block text-sm font-label text-on-surface-variant mb-2">
+              Notes
+            </label>
+            <textarea rows="2"
+              class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none resize-none"></textarea>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT SUMMARY -->
+      <div class="lg:col-span-4">
+        <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 sticky top-24">
+
+          <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">
+            Payment Summary
+          </h3>
+
+          <div class="space-y-4">
+
+            <div class="flex justify-between">
+              <span class="text-sm text-on-surface-variant">Outstanding</span>
+              <span class="font-bold"></span>
+            </div>
+
+            <div class="flex justify-between">
+              <span class="text-sm text-on-surface-variant">Paying Now</span>
+              <span class="font-bold text-primary"></span>
+            </div>
+
+            <div class="border-t border-outline-variant/10 pt-4">
+              <span class="text-xs uppercase font-label text-primary">Remaining</span>
+              <div class="text-3xl font-extrabold font-headline"></div>
+            </div>
+
+            <!-- ACTION -->
+            <button
+              class="w-full mt-6 text-white font-bold py-4 rounded-lg shadow-lg font-headline transition-all hover:scale-[1.01]"
+              style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+
+              <span class="flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">payments</span>
+                Post Payment
+              </span>
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
