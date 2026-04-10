@@ -17,6 +17,10 @@ export const hashPassword = async (password) => {
     return await bcrypt.hash(password, salt)
 }
 
+export const comparePassword = async (plain, hashed) => {
+    return await bcrypt.compare(plain, hashed);
+};
+
 export const formatFullName = (user) => {
     if (!user) return 'N/A';
     return [user.first_name, user.last_name]
