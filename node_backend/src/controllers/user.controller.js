@@ -9,7 +9,7 @@ const getAllUsers = async (req, res, next) => {
     }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
     try {
         const user = await userService.createUser(req.body);
         return res.api.created(user, "User created successfully");
@@ -18,7 +18,7 @@ const createUser = async (req, res) => {
     }
 };
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
     try {
         const user = await userService.getUserById(req.params.id);
         return res.api.success(user,"User retrieved successfully");
@@ -27,7 +27,7 @@ const getUserById = async (req, res) => {
     }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
     try {
         const user = await userService.updateUser(req.params.id, req.body);
         return res.api.success(user, "User updated successfully");
@@ -36,7 +36,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
     try {
         await userService.deleteUser(req.params.id);
         return res.api.success(null, "User deleted successfully");
