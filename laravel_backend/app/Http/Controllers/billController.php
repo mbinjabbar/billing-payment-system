@@ -68,68 +68,77 @@ class billController extends Controller
             'success' => false,
             'message' => 'A bill has already been generated for this visit.'], 422); }
  
+ $exists = Bill::where('visit_id', $request->visit_id)->exists();
+        if ($exists) { 
+            return response()->json(['success' => false, 'message' => 'Bill already exists.'], 422); 
+        }
 
-            $bill = Bill::create([
-                'visit_id' => $data['visit_id'],
-                'bill_date' => now(),
-                'insurance_firm_id' => $data['insurance_firm_id'],
-                'created_by' => $data['created_by'],
-                'procedure_codes' => $data['procedure_codes'],
-                'charges' => $charges,
-                'insurance_coverage' => $insurance,
-                'discount_amount' => $discount,
-                'tax_amount' => $tax,
-                'bill_amount' => $billAmount,
-                'outstanding_amount' => $billAmount,
-                'paid_amount' => $data['paid_amount'],
-                'status' => $data['status'],
-                'due_date' => $data['due_date'],
-                'notes' => $data['notes']
-            ]);
-            
-             $isCarAccident = $bill->visit->appointment->patientCase->car_accident;
-             $view = $isCarAccident ? 'NF2_pdf' : 'Standard_pdf';
-             $prefix = $isCarAccident ? 'NF2_' : 'Standard_';
+        $bill = Bill::create([
+            'visit_id' => $data['visit_id'],
+            'bill_date' => now(),
+            'insurance_firm_id' => $data['insurance_firm_id'],
+            'created_by' => $data['created_by'],
+            'procedure_codes' => $data['procedure_codes'],
+            'charges' => $charges,
+            'insurance_coverage' => $insurance,
+            'discount_amount' => $discount,
+            'tax_amount' => $tax,
+            'bill_amount' => $billAmount,
+            'outstanding_amount' => $billAmount,
+            'paid_amount' => $data['paid_amount'],
+            'status' => $data['status'],
+            'due_date' => $data['due_date'],
+            'notes' => $data['notes']
+        ]);
 
-            $bill->load('visit.appointment.patientCase.patient', 'visit.appointment.patientCase.nf2Detail', 'insurance_firm');
+        $bill->load('visit.appointment.patientCase.patient', 'visit.appointment.patientCase.nf2Detail', 'insurance_firm');
+        $isCarAccident = $bill->visit->appointment->patientCase->car_accident;
 
-            $pdf = PDF::loadView($view, compact('bill'));
+       
+        $filesToGenerate = [];
+        $filesToGenerate[] = ['view' => 'Standard_pdf', 'prefix' => 'Standard_', 'type' => 'Invoice'];
 
-            $fileName = $prefix . $bill->bill_number . '.pdf';
+        if ($isCarAccident) {
+            $filesToGenerate[] = ['view' => 'NF2_pdf', 'prefix' => 'NF2_', 'type' => 'NF2 Form'];
+        }
+
+        foreach ($filesToGenerate as $file) {
+            $pdf = PDF::loadView($file['view'], compact('bill'));
+            $fileName = $file['prefix'] . $bill->bill_number . '.pdf';
             $path = 'bills/' . $fileName;
-        
+
             Storage::put($path, $pdf->output());
             $fileSize = Storage::size($path);
-            $filetype = Storage::mimeType($path);
-            $maxSize = 5 * 1024 * 1024; 
-            if ($fileSize > $maxSize) {
-            Storage::delete($path);
-             return $this->error('File size exceeds the 5MB limit.');
-           }
 
-            $bill->update([
-                'generated_document_path' => $path
+            if ($fileSize > (5 * 1024 * 1024)) {
+                throw new Exception("File $fileName exceeds 5MB limit.");
+            }
+
+            
+            Document::create([
+                'bill_id' => $bill->id,
+                'document_type' => $file['type'],
+                'file_name' => $fileName,
+                'file_type' => Storage::mimeType($path),
+                'file_path' => $path,
+                'file_size' => $fileSize,
+                'upload_date' => now(),
+                'uploaded_by' => $data['created_by'],
+                'version' => 1
             ]);
 
-        Document::create([
-            'bill_id' => $bill->id,
-            'payment_id' => null, 
-            'document_type' => $data['document_type'] ?? 'Invoice',
-            'file_name' => $fileName,
-            'file_type' => $filetype,
-            'file_path' => $path,
-            'file_size' => $fileSize,
-            'upload_date' => now(),
-            'uploaded_by' => $data['created_by'],
-            'version' => 1
-        ]);        
-        DB::commit();
-        return $this->success($bill, ($isCarAccident ? 'NF2' : 'Standard') . ' Bill generated successfully.');
-        } catch (Exception $e) {
-              DB::rollBack();
-            Log::error('Error generating bill: ' . $e->getMessage());
-            return $this->error('bill data not found');
+            $bill->update(['generated_document_path' => $path]);
         }
+
+        DB::commit();
+        $msg = $isCarAccident ? 'Standard and NF2 Bills generated.' : 'Standard Bill generated.';
+        return $this->success($bill, $msg);
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        Log::error('Error: ' . $e->getMessage());
+        return $this->error('Failed to generate bill: ' . $e->getMessage());
+    }
     }
 
     public function show($id)
