@@ -1,66 +1,47 @@
-import User from '../models/User.model.js';
-import bcrypt from 'bcryptjs';
+import userService from '../services/user.service.js';
 
 const getAllUsers = async (req, res, next) => {
     try {
-        const users = await User.findAll();
-        return res.api.success("Users retrieved successfully", users);
+        const users = await userService.getAllUsers();
+        return res.api.success(users, "Users retrieved successfully");
     } catch (error) {
-        return res.api.error();
+        next(error);
     }
 };
 
 const createUser = async (req, res) => {
     try {
-        const { first_name, last_name, email, password, role } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({ first_name, last_name, email, password: hashedPassword, role });
+        const user = await userService.createUser(req.body);
         return res.api.created(user, "User created successfully");
     } catch (error) {
-        console.error("Error creating user:", error);
-        return res.api.error("Failed to create user");
+        next(error);
     }
 };
+
 const getUserById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findByPk(id);
-        if (!user) {
-            return res.api.error("User not found");
-        }
-        return res.api.success("User retrieved successfully", user);
+        const user = await userService.getUserById(req.params.id);
+        return res.api.success(user,"User retrieved successfully");
     } catch (error) {
-        return res.api.error("Failed to retrieve user");
-
+        next(error)
     }
 };
+
 const updateUser = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { first_name, last_name, email, role } = req.body;
-
-        const user = await User.findByPk(id);
-        if (!user) {
-            return res.api.notFound("User not found");
-        }
-        await user.update({ first_name, last_name, email, role });
-        return res.api.success("User updated successfully", user);
+        const user = await userService.updateUser(req.params.id, req.body);
+        return res.api.success(user, "User updated successfully");
     } catch (error) {
-        return res.api.error("Failed to update user");
+        next(error)
     }
 };
 
 const deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findByPk(id);
-        if (!user) {
-            return res.api.notFound("User not found");
-        }
-        await user.destroy();
-        return res.api.success("User deleted successfully");
+        await userService.deleteUser(req.params.id);
+        return res.api.success(null, "User deleted successfully");
     } catch (error) {
-        return res.api.error("Failed to delete user");
+        next(error)
     }
 }
 
