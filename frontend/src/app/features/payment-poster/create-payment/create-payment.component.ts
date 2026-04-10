@@ -21,19 +21,20 @@ export class CreatePaymentComponent {
 
    paymentForm = new FormGroup({
     amount_paid: new FormControl('', Validators.required),
-    payment_mode:new FormControl[''],
+    payment_mode: new FormControl('', Validators.required),
     check_number:new FormControl('',Validators.required),
     bank_name:new FormControl('',Validators.required),
     payment_date:new FormControl('',Validators.required),
-    payment_mode:new FormControl[''],
-    notes:new FormControl('',Validators.required)
+    payment_status: new FormControl('', Validators.required),
+    notes:new FormControl('')
   });
 
 
 
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('paymentId');
+    const id = this.route.snapshot.paramMap.get('billId');
+    console.log(id);
   }
 
    onfileselected(event: Event) {

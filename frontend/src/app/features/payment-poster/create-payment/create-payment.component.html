@@ -35,7 +35,7 @@
       <!-- LEFT -->
       <div class="lg:col-span-8 space-y-8">
 
-        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()"
+        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
         <!-- PAYMENT DETAILS -->
         <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 shadow-sm">
 
@@ -66,7 +66,9 @@
               </label>
 
               <select
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none">
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none"
+                formControlName="payment_mode" required
+                >
                 <option value="">Select payment mode</option>
                 <option value="cash">Cash</option>
                 <option value="card">Card</option>
@@ -152,7 +154,7 @@
 
               <select
                 class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none">
-                FormControl=""
+                FormControl="payment_status"
                 <option value="completed">Completed</option>
                 <option value="pending">Pending</option>
                 <option value="failed">Failed</option>
