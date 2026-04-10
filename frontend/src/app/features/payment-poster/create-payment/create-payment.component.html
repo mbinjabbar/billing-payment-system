@@ -35,7 +35,7 @@
       <!-- LEFT -->
       <div class="lg:col-span-8 space-y-8">
 
-        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        <form [formGroup]="paymentForm" id="postPaymentForm" (ngSubmit)="onSubmit()">
         <!-- PAYMENT DETAILS -->
         <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 shadow-sm">
 
@@ -204,7 +204,7 @@
             </div>
 
             <!-- ACTION -->
-            <button
+            <button type="submit" form="postPaymentForm"
               class="w-full mt-6 text-white font-bold py-4 rounded-lg shadow-lg font-headline transition-all hover:scale-[1.01]"
               style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
 

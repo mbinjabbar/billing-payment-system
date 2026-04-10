@@ -45,11 +45,11 @@ export class CreatePaymentComponent {
 
 
    onSubmit() {
-    if (!this.paymentForm.valid) return;
-    if (!this.selectedfile) {
-      alert("Please upload a chequee file");
-      return;
-    }
+    // if (!this.paymentForm.valid) return;
+    // if (!this.selectedfile) {
+    //   alert("Please upload a chequee file");
+    //   return;
+    // }
 
     const paymentdata = new FormData();
     paymentdata.append('amount_paid', this.paymentForm.get('amount_paid')?.value ?? '');
@@ -60,6 +60,7 @@ export class CreatePaymentComponent {
     paymentdata.append('payment_status', this.paymentForm.get('payment_status')?.value ?? '');
     paymentdata.append('notes', this.paymentForm.get('notes')?.value ?? '');
     if (this.selectedfile) paymentdata.append('payment', this.selectedfile);
+    console.log("works")
 
       this.paymentposterService.createPayment(paymentdata).subscribe({
       next:  (response: any) => {
