@@ -177,31 +177,5 @@
     </table>
 </div>
 
-<!-- BILLING ATTACHMENT -->
-<div style="margin-top: 15px; border: 1px dashed #000; padding: 10px;">
-    <h3 class="center" style="font-size: 11px;">ATTACHMENT: MEDICAL BILLING SUMMARY</h3>
-    <table style="margin-top: 8px;">
-        <tr class="bg-gray">
-            <th class="center">PROCEDURE CODE</th>
-            <th class="center">BASE CHARGES</th>
-            <th class="center">NET BILL AMOUNT</th>
-        </tr>
-        @if(is_array($bill->procedure_codes))
-            @foreach($bill->procedure_codes as $proc)
-            <tr>
-                <!-- 💡 SAFETY CHECK: Handle if $proc is a string OR an array -->
-                <td class="center">{{ is_array($proc) ? ($proc['code'] ?? 'N/A') : $proc }}</td>
-                <td class="center">${{ number_format($bill->charges, 2) }}</td>
-                <td class="center">${{ number_format($bill->bill_amount, 2) }}</td>
-            </tr>
-            @endforeach
-        @endif
-    </table>
-
-    <div style="margin-top: 10px; text-align: right;">
-        <p class="bold" style="font-size: 11px;">OUTSTANDING BALANCE: ${{ number_format($bill->outstanding_amount, 2) }}</p>
-    </div>
-</div>
-
 </body>
 </html>
