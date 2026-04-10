@@ -5,11 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Bill;
 use App\Models\Document;
-use App\Models\insuranceFirm;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -96,7 +95,7 @@ class billController extends Controller
 
        
         $filesToGenerate = [];
-        $filesToGenerate[] = ['view' => 'Standard_pdf', 'prefix' => 'Standard_', 'type' => 'Invoice'];
+        $filesToGenerate[] = ['view' => 'Invoice_pdf', 'prefix' => 'Invoice_', 'type' => 'Invoice'];
 
         if ($isCarAccident) {
             $filesToGenerate[] = ['view' => 'NF2_pdf', 'prefix' => 'NF2_', 'type' => 'NF2 Form'];
