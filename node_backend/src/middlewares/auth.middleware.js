@@ -8,7 +8,7 @@ export const authenticate = async (req, res, next) => {
             return res.status(401).json({ success: false, message: "No token, unauthorized" });
         }
         const token = authHeader.split(" ")[1];
-        const isBlacklisted = await redisClient.get(`blaclist:${token}`);
+        const isBlacklisted = await redisClient.get(`blacklist:${token}`);
         if(isBlacklisted) {
             return res.status(401).json({success: false, message: "Token revoked. Please login again"})
         }

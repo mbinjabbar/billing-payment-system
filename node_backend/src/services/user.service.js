@@ -1,5 +1,5 @@
-import bcrypt from 'bcryptjs';
 import userRepository from '../repositories/user.repository.js';
+import { hashPassword } from '../utils/helpers.js';
 
 class UserService {
     async getAllUsers() {
@@ -16,7 +16,7 @@ class UserService {
         const existing = await userRepository.findByEmail(data.email);
         if (existing) throw new Error("Email already registered");
 
-        const hashedPassword = await bcrypt.hash(data.password, 10);
+        const hashedPassword = hashPassword(data.password);
 
         return await userRepository.create({ ...data, password: hashedPassword });
     }
