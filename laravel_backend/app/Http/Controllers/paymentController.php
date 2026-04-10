@@ -31,14 +31,19 @@ class paymentController extends Controller
                 
             $data= $request->all();
              $bill = Bill::findOrFail($data['bill_id']);
+
+                $name = null;
+                 $type = null;
+                $filePath = null;
+
             
-            //if($data['payment_mode'] === 'Cheque' && $request->hasFile('cheque_file')) {
-                //$file = $request->file('cheque_file');
-               // $name = $file->getClientOriginalName();
-                //$type = $file->getClientOriginalExtension();
-                //$filePath = $file->store('cheque_files', 'public');
-              // $data['cheque_file_path'] = $filePath;
-           // }
+            if($request->hasFile('cheque_file')) {
+                $file = $request->file('cheque_file');
+               $name = $file->getClientOriginalName();
+                $type = $file->getClientOriginalExtension();
+                $filePath = $file->store('cheque_files', 'public');
+              $data['cheque_file_path'] = $filePath;
+           }
 
             if($data['amount_paid'] > $bill->outstanding_amount) {
                 return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
@@ -53,7 +58,7 @@ class paymentController extends Controller
                 'transaction_reference' => $data['transaction_reference'],
                 'payment_date' => $data['payment_date'],
                 'payment_status' => $data['payment_status'],
-                'cheque_file_path' => $data['cheque_file_path']?? null, 
+                'cheque_file_path'      => $filePath, 
                 'notes' => $data['notes'] ?? null,
             ]);
             $bill->paid_amount += $data['amount_paid'];
@@ -66,20 +71,20 @@ class paymentController extends Controller
             }
             $bill->save();
 
-             //if ($request->hasFile('cheque_file')) {
-             //Document::create([
-            //'bill_id' => $bill->id,
-            //'payment_id' => $payment->id, 
-            //'document_type' => 'Payment Receipt',
-            //'file_name' => $name,
-            //'file_type' => $type,
-            //'file_path' => $data['cheque_file_path'],
-            //'file_size' => $request->file('cheque_file')->getSize(),
-            //'upload_date' => now(),
-            //'uploaded_by' => $data['created_by'],
-            //'version' => 1
-        //]);
-             //}
+        if ($request->hasFile('cheque_file')) {
+    Document::create([
+        'bill_id'       => $bill->id,
+        'payment_id'    => $payment->id, 
+        'document_type' => 'Cheque Image', 
+        'file_name'     => $name,
+        'file_type'     => $type,    
+        'file_path'     => $filePath,
+        'file_size'     => $file->getSize(),
+        'upload_date'   => now(),
+        'uploaded_by'   => $data['created_by'] ?? 1,
+        'version'       => 1
+    ]);
+}
 
             return $this->success($payment, 'Payment created and bill updated successfully');
             } catch (Exception $e) {

@@ -17,7 +17,7 @@ export class CreatePaymentComponent {
   private router                = inject(Router);
   private paymentposterService = inject(PaymentPosterService);
   selectedfile: File | null = null;
-
+  billId: number = 0;
 
    paymentForm = new FormGroup({
     amount_paid: new FormControl('', Validators.required),
@@ -33,7 +33,7 @@ export class CreatePaymentComponent {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('billId');
-    console.log(id);
+    this.billId = id ? parseInt(id, 10) : 0;
   }
 
    onfileselected(event: Event) {
@@ -46,9 +46,9 @@ export class CreatePaymentComponent {
 
    onSubmit() {
     // if (!this.paymentForm.valid) return;
-    // if (!this.selectedfile) {
-    //   alert("Please upload a chequee file");
-    //   return;
+    //  if (!this.selectedfile) {
+    //    alert("Please upload a chequee file");
+    //    return;
     // }
 
     const paymentdata = new FormData();
@@ -58,16 +58,33 @@ export class CreatePaymentComponent {
     paymentdata.append('bank_name', this.paymentForm.get('bank_name')?.value ?? '');
     paymentdata.append('payment_date', this.paymentForm.get('payment_date')?.value ?? '');
     paymentdata.append('payment_status', this.paymentForm.get('payment_status')?.value ?? '');
+    paymentdata.append('transaction_reference', this.paymentForm.get('transaction_reference')?.value ?? '');
     paymentdata.append('notes', this.paymentForm.get('notes')?.value ?? '');
-    if (this.selectedfile) paymentdata.append('payment', this.selectedfile);
+    paymentdata.append('bill_id', this.billId.toString());
+    paymentdata.append('received_by',"1");
+   if (this.selectedfile) paymentdata.append('cheque_file', this.selectedfile);
     console.log("works")
 
       this.paymentposterService.createPayment(paymentdata).subscribe({
-      next:  (response: any) => {
-        console.log(response.data);
-      },
-        error: (err) => console.log(err)
-      });
+  next: (response: any) => {
+    console.log('Payment successful:', response.data);
+  },
+  error: (err) => {
+    // 1. Log the entire error object for debugging
+    console.error('Full error object:', err);
+
+    // 2. Check the HTTP status code (e.g., 400, 404, 500)
+    console.log('Status code:', err.status);
+
+    // 3. Get the error message (client-side or server-side)
+    console.log('Message:', err.message);
+
+    // 4. Access the custom error body sent by your backend
+    if (err.error) {
+      console.log('Server-side error details:', err.error);
+    }
+  }
+})
     }
   }
 

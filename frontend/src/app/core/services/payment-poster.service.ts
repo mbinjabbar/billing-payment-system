@@ -1,5 +1,6 @@
 import { Injectable,inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 
 @Injectable({
@@ -18,8 +19,11 @@ export class PaymentPosterService {
     return this.http.get(`${this.apiUrl}/payments/${paymentId}`)
   }
 
-  createPayment(payload: any){
-    return this.http.post(`${this.apiUrl}/payments`, payload);
+
+
+  createPayment(payment: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/payments`, payment);
   }
-  
+
+
 }
