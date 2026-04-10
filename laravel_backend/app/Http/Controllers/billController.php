@@ -58,8 +58,9 @@ class billController extends Controller
             $charges = $data['charges'];
             $discount = $data['discount_amount'];
             $tax = $data['tax_amount'];
-            $insurance = $data['insurance_coverage'];
-            $billAmount = ($charges - $insurance - $discount) + $tax;
+            $insurancePercent = $data['insurance_coverage'];
+            $insuranceAmount = ($charges * $insurancePercent) / 100;
+            $billAmount = ($charges - $insuranceAmount - $discount) + $tax;
 
             $exists = Bill::where('visit_id', $request->visit_id)->exists();
             if ($exists) {
@@ -76,7 +77,7 @@ class billController extends Controller
                 'created_by' => $data['created_by'],
                 'procedure_codes' => $data['procedure_codes'],
                 'charges' => $charges,
-                'insurance_coverage' => $insurance,
+                'insurance_coverage' => $insurancePercent,
                 'discount_amount' => $discount,
                 'tax_amount' => $tax,
                 'bill_amount' => $billAmount,
@@ -166,7 +167,8 @@ class billController extends Controller
                 'due_date'
             ]));
 
-            $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
+            $insuranceAmount = ($bill->charges * $bill->insurance_coverage) / 100;
+            $bill->bill_amount = ($bill->charges - $insuranceAmount - $bill->discount_amount) + $bill->tax_amount;
             $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
             if ($bill->outstanding_amount <= 0) {
