@@ -1,18 +1,15 @@
-import jwt from 'jsonwebtoken';
-import redisClient from '../configs/redis.client.js';
+import { extractToken, isTokenRevoked, verifyJWT } from '../utils/helpers.js';
 
 export const authenticate = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ success: false, message: "No token, unauthorized" });
+        const token = extractToken(req.headers.authorization);
+        if (!token) return res.api.unauthorized("No token provided");
+
+        if (await isTokenRevoked(token)) {
+            return res.api.unauthorized("Token revoked. Please login again");
         }
-        const token = authHeader.split(" ")[1];
-        const isBlacklisted = await redisClient.get(`blacklist:${token}`);
-        if(isBlacklisted) {
-            return res.status(401).json({success: false, message: "Token revoked. Please login again"})
-        }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const decoded = verifyJWT(token);
         req.user = decoded;
         next();
     } catch (err) {

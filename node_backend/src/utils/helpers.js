@@ -48,3 +48,21 @@ export const generateToken = (user) => {
         }
     );
 };
+
+export const verifyJWT = (token) => {
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+        return null;
+    }
+};
+
+export const extractToken = (authHeader) => {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+    return authHeader.split(" ")[1];
+};
+
+export const isTokenRevoked = async (token) => {
+    const blacklisted = await redisClient.get(`blacklist:${token}`);
+    return !!blacklisted;
+};
