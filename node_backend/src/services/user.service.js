@@ -16,7 +16,7 @@ class UserService {
         const existing = await userRepository.findByEmail(data.email);
         if (existing) throw new Error("Email already registered");
 
-        const hashedPassword = hashPassword(data.password);
+        const hashedPassword = await hashPassword(data.password);
 
         return await userRepository.create({ ...data, password: hashedPassword });
     }
@@ -24,10 +24,10 @@ class UserService {
     async updateUser(id, data) {
         const updatedUser = await userRepository.update(id, data);
         if (!updatedUser) throw new Error("User not found or update failed");
-        return updateUser;
+        return updatedUser;
     }
 
-    async deleteUpdate(id) {
+    async deleteUser(id) {
         const result = await userRepository.delete(id);
         if (!result) throw new Error("User not found");
         return result;

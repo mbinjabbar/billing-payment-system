@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import redisClient from '../configs/redis.client.js';
 
 export const getTokenRemainingTime = (token) => {
     try {
