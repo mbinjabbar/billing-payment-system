@@ -15,13 +15,40 @@ use App\Models\Document;
 class paymentController extends Controller
 {
     use ApiResponse;
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $payments = Payment::with('bill.visit.appointment.patientCase.patient')->latest()->paginate(10);
+               $query = Payment::with('bill.visit.appointment.patientCase.patient');
+                $query->when($request->filled('bill_id'), function ($q) use ($request) {
+                 $q->where('bill_id', $request->bill_id);
+                });
+               $query->when($request->filled('payment_mode'), function ($q) use ($request) {
+               $q->where('payment_mode', $request->payment_mode);
+              });
+
+                $query->when($request->filled('payment_status'), function ($q) use ($request) {
+                $q->where('payment_status', $request->payment_status);
+                });
+            $query->when($request->filled('from_date') && $request->filled('to_date'),function ($q) use ($request) {
+            $q->whereBetween('payment_date', [$request->from_date,$request->to_date
+            ]);
+        }
+        );
+
+        $payments = $query->latest()->paginate(10);            
             return $this->success($payments, 'Payments retrieved successfully');
         } catch (Exception $e) {
-            return $this->error('An error occurred while fetching payments');
+            \Log::error('PAYMENT LIST ERROR', [
+            'message' => $e->getMessage(),
+            'line' => $e->getLine()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while fetching payments',
+            'error' => $e->getMessage()
+        ], 500);
+    
         }
     }
 

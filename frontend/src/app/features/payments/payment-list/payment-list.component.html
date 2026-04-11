@@ -1,4 +1,43 @@
-<p>payment-list works!</p>
+<h1 class="mt-23 pt-24">payments</h1>
+
+<form [formGroup]="filterForm" (ngSubmit)="getPayments()">
+
+  <select formControlName="bill_id">
+  <option value="">All Bills</option>
+
+  @for (payment of paymentsList; track $index) {
+    <option [value]="payment.bill_id">
+      Bill #{{ payment.bill_id }}
+    </option>
+  }
+</select>
+
+  <select formControlName="payment_mode">
+    <option value="">Select payment mode</option>
+    <option value="cash">Cash</option>
+    <option value="cheque">Cheque</option>
+    <option value="bank transfer">Bank Transfer</option>
+    <option value="Credit Card">Credit Card</option>
+    <option value="Debit Card">Debit Card</option>
+    <option value="Insurance">Insurance</option>
+    <option value="Online Payment">Online Payment</option>
+  </select>
+
+  <select formControlName="payment_status">
+    <option value="">All Status</option>
+    <option value="completed">Completed</option>
+    <option value="paid">Paid</option>
+    <option value="pending">Pending</option>
+  </select>
+
+  <input type="date" formControlName="from_date" />
+  <input type="date" formControlName="to_date" />
+
+  <button type="submit">Filter</button>
+  <button type="button" (click)="resetFilters()">Reset</button>
+
+</form>
+
 <h2>Payments List</h2>
 
 <table border="1">

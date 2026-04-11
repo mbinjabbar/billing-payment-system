@@ -10,10 +10,15 @@ export class PaymentPosterService {
     private apiUrl = 'http://localhost:8000/api';
   private http = inject(HttpClient);
 
-  getPayments()
-  {
-    return this.http.get(`${this.apiUrl}/payments`)
-  }
+  // getPayments()
+  // {
+  //   return this.http.get(`${this.apiUrl}/payments`)
+  // }
+  getPayments(filters?: any) {
+  return this.http.get(`${this.apiUrl}/payments`, {
+    params: filters
+  });
+}
   
   getPaymentById(paymentId:number){
     return this.http.get(`${this.apiUrl}/payments/${paymentId}`)
