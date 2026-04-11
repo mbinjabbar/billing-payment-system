@@ -11,7 +11,7 @@
         </a>
 
         <h1 class="text-4xl font-headline font-extrabold tracking-tight">
-          Post Payment
+          {{ paymentId ? 'Edit Payment' : 'Add Payment' }}
         </h1>
       </div>
 
@@ -174,7 +174,7 @@
               Notes
             </label>
             <textarea rows="2"
-            formControlName="notes" required
+            formControlName="notes" 
               class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none resize-none"></textarea>
           </div>
 
@@ -215,7 +215,7 @@
 
               <span class="flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">payments</span>
-                Post Payment
+                 {{ paymentId ? 'Update Payment' : 'Post Payment' }}
               </span>
             </button>
 

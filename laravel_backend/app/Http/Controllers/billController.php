@@ -178,6 +178,48 @@ class billController extends Controller
             }
 
             $bill->save();
+
+              $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
+
+        $pdf = Pdf::loadView('Invoice_pdf', compact('bill'));
+
+        $fileName = 'Invoice_' . $bill->bill_number . '.pdf';
+        $path = 'bills/' . $fileName;
+
+        Storage::put($path, $pdf->output());
+
+        $fileSize = Storage::size($path);
+        // Update or Create Document
+        // ---------------------------
+        $document = Document::where('bill_id', $bill->id)
+            ->where('document_type', 'Invoice')
+            ->first();
+
+        if ($document) {
+            $version = $document->version + 1;
+
+            $document->update([
+                'file_name' => $fileName,
+                'file_type' => Storage::mimeType($path),
+                'file_path' => $path,
+                'file_size' => $fileSize,
+                'upload_date' => now(),
+                'uploaded_by' => auth()->id() ?? $bill->created_by,
+                'version' => $version
+            ]);
+        } else {
+            Document::create([
+                'bill_id' => $bill->id,
+                'document_type' => 'Invoice',
+                'file_name' => $fileName,
+                'file_type' => Storage::mimeType($path),
+                'file_path' => $path,
+                'file_size' => $fileSize,
+                'upload_date' => now(),
+                'uploaded_by' => auth()->id() ?? $bill->created_by,
+                'version' => 1
+            ]);
+        }
             return $this->success($bill, 'Bill updated and recalculated successfully.');
         } catch (Exception $e) {
             return $this->error('Failed to update bill.');

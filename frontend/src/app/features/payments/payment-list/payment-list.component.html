@@ -1,0 +1,45 @@
+<p>payment-list works!</p>
+<h2>Payments List</h2>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Amount Paid</th>
+      <th>Payment Mode</th>
+      <th>Cheque no</th>
+      <th>Bank No</th>
+      <th>Date</th>
+      <th>Payment Status</th>
+      <th>Transaction Reference</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    @for (payment of paymentsList; track $index) {
+      <tr>
+        <td>{{ payment.amount_paid }}</td>
+        <td>{{ payment.payment_mode }}</td>
+        <td>{{ payment.check_number }}</td>
+        <td>{{ payment.bank_name }}</td>
+        <td>{{ payment.payment_date | date:'MMM d, y'}}</td>
+        <td>{{ payment.payment_status }}</td>
+        <td>{{ payment.transaction_reference }}</td>
+        <td>{{ payment.notes ? payment.notes : 'N/A' }}</td>
+         <button 
+  [routerLink]="['/payments/edit', payment.id]"
+  class="bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transform hover:scale-105 mr-2"
+>
+  Edit
+</button>
+
+<button 
+  (click)="deletePayment(payment.id)"
+  class="bg-red-500 text-white font-medium px-4 py-2 transform hover:scale-105 rounded-lg "
+>
+  Delete
+</button>
+      </tr>
+    }  
+  </tbody>
+</table>

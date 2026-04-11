@@ -19,11 +19,17 @@ export class PaymentPosterService {
     return this.http.get(`${this.apiUrl}/payments/${paymentId}`)
   }
 
-
-
   createPayment(payment: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/payments`, payment);
   }
+
+  updatePayment(paymentId:number,payment:FormData){
+    return this.http.post(`${this.apiUrl}/payments/${paymentId}`,payment);
+  }
+
+  deletePayment(paymentId: number) {
+  return this.http.delete(`${this.apiUrl}/payments/${paymentId}`);
+}
 
 
 }

@@ -11,6 +11,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Log;
 use App\Models\Document;
 
+
 class paymentController extends Controller
 {
     use ApiResponse;
@@ -111,11 +112,28 @@ class paymentController extends Controller
     try {
         $payment = Payment::findOrFail($id);
         $bill = Bill::findOrFail($request->bill_id);
+
+        $filePath = $payment->cheque_file_path; 
+        $name = null;
+        $type = null;
+        $fileSize = null;
+
+   
+        if ($request->hasFile('cheque_file')) {
+            $file = $request->file('cheque_file');
+            $name = $file->getClientOriginalName();
+            $type = $file->getClientOriginalExtension();
+            $fileSize = $file->getSize();
+            $filePath = $file->store('cheque_files', 'public');
+        }
+
+        
         $oldAmountPaid = $payment->amount_paid;
         $newAmountPaid = $request->amount_paid;
         if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
             return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
         }
+        
         $payment->fill($request->only([
             'bill_id',
             'received_by', 
@@ -126,6 +144,7 @@ class paymentController extends Controller
             'transaction_reference',
             'payment_date', 
             'payment_status',
+            'cheque_file_path'=> $filePath, 
             'notes'
         ]));
         $payment->save();
@@ -140,9 +159,27 @@ class paymentController extends Controller
             $bill->status = 'Partial';
         }
         $bill->save();
+         if ($request->hasFile('cheque_file')) {
+    Document::create([
+        'bill_id'       => $bill->id,
+        'payment_id'    => $payment->id, 
+        'document_type' => 'Cheque Image', 
+        'file_name'     => $name,
+        'file_type'     => $type,    
+        'file_path'     => $filePath,
+        'file_size'     => $fileSize,
+        'upload_date'   => now(),
+        'uploaded_by'   => $data['created_by'] ?? 1,
+        'version'       => 1
+    ]);
         return $this->success($payment, 'Payment and Bill updated successfully');   
-    } catch (Exception $e) {
-        return $this->error('An error occurred while updating the payment');
+    } 
+    }catch (Exception $e) {
+         \Log::error('UPDATE PAYMENT FAILED', [
+            'error' => $e->getMessage(),
+            'line' => $e->getLine()
+        ]);
+        return $this->error($e->getMessage());
     }
 }
 
