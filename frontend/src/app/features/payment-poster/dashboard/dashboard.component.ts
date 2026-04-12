@@ -1,70 +1,85 @@
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { PaymentPosterService } from '../../../core/services/payment-poster.service';
+import { BillService } from '../../../core/services/bill.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent {
-payments = [
-  {
-    id: 'PMT-001',
-    patient: 'Ali Khan',
-    status: 'Posted',
-    amount: 5000,
-    date: '2026-04-08'
-  },
-  {
-    id: 'PMT-002',
-    patient: 'Sara Ahmed',
-    status: 'Unapplied',
-    amount: 3200,
-    date: '2026-04-07'
-  },
-  {
-    id: 'PMT-003',
-    patient: 'Usman Tariq',
-    status: 'Posted',
-    amount: 8700,
-    date: '2026-04-06'
+  private paymentService = inject(PaymentPosterService);
+  private billService    = inject(BillService);
+
+  payments = signal<any[]>([]);
+  bills    = signal<any[]>([]);
+  loading  = signal(true);
+
+  ngOnInit() {
+    // Load recent payments (latest 5 for the table)
+    this.paymentService.getPayments({ per_page: 5 }).subscribe({
+      next: (res: any) => {
+        this.payments.set(res.data ?? []);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+
+    // Load bills to calculate A/R stats
+    this.billService.getBills({}).subscribe({
+      next: (res: any) => this.bills.set(res.data ?? []),
+      error: () => {},
+    });
   }
-];
 
-bills = [
-  { bill_amount: 20000, outstanding_amount: 5000 },
-  { bill_amount: 15000, outstanding_amount: 3000 }
-];
+  // ── Stats ────────────────────────────────────────────────────────────────
+  totalCollected = computed(() =>
+    this.payments().reduce((sum, p) => sum + Number(p.amount_paid), 0)
+  );
 
-// Stats
-totalCollected() {
-  return this.payments.reduce((sum, p) => sum + p.amount, 0);
-}
+  totalOutstanding = computed(() =>
+    this.bills().reduce((sum, b) => sum + Number(b.outstanding_amount), 0)
+  );
 
-remainingAR() {
-  return this.bills.reduce((sum, b) => sum + b.outstanding_amount, 0);
-}
+  totalBillAmount = computed(() =>
+    this.bills().reduce((sum, b) => sum + Number(b.bill_amount), 0)
+  );
 
-unappliedPaymentsCount() {
-  return this.payments.filter(p => p.status === 'Unapplied').length;
-}
+  pendingBillsCount = computed(() =>
+    this.bills().filter(b => b.status === 'Pending').length
+  );
 
-collectionProgress() {
-  const totalBills = this.bills.reduce((sum, b) => sum + b.bill_amount, 0);
-  const collected = this.totalCollected();
-  return totalBills ? (collected / totalBills) * 100 : 0;
-}
+  collectionProgress = computed(() => {
+    const total = this.totalBillAmount();
+    if (!total) return 0;
+    const pct = (this.totalCollected() / total) * 100;
+    return pct > 100 ? 100 : pct;
+  });
 
-// Status UI
-getPaymentStatusClass(status: string) {
-  switch (status) {
-    case 'Posted':
-      return 'bg-green-100 text-green-800';
-    case 'Unapplied':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
+  // ── UI helpers ───────────────────────────────────────────────────────────
+  getPaymentStatusClass(status: string): string {
+    switch (status) {
+      case 'Completed': return 'bg-green-100 text-green-700';
+      case 'Pending':   return 'bg-orange-100 text-orange-700';
+      case 'Failed':    return 'bg-red-100 text-red-700';
+      case 'Refunded':  return 'bg-gray-200 text-gray-600';
+      default:          return 'bg-gray-100 text-gray-700';
+    }
   }
-}
+
+  getPaymentModeClass(mode: string): string {
+    switch (mode) {
+      case 'Cash':           return 'bg-green-100 text-green-700';
+      case 'Check':          return 'bg-blue-100 text-blue-700';
+      case 'Bank Transfer':  return 'bg-indigo-100 text-indigo-700';
+      case 'Credit Card':    return 'bg-purple-100 text-purple-700';
+      case 'Debit Card':     return 'bg-violet-100 text-violet-700';
+      case 'Insurance':      return 'bg-cyan-100 text-cyan-700';
+      case 'Online Payment': return 'bg-orange-100 text-orange-700';
+      default:               return 'bg-gray-100 text-gray-700';
+    }
+  }
 }
