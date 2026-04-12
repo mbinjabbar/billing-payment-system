@@ -12,8 +12,8 @@ use App\Http\Controllers\SettingsController;
 
 Route::get('/bills/stats', [billController::class, 'stats']);
 Route::post('/bills/export', [billController::class, 'export']);
-Route::apiResource('/bills', billController::class);
 Route::patch('/bills/{id}/status', [billController::class, 'updateStatus']);
+Route::apiResource('/bills', billController::class);
 Route::get('/bills/invoice/{id}', [documentController::class, 'downloadInvoice']);
 Route::get('/bills/nf2/{id}', [documentController::class, 'downloadNF2']);
 

@@ -171,9 +171,18 @@ class billController extends Controller
         try {
             $bill = Bill::findOrFail($id);
 
-            if (in_array($bill->status, ['Cancelled', 'Written Off'])) {
-                return $this->error('Cannot edit a bill that is Cancelled or Written Off.', 403);
+            if ($bill->paid_amount > 0) {
+                return $this->error('Cannot edit a bill that has payments posted against it.', 403);
             }
+
+            if ($request->status === 'Cancelled' && $bill->paid_amount > 0) {
+                return $this->error('Cannot cancel a bill with payments. Use Write Off instead.', 422);
+            }
+
+            if ($request->status === 'Written Off' && $bill->status !== 'Partial') {
+                return $this->error('Only partially paid bills can be written off.', 422);
+            }
+
             // $user = $request->get('auth_user');
 
             // if($user->role === 'Payment Poster') {
@@ -277,17 +286,28 @@ class billController extends Controller
     }
 
     public function updateStatus(Request $request, $id)
-    {
-        try {
-            $bill = Bill::findOrFail($id);
-            $request->validate([
-                'status' => 'required|in:Cancelled,Written Off'
-            ]);
-            $bill->status = $request->status;
-            $bill->save();
-            return $this->success($bill, 'Bill status updated successfully.');
-        } catch (Exception $e) {
-            return $this->error('Failed to update bill status.');
+{
+    try {
+        $bill = Bill::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:Cancelled,Written Off'
+        ]);
+
+        if ($request->status === 'Cancelled' && $bill->paid_amount > 0) {
+            return $this->error('Cannot cancel a bill with payments posted. Use Write Off instead.', 422);
         }
+
+        if ($request->status === 'Written Off' && $bill->status !== 'Partial') {
+            return $this->error('Only partially paid bills can be written off.', 422);
+        }
+
+        $bill->status = $request->status;
+        $bill->save();
+
+        return $this->success($bill, 'Bill status updated successfully.');
+    } catch (Exception $e) {
+        return $this->error('Failed to update bill status.');
     }
+}
 }

@@ -145,8 +145,15 @@ overrideStatus(billId: number, event: Event) {
   if (!status) return;
 
   this.billService.updateBillStatus(billId, status).subscribe({
-    next: () => this.fetchBills(this.currentPage()),
-    error: () => select.value = '',
+    next: () => {
+      select.value = '';
+       console.log('Status override called:', billId, status);
+      this.fetchBills(this.currentPage());
+    },
+    error: (err) => {
+      select.value = '';
+      console.error(err.error?.message || 'Failed to update status');
+    }
   });
 }
 }
