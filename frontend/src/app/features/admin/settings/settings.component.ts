@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ProcedureCodesService } from '../../../core/services/procedure-codes.service';
 import { InsuranceFirmsService } from '../../../core/services/insurance-firms.service';
+import { SettingsService } from '../../../core/services/settings.service';
 
 type Tab = 'procedures' | 'insurance' | 'config';
 
@@ -15,19 +16,20 @@ type Tab = 'procedures' | 'insurance' | 'config';
 export class SettingsComponent {
   private procedureService = inject(ProcedureCodesService);
   private insuranceService = inject(InsuranceFirmsService);
+  private settingsService  = inject(SettingsService);
 
   activeTab = signal<Tab>('procedures');
 
   // ── Shared ───────────────────────────────────────────────────────────────
-  loading         = signal(false);
-  confirmDeleteId = signal<number | null>(null);
+  loading           = signal(false);
+  confirmDeleteId   = signal<number | null>(null);
   confirmDeleteType = signal<'procedure' | 'insurance' | null>(null);
-  error           = signal('');
-  success         = signal('');
+  error             = signal('');
+  success           = signal('');
 
   // ── Procedure Codes ───────────────────────────────────────────────────────
   procedures       = signal<any[]>([]);
-  editingProcedure = signal<any>(null); // null = create mode
+  editingProcedure = signal<any>(null);
 
   procedureForm = new FormGroup({
     code:            new FormControl('', Validators.required),
@@ -51,10 +53,25 @@ export class SettingsComponent {
     is_active:      new FormControl(true),
   });
 
+  // ── App Settings ─────────────────────────────────────────────────────────
+  settingsForm = new FormGroup({
+    clinic_name:      new FormControl('', Validators.required),
+    clinic_address:   new FormControl(''),
+    clinic_phone:     new FormControl(''),
+    clinic_email:     new FormControl('', Validators.email),
+    default_tax_rate: new FormControl('0'),
+    default_due_days: new FormControl('30'),
+    invoice_footer:   new FormControl(''),
+    max_file_size_mb: new FormControl('5'),
+  });
+
+  savingConfig = signal(false);
+
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit() {
     this.loadProcedures();
     this.loadInsuranceFirms();
+    this.loadSettings();
   }
 
   setTab(tab: Tab) {
@@ -161,6 +178,36 @@ export class SettingsComponent {
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to save insurance firm.');
         this.loading.set(false);
+      }
+    });
+  }
+
+  // ── App Settings ──────────────────────────────────────────────────────────
+  loadSettings() {
+    this.settingsService.getSettings().subscribe({
+      next: (res: any) => {
+        this.settingsForm.patchValue(res.data ?? res);
+      },
+      error: () => this.error.set('Failed to load settings.'),
+    });
+  }
+
+  saveConfig() {
+    if (this.settingsForm.invalid) {
+      this.settingsForm.markAllAsTouched();
+      return;
+    }
+    this.savingConfig.set(true);
+    this.clearMessages();
+
+    this.settingsService.saveSettings(this.settingsForm.value).subscribe({
+      next: () => {
+        this.success.set('Settings saved successfully.');
+        this.savingConfig.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to save settings.');
+        this.savingConfig.set(false);
       }
     });
   }

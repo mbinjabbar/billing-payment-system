@@ -365,91 +365,125 @@
     }
 
     <!-- ══ TAB: APP CONFIGURATION ══ -->
-    @if (activeTab() === 'config') {
-      <div class="max-w-2xl space-y-6">
+@if (activeTab() === 'config') {
+  <div class="max-w-2xl">
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-8 space-y-6"
+      [formGroup]="settingsForm">
 
-        <!-- App Info -->
-        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 space-y-5">
-          <h3 class="text-lg font-bold font-headline">Application Info</h3>
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">App Name</p>
-              <p class="font-bold font-headline">MedBilling</p>
-            </div>
-            <div>
-              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Version</p>
-              <p class="font-bold font-headline">1.0.0</p>
-            </div>
-            <div>
-              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Frontend</p>
-              <p class="font-bold font-headline">Angular 19</p>
-            </div>
-            <div>
-              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Backend</p>
-              <p class="font-bold font-headline">Laravel 11 + Node.js</p>
-            </div>
-            <div>
-              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Auth Backend</p>
-              <p class="font-bold font-headline">http://localhost:3000</p>
-            </div>
-            <div>
-              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">API Backend</p>
-              <p class="font-bold font-headline">http://localhost:8000</p>
-            </div>
-          </div>
-        </div>
+      <h3 class="text-lg font-bold font-headline">Clinic Information</h3>
+      <p class="text-sm text-on-surface-variant font-body -mt-4">
+        This information appears on generated invoices and PDFs.
+      </p>
 
-        <!-- System Rules -->
-        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 space-y-4">
-          <h3 class="text-lg font-bold font-headline">System Rules</h3>
-          <div class="space-y-3 text-sm">
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
-              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
-              <div>
-                <p class="font-semibold">One bill per visit</p>
-                <p class="text-xs text-on-surface-variant font-label mt-0.5">Each visit can only have one bill generated.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
-              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
-              <div>
-                <p class="font-semibold">Soft deletes only</p>
-                <p class="text-xs text-on-surface-variant font-label mt-0.5">No records are permanently deleted from the database.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
-              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
-              <div>
-                <p class="font-semibold">File upload limit</p>
-                <p class="text-xs text-on-surface-variant font-label mt-0.5">Max 5MB per file. Accepted: PDF, JPG, PNG, DOCX.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
-              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
-              <div>
-                <p class="font-semibold">Auto-generated numbers</p>
-                <p class="text-xs text-on-surface-variant font-label mt-0.5">Bill and payment numbers are auto-generated and unique.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
-              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
-              <div>
-                <p class="font-semibold">NF2 form for car accidents</p>
-                <p class="text-xs text-on-surface-variant font-label mt-0.5">NF2 PDF is auto-generated when a visit is linked to a car accident case.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
-              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
-              <div>
-                <p class="font-semibold">JWT session — 8 hours</p>
-                <p class="text-xs text-on-surface-variant font-label mt-0.5">Sessions expire after 8 hours of inactivity. Logout blacklists the token.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <!-- Clinic Name -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+          Clinic / Practice Name <span class="text-error">*</span>
+        </label>
+        <input type="text" formControlName="clinic_name"
+          placeholder="e.g. ABC Medical Center"
+          class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
       </div>
-    }
+
+      <!-- Address -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+          Address
+        </label>
+        <textarea formControlName="clinic_address" rows="2"
+          placeholder="e.g. 123 Medical Drive, New York, NY 10001"
+          class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition resize-none">
+        </textarea>
+      </div>
+
+      <!-- Phone + Email -->
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Phone</label>
+          <input type="text" formControlName="clinic_phone"
+            placeholder="+1 (555) 000-0000"
+            class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Email</label>
+          <input type="email" formControlName="clinic_email"
+            placeholder="billing@clinic.com"
+            class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+        </div>
+      </div>
+
+      <div class="border-t border-outline-variant/10 pt-6">
+        <h3 class="text-lg font-bold font-headline mb-4">Billing Defaults</h3>
+        <p class="text-sm text-on-surface-variant font-body -mt-2 mb-4">
+          These values auto-fill when creating a new bill.
+        </p>
+
+        <div class="grid grid-cols-2 gap-6">
+          <!-- Default Tax Rate -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+              Default Tax Rate (%)
+            </label>
+            <div class="relative">
+              <input type="number" formControlName="default_tax_rate" min="0" max="100"
+                class="w-full px-4 py-3 pr-8 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">%</span>
+            </div>
+          </div>
+
+          <!-- Default Due Days -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+              Default Due Days
+            </label>
+            <div class="relative">
+              <input type="number" formControlName="default_due_days" min="1"
+                class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant font-label">days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-outline-variant/10 pt-6">
+        <h3 class="text-lg font-bold font-headline mb-4">Invoice Settings</h3>
+
+        <!-- Invoice Footer -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+            Invoice Footer Text
+          </label>
+          <input type="text" formControlName="invoice_footer"
+            placeholder="e.g. Thank you for your payment."
+            class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+          <p class="text-xs text-on-surface-variant font-label mt-1">Appears at the bottom of generated PDF invoices.</p>
+        </div>
+
+        <!-- Max File Size -->
+        <div class="mt-5">
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+            Max Upload File Size (MB)
+          </label>
+          <div class="relative">
+            <input type="number" formControlName="max_file_size_mb" min="1" max="20"
+              class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant font-label">MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <div class="pt-2">
+        <button (click)="saveConfig()" [disabled]="savingConfig()"
+          class="px-8 py-3 rounded-lg text-sm font-bold text-white disabled:opacity-50 transition font-headline"
+          style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+          {{ savingConfig() ? 'Saving...' : 'Save Settings' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
 
   </div>
 </div>
