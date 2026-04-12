@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PaymentPosterService } from '../../../core/services/payment-poster.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 
 
@@ -16,6 +17,8 @@ export class CreatePaymentComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private paymentposterService = inject(PaymentPosterService);
+  private authService = inject(AuthService);
+  
   selectedfile: File | null = null;
   billId: number = 0;
   paymentId: number = 0;
@@ -98,23 +101,16 @@ export class CreatePaymentComponent {
 
     else {
       paymentdata.append('bill_id', this.billId.toString());
-      paymentdata.append('received_by', "1");
+      paymentdata.append('received_by', String(this.authService.getUserId()));
       this.paymentposterService.createPayment(paymentdata).subscribe({
         next: (response: any) => {
           console.log('Payment successful:', response.data);
           this.router.navigate(['/payment-list']);
         },
         error: (err) => {
-          // 1. Log the entire error object for debugging
           console.error('Full error object:', err);
-
-          // 2. Check the HTTP status code (e.g., 400, 404, 500)
           console.log('Status code:', err.status);
-
-          // 3. Get the error message (client-side or server-side)
           console.log('Message:', err.message);
-
-          // 4. Access the custom error body sent by your backend
           if (err.error) {
             console.log('Server-side error details:', err.error);
           }

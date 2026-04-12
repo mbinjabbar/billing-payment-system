@@ -74,13 +74,13 @@ export const routes: Routes = [
     path: 'bills/:billId/pay',
     canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
     loadComponent: () =>
-      import('./features/payment-poster/create-payment/create-payment.component').then(m => m.CreatePaymentComponent)
+      import('./features/payments/create-payment/create-payment.component').then(m => m.CreatePaymentComponent)
   },
   {
     path: 'payments/edit/:id',
     canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
     loadComponent: () =>
-      import('./features/payment-poster/create-payment/create-payment.component').then(m => m.CreatePaymentComponent)
+      import('./features/payments/create-payment/create-payment.component').then(m => m.CreatePaymentComponent)
   },
   {
     path: 'payments/payment-list',
