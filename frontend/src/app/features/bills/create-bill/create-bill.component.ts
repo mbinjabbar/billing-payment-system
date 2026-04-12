@@ -20,7 +20,7 @@ export class CreateBillComponent {
   private insuranceFirmsService = inject(InsuranceFirmsService);
   private visitService          = inject(VisitService);
   private billService           = inject(BillService);
-  private authSerivice           = inject(AuthService);
+  private authService           = inject(AuthService);
 
   protected Number = Number;
 
@@ -181,7 +181,7 @@ export class CreateBillComponent {
     const payload = {
       visit_id:          this.visit().data?.id,
       insurance_firm_id: this.selectedInsuranceId(),
-      created_by:        this.authSerivice.getUserId(),
+      created_by:        this.authService.getUserId(),
       procedure_codes:   this.selectedProcedures().map((p) => ({ code: p.code, name: p.name, standard_charge: p.standard_charge})),
       charges:           Number(summary.total),
       insurance_coverage: Number(this.billing().insurance),
