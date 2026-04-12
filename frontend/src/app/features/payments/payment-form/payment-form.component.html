@@ -212,39 +212,6 @@
               </div>
             }
 
-            <!-- Optional File Upload for non-Check modes -->
-            @if (paymentMode() && paymentMode() !== 'Check' && paymentMode() !== 'Cash') {
-              <div>
-                <label class="block text-sm font-label text-on-surface-variant mb-2">
-                  Upload Receipt / Proof <span class="text-on-surface-variant/50 font-normal">(optional)</span>
-                </label>
-                @if (!selectedFile()) {
-                  <label class="flex items-center gap-3 w-full bg-surface-container-low rounded-lg p-4 border border-dashed border-outline-variant/30 hover:border-primary cursor-pointer transition-colors">
-                    <span class="material-symbols-outlined text-on-surface-variant icon-md">upload_file</span>
-                    <div>
-                      <p class="text-sm font-semibold text-on-surface-variant">Click to upload proof</p>
-                      <p class="text-xs text-on-surface-variant/60 font-label">PDF, JPG, PNG — max 5MB</p>
-                    </div>
-                    <input type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png"
-                      (change)="onFileSelected($event)" />
-                  </label>
-                } @else {
-                  <div class="flex items-center justify-between w-full bg-surface-container-low rounded-lg p-4 border border-primary/30">
-                    <div class="flex items-center gap-3">
-                      <span class="material-symbols-outlined text-primary icon-md">description</span>
-                      <div>
-                        <p class="text-sm font-semibold text-on-surface">{{ selectedFile()!.name }}</p>
-                        <p class="text-xs text-on-surface-variant font-label">{{ (selectedFile()!.size / 1024).toFixed(1) }} KB</p>
-                      </div>
-                    </div>
-                    <button type="button" (click)="clearFile()" class="text-error hover:text-error/70 transition">
-                      <span class="material-symbols-outlined icon-sm">close</span>
-                    </button>
-                  </div>
-                }
-              </div>
-            }
-
             <!-- Payment Date + Status -->
             <div class="grid md:grid-cols-2 gap-6">
 
