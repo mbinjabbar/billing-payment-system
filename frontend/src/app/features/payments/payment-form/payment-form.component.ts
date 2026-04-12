@@ -12,7 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [RouterLink, ReactiveFormsModule, CommonModule],
   templateUrl: './payment-form.component.html',
 })
-export class CreatePaymentComponent {
+export class PaymentFormComponent {
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
   private paymentService = inject(PaymentPosterService);
