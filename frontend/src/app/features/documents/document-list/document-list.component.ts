@@ -1,30 +1,44 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { DocumentService } from '../../../core/services/document.service';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-document-list',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './document-list.component.html',
-  styleUrl: './document-list.component.css'
+  styleUrl: './document-list.component.css',
 })
 export class DocumentListComponent {
   private documentService = inject(DocumentService);
+  private authService = inject(AuthService);
 
-  documents   = signal<any>({});
-  loading     = signal(false);
+  role = computed(() => this.authService.getRole() ?? '');
+
+  documents = signal<any>({});
+  loading = signal(false);
   currentPage = signal(1);
-  activeType  = signal('');
+  activeType = signal('');
 
   // ── Computed pagination ──────────────────────────────────────────────────
-  list       = computed(() => this.documents()?.data  ?? []);
-  totalItems = computed(() => this.documents()?.meta?.total    ?? 0);
+  list = computed(() => this.documents()?.data ?? []);
+  totalItems = computed(() => this.documents()?.meta?.total ?? 0);
   totalPages = computed(() => this.documents()?.meta?.last_page ?? 1);
-  from       = computed(() => this.documents()?.meta?.from      ?? 0);
-  to         = computed(() => this.documents()?.meta?.to        ?? 0);
+  from = computed(() => this.documents()?.meta?.from ?? 0);
+  to = computed(() => this.documents()?.meta?.to ?? 0);
 
-  readonly docTypes = ['NF2 Form', 'Invoice', 'Receipt', 'Cheque Image', 'Supporting Document'];
+  // ── Doc type filter pills per role ───────────────────────────────────────
+  visibleDocTypes = computed(() => {
+    switch (this.role()) {
+      case 'Biller':
+        return ['Invoice', 'NF2 Form'];
+      case 'Payment Poster':
+        return ['Invoice', 'Cheque Image'];
+      default:
+        return ['Invoice', 'NF2 Form', 'Cheque Image', 'Supporting Document'];
+    }
+  });
 
   ngOnInit() {
     this.loadDocuments();
@@ -32,7 +46,8 @@ export class DocumentListComponent {
 
   loadDocuments(page: number = 1) {
     this.loading.set(true);
-    const params: any = { page };
+
+    const params: any = { page, role: this.role() };
     if (this.activeType()) params.type = this.activeType();
 
     this.documentService.getDocuments(params).subscribe({
@@ -46,7 +61,8 @@ export class DocumentListComponent {
   }
 
   filterByType(type: string) {
-    this.activeType.set(type);
+    // Toggle off if same type clicked again
+    this.activeType.set(this.activeType() === type ? '' : type);
     this.loadDocuments(1);
   }
 
@@ -57,7 +73,7 @@ export class DocumentListComponent {
   }
 
   visiblePages(): (number | string)[] {
-    const total   = this.totalPages();
+    const total = this.totalPages();
     const current = this.currentPage();
     const pages: (number | string)[] = [];
 
@@ -75,34 +91,38 @@ export class DocumentListComponent {
     return pages;
   }
 
+  downloadDocument(doc: any) {
+    this.documentService.downloadDocument(doc);
+  }
+
   // ── UI helpers ───────────────────────────────────────────────────────────
   getDocTypeClass(type: string): string {
     switch (type) {
-      case 'NF2 Form':            return 'bg-orange-100 text-orange-700';
-      case 'Invoice':             return 'bg-cyan-100 text-cyan-700';
-      case 'Receipt':             return 'bg-green-100 text-green-700';
-      case 'Cheque Image':        return 'bg-purple-100 text-purple-700';
-      case 'Supporting Document': return 'bg-gray-100 text-gray-600';
-      default:                    return 'bg-gray-100 text-gray-600';
+      case 'Invoice':
+        return 'bg-cyan-100 text-cyan-700';
+      case 'NF2 Form':
+        return 'bg-orange-100 text-orange-700';
+      case 'Cheque Image':
+        return 'bg-purple-100 text-purple-700';
+      case 'Supporting Document':
+        return 'bg-gray-100 text-gray-600';
+      default:
+        return 'bg-gray-100 text-gray-600';
     }
   }
 
   getDocIcon(type: string): string {
     switch (type) {
-      case 'NF2 Form':     return 'article';
-      case 'Invoice':      return 'receipt_long';
-      case 'Receipt':      return 'receipt';
-      case 'Cheque Image': return 'image';
-      default:             return 'description';
+      case 'Invoice':
+        return 'receipt_long';
+      case 'NF2 Form':
+        return 'article';
+      case 'Cheque Image':
+        return 'image';
+      case 'Supporting Document':
+        return 'folder';
+      default:
+        return 'description';
     }
-  }
-
-  // Bills PDF goes through the Laravel download endpoint
-  // Cheque images are in public storage
-  getDownloadUrl(doc: any): string {
-    if (doc.document_type === 'Invoice' || doc.document_type === 'NF2 Form') {
-      return `http://localhost:8000/api/bills/pdf/${doc.bill_id}`;
-    }
-    return `http://localhost:8000/storage/${doc.file_path}`;
   }
 }

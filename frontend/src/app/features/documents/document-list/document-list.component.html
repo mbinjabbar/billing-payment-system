@@ -30,7 +30,7 @@
             All
           </button>
 
-          @for (type of docTypes; track type) {
+          @for (type of visibleDocTypes(); track type) {
             <button
               (click)="filterByType(type)"
               class="px-3 py-1.5 rounded-lg text-xs font-bold transition font-headline"
@@ -146,20 +146,14 @@
                   </td>
 
                   <!-- Actions -->
-                  <td class="px-5 py-4 text-right space-x-2">
-                    <a
-                      [href]="getDownloadUrl(doc)"
-                      target="_blank"
-                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
-                      View
-                    </a>
-                    <a
-                      [href]="getDownloadUrl(doc)"
-                      download
-                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
-                      Download
-                    </a>
-                  </td>
+<td class="px-5 py-4 text-right">
+  <button
+    (click)="downloadDocument(doc)"
+    class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition inline-flex items-center gap-1.5">
+    <span class="material-symbols-outlined icon-sm">download</span>
+    Download
+  </button>
+</td>
 
                 </tr>
               }

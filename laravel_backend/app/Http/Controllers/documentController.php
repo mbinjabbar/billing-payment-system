@@ -12,17 +12,20 @@ class documentController extends Controller
     use ApiResponse;
     public function index(Request $request)
     {
-        $documents = Document::with([
-            'bill.visit.appointment.patientCase.patient',
-            'uploader'
-        ])
-            ->when($request->type, function ($q) use ($request) {
-                return $q->where('document_type', $request->type);
-            })
-            ->latest()
-            ->paginate(10);
+        $query = Document::with('bill.visit.appointment.patientCase.patient', 'payment');
 
-        return $this->success($documents, 'Document listing retrieved.');
+        // Filter by role
+        $role = $request->query('role');
+
+        if ($role === 'Biller') {
+            $query->whereIn('document_type', ['Invoice', 'NF2 Form']);
+        } elseif ($role === 'Payment Poster') {
+            $query->whereIn('document_type', ['Invoice', 'Cheque Image']);
+        }
+        // Admin gets everything
+
+        $documents = $query->latest()->paginate(10);
+        return $this->success($documents, 'Documents retrieved successfully.');
     }
 
     public function store(Request $request)
@@ -84,4 +87,26 @@ class documentController extends Controller
             return $this->error('NF2 document not found.');
         }
     }
+
+    public function downloadCheque($id)
+{
+    try {
+        $document = Document::findOrFail($id);
+
+        if ($document->document_type !== 'Cheque Image') {
+            return $this->error('Not a cheque document.');
+        }
+
+        // Cheque files stored in public storage
+        $filePath = storage_path('app/public/' . $document->file_path);
+
+        if (!file_exists($filePath)) {
+            return $this->error('Cheque file not found.');
+        }
+
+        return response()->download($filePath);
+    } catch (Exception $e) {
+        return $this->error('Failed to download cheque.');
+    }
+}
 }
