@@ -9,12 +9,15 @@ use App\Http\Controllers\procedurecodesController;
 use App\Http\Controllers\insurancefirmsController;
 
 
-Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
+Route::get('/bills/stats', [billController::class, 'stats']);
 Route::post('/bills/export', [billController::class, 'export']);
+Route::get('/bills/pdf/{id}', [billController::class, 'downloadPDF']);
 Route::apiResource('/bills', billController::class);
+
+Route::post('/payments/export', [paymentController::class, 'export']);
 Route::apiResource('/payments', paymentController::class);
+
+Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
 Route::apiResource('/procedurecodes', procedurecodesController::class);
 Route::apiResource('/insurancefirms', insurancefirmsController::class);
 Route::apiResource('/documents', documentController::class);
-Route::get('/bills/pdf/{id}', [billController::class, 'downloadPDF']);
-Route::post('/payments/export', [PaymentController::class, 'export']);

@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
   selector: 'app-create-payment',
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, CommonModule],
-  templateUrl: './create-payment.component.html',
+  templateUrl: './payment-form.component.html',
 })
 export class CreatePaymentComponent {
   private route          = inject(ActivatedRoute);
