@@ -1,143 +1,205 @@
 <div class="bg-surface text-on-surface min-h-screen font-body">
   <div class="pt-10 px-10 pb-12 space-y-8 w-full">
 
-    <!-- Header -->
-    <section class="flex justify-between items-end">
-      <div>
-        <h2 class="text-4xl font-extrabold tracking-tight font-headline">
-          Documents
-        </h2>
-        <p class="text-on-surface-variant mt-2 max-w-2xl font-body">
-          Access all uploaded files including NF2 forms, invoices, and receipts.
-        </p>
-      </div>
-
-      <!-- Filter -->
-      <select
-        class="bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-2 text-sm font-bold text-on-surface outline-none">
-        <option>All Types</option>
-        <option>NF2 Form</option>
-        <option>Invoice</option>
-        <option>Receipt</option>
-        <option>Cheque Image</option>
-      </select>
+    <!-- Page Header -->
+    <section>
+      <h2 class="text-4xl font-extrabold tracking-tight font-headline">Documents</h2>
+      <p class="text-on-surface-variant mt-2 font-body">
+        Access all uploaded files including NF2 forms, invoices, and receipts.
+      </p>
     </section>
 
-    <!-- Table -->
+    <!-- Table Card -->
     <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
-      <!-- Table Header -->
-      <div class="px-6 py-5 border-b border-outline-variant/10">
-        <h3 class="text-xl font-bold font-headline">
-          Document Records
-        </h3>
+      <!-- Table Header with inline type filter -->
+      <div class="px-6 py-4 border-b border-outline-variant/10">
+        <div class="flex flex-wrap items-center gap-2">
+
+          <!-- Title -->
+          <h3 class="text-lg font-bold font-headline mr-1">Document Records</h3>
+
+          <!-- Divider -->
+          <div class="w-px h-5 bg-outline-variant/30 mx-1"></div>
+
+          <!-- Type filter pills -->
+          <button
+            (click)="filterByType('')"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold transition font-headline"
+            [class]="activeType() === '' ? 'bg-primary text-white' : 'border border-outline-variant/30 hover:bg-surface-container-low'">
+            All
+          </button>
+
+          @for (type of docTypes; track type) {
+            <button
+              (click)="filterByType(type)"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition font-headline"
+              [class]="activeType() === type ? 'bg-primary text-white' : 'border border-outline-variant/30 hover:bg-surface-container-low'">
+              {{ type }}
+            </button>
+          }
+
+          <!-- Push right -->
+          <div class="flex-1"></div>
+
+          <!-- Record count -->
+          @if (totalItems() > 0) {
+            <p class="text-xs text-on-surface-variant font-label">
+              {{ from() }}–{{ to() }} of {{ totalItems() }}
+            </p>
+          }
+
+        </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="flex items-center justify-center py-20">
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+            <p class="text-sm text-on-surface-variant font-label">Loading documents...</p>
+          </div>
+        </div>
+      }
 
-          <!-- Head -->
-          <thead>
-            <tr class="bg-surface-container-low">
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Document</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Type</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Uploaded</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Version</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Action</th>
-            </tr>
-          </thead>
+      <!-- Table -->
+      @if (!loading()) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Document</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Type</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Uploaded</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Version</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
+              </tr>
+            </thead>
 
-          <!-- Body -->
-          <tbody class="divide-y divide-outline-variant/10">
-            @for (doc of documents(); track doc.id) {
-            <tr class="hover:bg-surface-container-low transition">
+            <tbody class="divide-y divide-outline-variant/10">
 
-              <!-- Document -->
-              <td class="px-5 py-4">
-                <div class="flex items-center gap-3">
-                  <span class="material-symbols-outlined text-red-500 text-[20px]">
-                    picture_as_pdf
-                  </span>
+              @if (list().length === 0) {
+                <tr>
+                  <td colspan="7" class="px-5 py-16 text-center">
+                    <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">folder_open</span>
+                    <p class="text-sm font-bold text-on-surface-variant">No documents found</p>
+                    @if (activeType()) {
+                      <button (click)="filterByType('')"
+                        class="text-xs text-primary font-bold mt-2 hover:underline">
+                        Clear filter
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
 
-                  <div>
+              @for (doc of list(); track doc.id) {
+                <tr class="hover:bg-surface-container-low transition">
+
+                  <!-- Document -->
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-primary icon-md">
+                        {{ getDocIcon(doc.document_type) }}
+                      </span>
+                      <div>
+                        <p class="font-bold text-sm">{{ doc.file_name }}</p>
+                        <p class="text-xs text-on-surface-variant font-label">
+                          {{ (doc.file_size / 1024) | number:'1.0-0' }} KB
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Patient -->
+                  <td class="px-5 py-4">
                     <p class="font-bold">
-                      {{ doc.file_name }}
+                      {{ doc.bill?.visit?.appointment?.patient_case?.patient?.full_name ?? '—' }}
                     </p>
-                    <p class="text-xs text-on-surface-variant">
-                      {{ doc.file_size / 1024 | number:'1.0-0' }} KB
-                    </p>
-                  </div>
-                </div>
-              </td>
+                  </td>
 
-              <!-- Patient -->
-              <td class="px-5 py-4">
-                <p class="font-bold">
-                  {{ doc.bill?.visit?.appointment?.patient_case?.patient?.full_name }}
-                </p>
-              </td>
+                  <!-- Type -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                      [class]="getDocTypeClass(doc.document_type)">
+                      {{ doc.document_type }}
+                    </span>
+                  </td>
 
-              <!-- Type -->
-              <td class="px-5 py-4">
-                <span
-                  class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
-                  [ngClass]="{
-                    'bg-orange-700': doc.document_type === 'NF2 Form',
-                    'bg-cyan-700': doc.document_type === 'Invoice',
-                    'bg-green-700': doc.document_type === 'Receipt',
-                    'bg-purple-700': doc.document_type === 'Cheque Image',
-                    'bg-gray-600': doc.document_type === 'Supporting Document'
-                  }">
-                  {{ doc.document_type }}
-                </span>
-              </td>
+                  <!-- Bill # -->
+                  <td class="px-5 py-4">
+                    <p class="font-bold text-xs">{{ doc.bill?.bill_number || '—' }}</p>
+                  </td>
 
-              <!-- Bill -->
-              <td class="px-5 py-4">
-                <p class="font-bold">
-                  {{ doc.bill?.bill_number || '—' }}
-                </p>
-              </td>
+                  <!-- Upload Date -->
+                  <td class="px-5 py-4 whitespace-nowrap text-sm">
+                    {{ doc.upload_date | date:'MMM d, y' }}
+                  </td>
 
-              <!-- Upload Date -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                {{ doc.upload_date | date }}
-              </td>
+                  <!-- Version -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-surface-container-low text-on-surface-variant font-label">
+                      v{{ doc.version }}
+                    </span>
+                  </td>
 
-              <!-- Version -->
-              <td class="px-5 py-4 text-center font-semibold">
-                v{{ doc.version }}
-              </td>
+                  <!-- Actions -->
+                  <td class="px-5 py-4 text-right space-x-2">
+                    <a
+                      [href]="getDownloadUrl(doc)"
+                      target="_blank"
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
+                      View
+                    </a>
+                    <a
+                      [href]="getDownloadUrl(doc)"
+                      download
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                      Download
+                    </a>
+                  </td>
 
-              <!-- Actions -->
-              <td class="px-5 py-4 text-right space-x-2">
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
 
-                <!-- View -->
-                <a
-                  [href]="doc.file_path"
-                  target="_blank"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container">
-                  View
-                </a>
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+            <p class="text-xs text-on-surface-variant font-label">
+              Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
 
-                <!-- Download -->
-                <a
-                  [href]="doc.file_path"
-                  download
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary-container text-on-secondary-container hover:opacity-80">
-                  Download
-                </a>
+              @for (page of visiblePages(); track $index) {
+                @if (page === '...') {
+                  <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
+                } @else {
+                  <button
+                    (click)="goToPage(+page)"
+                    class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+                    [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
+                    {{ page }}
+                  </button>
+                }
+              }
 
-              </td>
-
-            </tr>
-            }
-          </tbody>
-
-        </table>
-      </div>
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
+              <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
+            </div>
+          </div>
+        }
+      }
 
     </section>
   </div>
