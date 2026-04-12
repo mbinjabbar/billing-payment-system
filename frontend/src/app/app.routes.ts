@@ -10,12 +10,32 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent)
   },
 
-  // Admin
+   // Admin
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard(['Admin'])],
-    loadComponent: () =>
-      import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin/users/user-list/user-list.component').then(m => m.UserListComponent)
+      },
+      {
+        path: 'users/create',
+        loadComponent: () =>
+          import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
+      },
+      {
+        path: 'users/edit/:id',
+        loadComponent: () =>
+          import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
+      },
+    ]
   },
 
   // Biller

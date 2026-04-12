@@ -29,6 +29,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'Bills',     icon: 'receipt_long',   route: '/bills/bill-list' },
   { label: 'Payments',  icon: 'payments',       route: '/payments/payment-list' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
+  { label: 'Users',     icon: 'group',           route: '/admin/users' },
 ];
 
 @Component({
