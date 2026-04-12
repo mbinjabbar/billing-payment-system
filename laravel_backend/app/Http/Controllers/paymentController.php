@@ -20,62 +20,65 @@ class paymentController extends Controller
     public function index(Request $request)
     {
         try {
-               $query = Payment::with('bill.visit.appointment.patientCase.patient');
-                $query->when($request->filled('bill_id'), function ($q) use ($request) {
-                 $q->where('bill_id', $request->bill_id);
-                });
-               $query->when($request->filled('payment_mode'), function ($q) use ($request) {
-               $q->where('payment_mode', $request->payment_mode);
-              });
+            $query = Payment::with('bill.visit.appointment.patientCase.patient');
+            $query->when($request->filled('bill_id'), function ($q) use ($request) {
+                $q->where('bill_id', $request->bill_id);
+            });
+            $query->when($request->filled('payment_mode'), function ($q) use ($request) {
+                $q->where('payment_mode', $request->payment_mode);
+            });
 
-                $query->when($request->filled('payment_status'), function ($q) use ($request) {
+            $query->when($request->filled('payment_status'), function ($q) use ($request) {
                 $q->where('payment_status', $request->payment_status);
-                });
-            $query->when($request->filled('from_date') && $request->filled('to_date'),function ($q) use ($request) {
-            $q->whereBetween('payment_date', [$request->from_date,$request->to_date
-            ]);
-        }
-        );
+            });
+            $query->when(
+                $request->filled('from_date') && $request->filled('to_date'),
+                function ($q) use ($request) {
+                    $q->whereBetween('payment_date', [
+                        $request->from_date,
+                        $request->to_date
+                    ]);
+                }
+            );
 
-        $payments = $query->latest()->paginate(10);            
+            $payments = $query->latest()->paginate(10);
             return $this->success($payments, 'Payments retrieved successfully');
         } catch (Exception $e) {
             \Log::error('PAYMENT LIST ERROR', [
-            'message' => $e->getMessage(),
-            'line' => $e->getLine()
-        ]);
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
+            ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while fetching payments',
-            'error' => $e->getMessage()
-        ], 500);
-    
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching payments',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
-    
+
     public function store(Request $request)
-    {    
-            try {
-                
-            $data= $request->all();
-             $bill = Bill::findOrFail($data['bill_id']);
+    {
+        try {
 
-                $name = null;
-                 $type = null;
-                $filePath = null;
+            $data = $request->all();
+            $bill = Bill::findOrFail($data['bill_id']);
 
-            
-            if($request->hasFile('cheque_file')) {
+            $name = null;
+            $type = null;
+            $filePath = null;
+
+
+            if ($request->hasFile('cheque_file')) {
                 $file = $request->file('cheque_file');
-               $name = $file->getClientOriginalName();
+                $name = $file->getClientOriginalName();
                 $type = $file->getClientOriginalExtension();
                 $filePath = $file->store('cheque_files', 'public');
-              $data['cheque_file_path'] = $filePath;
-           }
+                $data['cheque_file_path'] = $filePath;
+            }
 
-            if($data['amount_paid'] > $bill->outstanding_amount) {
+            if ($data['amount_paid'] > $bill->outstanding_amount) {
                 return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
             }
             $payment = Payment::create([
@@ -88,11 +91,12 @@ class paymentController extends Controller
                 'transaction_reference' => $data['transaction_reference'],
                 'payment_date' => $data['payment_date'],
                 'payment_status' => $data['payment_status'],
-                'cheque_file_path'      => $filePath, 
+                'cheque_file_path'      => $filePath,
                 'notes' => $data['notes'] ?? null,
             ]);
             $bill->paid_amount += $data['amount_paid'];
-            $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
+            $insuranceAmount = ($bill->charges * $bill->insurance_coverage) / 100;
+            $bill->bill_amount = ($bill->charges - $insuranceAmount - $bill->discount_amount) + $bill->tax_amount;
             $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
             if ($bill->outstanding_amount <= 0) {
                 $bill->status = 'Paid';
@@ -101,26 +105,26 @@ class paymentController extends Controller
             }
             $bill->save();
 
-        if ($request->hasFile('cheque_file')) {
-    Document::create([
-        'bill_id'       => $bill->id,
-        'payment_id'    => $payment->id, 
-        'document_type' => 'Cheque Image', 
-        'file_name'     => $name,
-        'file_type'     => $type,    
-        'file_path'     => $filePath,
-        'file_size'     => $file->getSize(),
-        'upload_date'   => now(),
-        'uploaded_by'   => $data['created_by'] ?? 1,
-        'version'       => 1
-    ]);
-}
+            if ($request->hasFile('cheque_file')) {
+                Document::create([
+                    'bill_id'       => $bill->id,
+                    'payment_id'    => $payment->id,
+                    'document_type' => 'Cheque Image',
+                    'file_name'     => $name,
+                    'file_type'     => $type,
+                    'file_path'     => $filePath,
+                    'file_size'     => $file->getSize(),
+                    'upload_date'   => now(),
+                    'uploaded_by'   => $data['created_by'] ?? 1,
+                    'version'       => 1
+                ]);
+            }
 
             return $this->success($payment, 'Payment created and bill updated successfully');
-            } catch (Exception $e) {
-               
-                  return $this->error($e->getMessage());
-            }
+        } catch (Exception $e) {
+
+            return $this->error($e->getMessage());
+        }
     }
 
 
@@ -129,101 +133,101 @@ class paymentController extends Controller
         try {
             $payment = Payment::findOrFail($id);
             return $this->success($payment, 'Payment retrieved successfully');
-        
         } catch (Exception $e) {
             return $this->error('Payment not found');
         }
     }
 
-    
+
     public function update(Request $request, $id)
-{
-    try {
-        $payment = Payment::findOrFail($id);
-        $bill = Bill::findOrFail($request->bill_id);
+    {
+        try {
+            $payment = Payment::findOrFail($id);
+            $bill = Bill::findOrFail($request->bill_id);
 
-        $filePath = $payment->cheque_file_path; 
-        $name = null;
-        $type = null;
-        $fileSize = null;
+            $filePath = $payment->cheque_file_path;
+            $name = null;
+            $type = null;
+            $fileSize = null;
 
-   
-        if ($request->hasFile('cheque_file')) {
-            $file = $request->file('cheque_file');
-            $name = $file->getClientOriginalName();
-            $type = $file->getClientOriginalExtension();
-            $fileSize = $file->getSize();
-            $filePath = $file->store('cheque_files', 'public');
-        }
 
-        
-        $oldAmountPaid = $payment->amount_paid;
-        $newAmountPaid = $request->amount_paid;
-        if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
-            return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
+            if ($request->hasFile('cheque_file')) {
+                $file = $request->file('cheque_file');
+                $name = $file->getClientOriginalName();
+                $type = $file->getClientOriginalExtension();
+                $fileSize = $file->getSize();
+                $filePath = $file->store('cheque_files', 'public');
+            }
+
+
+            $oldAmountPaid = $payment->amount_paid;
+            $newAmountPaid = $request->amount_paid;
+            if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
+                return response()->json(['message' => 'Amount paid cannot exceed outstanding amount'], 400);
+            }
+
+            $payment->fill($request->only([
+                'bill_id',
+                'received_by',
+                'amount_paid',
+                'payment_mode',
+                'check_number',
+                'bank_name',
+                'transaction_reference',
+                'payment_date',
+                'payment_status',
+                'cheque_file_path' => $filePath,
+                'notes'
+            ]));
+            $payment->save();
+            $difference = $newAmountPaid - $oldAmountPaid;
+            $bill->increment('paid_amount', $difference);
+            $bill->refresh();
+            $insuranceAmount = ($bill->charges * $bill->insurance_coverage) / 100;
+            $bill->bill_amount = ($bill->charges - $insuranceAmount - $bill->discount_amount) + $bill->tax_amount;
+            $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
+            if ($bill->outstanding_amount <= 0) {
+                $bill->status = 'Paid';
+            } else {
+                $bill->status = 'Partial';
+            }
+            $bill->save();
+            if ($request->hasFile('cheque_file')) {
+                Document::create([
+                    'bill_id'       => $bill->id,
+                    'payment_id'    => $payment->id,
+                    'document_type' => 'Cheque Image',
+                    'file_name'     => $name,
+                    'file_type'     => $type,
+                    'file_path'     => $filePath,
+                    'file_size'     => $fileSize,
+                    'upload_date'   => now(),
+                    'uploaded_by'   => $data['created_by'] ?? 1,
+                    'version'       => 1
+                ]);
+                return $this->success($payment, 'Payment and Bill updated successfully');
+            }
+        } catch (Exception $e) {
+            \Log::error('UPDATE PAYMENT FAILED', [
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ]);
+            return $this->error($e->getMessage());
         }
-        
-        $payment->fill($request->only([
-            'bill_id',
-            'received_by', 
-            'amount_paid', 
-            'payment_mode',
-            'check_number', 
-            'bank_name', 
-            'transaction_reference',
-            'payment_date', 
-            'payment_status',
-            'cheque_file_path'=> $filePath, 
-            'notes'
-        ]));
-        $payment->save();
-        $difference = $newAmountPaid - $oldAmountPaid;
-        $bill->increment('paid_amount', $difference);
-        $bill->refresh();
-        $bill->bill_amount = ($bill->charges - $bill->insurance_coverage - $bill->discount_amount) + $bill->tax_amount;
-        $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
-        if ($bill->outstanding_amount <= 0) {
-            $bill->status = 'Paid';
-        } else {
-            $bill->status = 'Partial';
-        }
-        $bill->save();
-         if ($request->hasFile('cheque_file')) {
-    Document::create([
-        'bill_id'       => $bill->id,
-        'payment_id'    => $payment->id, 
-        'document_type' => 'Cheque Image', 
-        'file_name'     => $name,
-        'file_type'     => $type,    
-        'file_path'     => $filePath,
-        'file_size'     => $fileSize,
-        'upload_date'   => now(),
-        'uploaded_by'   => $data['created_by'] ?? 1,
-        'version'       => 1
-    ]);
-        return $this->success($payment, 'Payment and Bill updated successfully');   
-    } 
-    }catch (Exception $e) {
-         \Log::error('UPDATE PAYMENT FAILED', [
-            'error' => $e->getMessage(),
-            'line' => $e->getLine()
-        ]);
-        return $this->error($e->getMessage());
     }
-}
 
-public function export(Request $request)
-{
-    try {
-        return Excel::download(
-            new PaymentsExport($request->all()),
-            'payments.xlsx'
-        );
-    } catch (Exception $e) {
-        return $this->error($e->getMessage());
+    public function export(Request $request)
+    {
+        try {
+            return Excel::download(
+                new PaymentsExport($request->all()),
+                'payments.xlsx'
+            );
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
-}
-    
+
     public function destroy($id)
     {
         try {
@@ -233,6 +237,5 @@ public function export(Request $request)
         } catch (Exception $e) {
             return $this->error('An error occurred while deleting the payment');
         }
-    
     }
 }
