@@ -275,4 +275,19 @@ class billController extends Controller
             return $this->error($e->getMessage());
         }
     }
+
+public function updateStatus(Request $request, $id)
+{
+    try {
+        $bill = Bill::findOrFail($id);
+        $request->validate([
+            'status' => 'required|in:Cancelled,Written Off'
+        ]);
+        $bill->status = $request->status;
+        $bill->save();
+        return $this->success($bill, 'Bill status updated successfully.');
+    } catch (Exception $e) {
+        return $this->error('Failed to update bill status.');
+    }
+}
 }

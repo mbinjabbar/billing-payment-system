@@ -91,18 +91,16 @@
           }
 
           <!-- Divider -->
-  <div class="w-px h-5 bg-outline-variant/30"></div>
- 
-  <!-- Export -->
-  <button
-    (click)="exportBills()"
-    [disabled]="exporting()"
-    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-50 transition font-headline">
-    <span class="material-symbols-outlined icon-sm">
-      {{ exporting() ? 'hourglass_top' : 'download' }}
-    </span>
-    {{ exporting() ? 'Exporting...' : 'Export Excel' }}
-  </button>
+          <div class="w-px h-5 bg-outline-variant/30"></div>
+
+          <!-- Export -->
+          <button (click)="exportBills()" [disabled]="exporting()"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-50 transition font-headline">
+            <span class="material-symbols-outlined icon-sm">
+              {{ exporting() ? 'hourglass_top' : 'download' }}
+            </span>
+            {{ exporting() ? 'Exporting...' : 'Export Excel' }}
+          </button>
 
         </div>
       </div>
@@ -216,15 +214,30 @@
                 </button>
 
                 <!-- Edit — Biller and Admin only -->
-                @if (role() === 'Biller' || role() === 'Admin') {
+                @if ((role() === 'Biller' || role() === 'Admin') &&
+                bill.status !== 'Cancelled' && bill.status !== 'Written Off') {
                 <button [routerLink]="['/bills/edit', bill.id]"
                   class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
                   Edit
                 </button>
                 }
 
+
+                <!-- In bill-list actions td, after Edit button -->
+                @if (role() === 'Admin' || role() === 'Biller') {
+                @if (bill.status !== 'Paid' && bill.status !== 'Cancelled' && bill.status !== 'Written Off') {
+                <select (change)="overrideStatus(bill.id, $event)"
+                  class="px-2 py-1.5 rounded-md text-xs font-bold border border-outline-variant/20 bg-surface-container-low outline-none cursor-pointer">
+                  <option value="">Change Status</option>
+                  <option value="Cancelled">Cancel</option>
+                  <option value="Written Off">Write Off</option>
+                </select>
+                }
+                }
+
                 <!-- Post Payment — Payment Poster and Admin only -->
-                @if (role() === 'Payment Poster' || role() === 'Admin') {
+                @if ((role() === 'Payment Poster' || role() === 'Admin') &&
+                bill.status !== 'Cancelled' && bill.status !== 'Written Off' && bill.status !== 'Paid') {
                 <button [routerLink]="['/bills', bill.id, 'pay']"
                   class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
                   Post Payment

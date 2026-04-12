@@ -35,4 +35,8 @@ export class BillService {
       responseType: 'blob'
     });
   }
+  
+  updateBillStatus(id: number, status: string) {
+  return this.http.patch(`${this.apiUrl}/bills/${id}/status`, { status });
+}
 }

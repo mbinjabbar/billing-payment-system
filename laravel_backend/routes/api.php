@@ -14,6 +14,7 @@ Route::get('/bills/stats', [billController::class, 'stats']);
 Route::post('/bills/export', [billController::class, 'export']);
 Route::get('/bills/pdf/{id}', [billController::class, 'downloadPDF']);
 Route::apiResource('/bills', billController::class);
+Route::patch('/bills/{id}/status', [billController::class, 'updateStatus']);
 
 Route::post('/payments/export', [paymentController::class, 'export']);
 Route::apiResource('/payments', paymentController::class);

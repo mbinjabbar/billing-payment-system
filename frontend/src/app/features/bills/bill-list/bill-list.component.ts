@@ -138,4 +138,15 @@ export class BillListComponent implements OnInit {
     error: () => this.exporting.set(false),
   });
 }
+
+overrideStatus(billId: number, event: Event) {
+  const select = event.target as HTMLSelectElement;
+  const status = select.value;
+  if (!status) return;
+
+  this.billService.updateBillStatus(billId, status).subscribe({
+    next: () => this.fetchBills(this.currentPage()),
+    error: () => select.value = '',
+  });
+}
 }
