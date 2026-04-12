@@ -36,5 +36,11 @@ export class PaymentPosterService {
   return this.http.delete(`${this.apiUrl}/payments/${paymentId}`);
 }
 
+exportPayments(filters: any) {
+  return this.http.post(`${this.apiUrl}/payments/export`, filters, {
+    responseType: 'blob'
+  });
+}
+
 
 }

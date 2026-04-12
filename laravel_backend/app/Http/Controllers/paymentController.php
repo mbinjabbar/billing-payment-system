@@ -10,6 +10,8 @@ use App\Models\Bill;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Log;
 use App\Models\Document;
+use App\Exports\PaymentsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class paymentController extends Controller
@@ -210,6 +212,17 @@ class paymentController extends Controller
     }
 }
 
+public function export(Request $request)
+{
+    try {
+        return Excel::download(
+            new PaymentsExport($request->all()),
+            'payments.xlsx'
+        );
+    } catch (Exception $e) {
+        return $this->error($e->getMessage());
+    }
+}
     
     public function destroy($id)
     {

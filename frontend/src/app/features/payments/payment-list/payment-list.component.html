@@ -1,4 +1,7 @@
 <h1 class="mt-23 pt-24">payments</h1>
+<button (click)="exportPayments()" class="btn btn-success">
+  Export Excel
+</button>
 
 <form [formGroup]="filterForm" (ngSubmit)="getPayments()">
 

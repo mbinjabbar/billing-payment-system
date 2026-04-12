@@ -16,7 +16,7 @@ export class PaymentListComponent {
   uniqueBills: number[] = [];
 
   filterForm = new FormGroup({
-   bill_id: new FormControl(''), 
+  bill_id: new FormControl(''), 
   payment_mode: new FormControl(''),
   payment_status: new FormControl(''),
   from_date: new FormControl(''),
@@ -29,35 +29,59 @@ export class PaymentListComponent {
 
   
   getPayments() {
-  const filters = this.filterForm.value;
-  this.paymentposterService.getPayments(filters).subscribe({
+    const filters = this.getFilters();
+    this.paymentposterService.getPayments(filters).subscribe({
+      next: (res: any) => {
+        this.paymentsList = res.data.data || res.data;
+        this.uniqueBills = [
+          ...new Set(this.paymentsList.map(p => p.bill_id))
+        ];
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  }
+
+  private cleanFilters(filters: any): any {
+    const cleaned: any = {};
+    Object.keys(filters).forEach(key => {
+      const value = filters[key];
+      if (value !== null && value !== '' && value !== undefined) {
+        cleaned[key] = value;
+      }
+    });
+    return cleaned;
+  }
+
+  private getFilters(): any {
+    return this.cleanFilters(this.filterForm.value);
+  }
+
+  resetFilters() {
+    this.filterForm.reset();
+    this.getPayments();
+  }
+
+  exportPayments() {
+  const filters = this.getFilters();
+  this.paymentposterService.exportPayments(filters).subscribe({
     next: (res: any) => {
-      this.paymentsList = res.data.data || res.data;
-       this.uniqueBills = [
-        ...new Set(this.paymentsList.map(p => p.bill_id))
-      ];
-  
+      const blob = new Blob([res], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'payments.xlsx';
+      a.click();
     },
     error: (err) => {
-      console.error('Error fetching payments', err);
+      console.log(err);
     }
   });
 }
-resetFilters() {
-  
- this.filterForm.reset({
-   bill_id: '',
-    payment_mode: '',
-    payment_status: '',
-    from_date: '',
-    to_date: ''
-  });
-  this.paymentposterService.getPayments({}).subscribe({
-    next: (res: any) => {
-      this.paymentsList = res.data.data || res.data;
-    }
-  });
-}
+
   deletePayment(id: number) {
    this.paymentposterService.deletePayment(id).subscribe({
     next: () => {
