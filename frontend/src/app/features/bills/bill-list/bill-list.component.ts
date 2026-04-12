@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { BillService } from '../../../core/services/bill.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-bills',
@@ -13,10 +14,12 @@ import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 export class BillListComponent implements OnInit {
 
   private billService = inject(BillService);
+  private authService = inject(AuthService);
 
   bills       = signal<any>({});
   loading     = signal(false);
   currentPage = signal(1);
+  role = computed(() => this.authService.getRole());
 
   filterForm = new FormGroup({
     patient_name: new FormControl(''),

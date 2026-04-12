@@ -23,15 +23,11 @@
           <div class="w-px h-5 bg-outline-variant/30 mx-1"></div>
 
           <!-- Patient Name -->
-          <input
-            type="text"
-            formControlName="patient_name"
-            placeholder="Patient name"
+          <input type="text" formControlName="patient_name" placeholder="Patient name"
             class="w-32 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body" />
 
           <!-- Status -->
-          <select
-            formControlName="status"
+          <select formControlName="status"
             class="px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body">
             <option value="">All Statuses</option>
             <option value="Draft">Draft</option>
@@ -43,53 +39,43 @@
           </select>
 
           <!-- From Date -->
-          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">From</span>
-            <input
-              type="date"
-              formControlName="start_date"
-              class="bg-transparent text-xs outline-none font-body" />
+            <input type="date" formControlName="start_date" class="bg-transparent text-xs outline-none font-body" />
           </div>
 
           <!-- To Date -->
-          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">To</span>
-            <input
-              type="date"
-              formControlName="end_date"
-              class="bg-transparent text-xs outline-none font-body" />
+            <input type="date" formControlName="end_date" class="bg-transparent text-xs outline-none font-body" />
           </div>
 
           <!-- Min Amount -->
-          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label">$</span>
-            <input
-              type="number"
-              formControlName="min_amount"
-              placeholder="Min"
+            <input type="number" formControlName="min_amount" placeholder="Min"
               class="w-16 bg-transparent text-xs outline-none font-body" />
           </div>
 
           <!-- Max Amount -->
-          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label">$</span>
-            <input
-              type="number"
-              formControlName="max_amount"
-              placeholder="Max"
+            <input type="number" formControlName="max_amount" placeholder="Max"
               class="w-16 bg-transparent text-xs outline-none font-body" />
           </div>
 
           <!-- Apply -->
-          <button
-            (click)="applyFilters()"
+          <button (click)="applyFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
             Filter
           </button>
 
           <!-- Reset -->
-          <button
-            (click)="resetFilters()"
+          <button (click)="resetFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
             Reset
           </button>
@@ -99,9 +85,9 @@
 
           <!-- Record count -->
           @if (totalItems() > 0) {
-            <p class="text-xs text-on-surface-variant font-label">
-              {{ from() }}–{{ to() }} of {{ totalItems() }}
-            </p>
+          <p class="text-xs text-on-surface-variant font-label">
+            {{ from() }}–{{ to() }} of {{ totalItems() }}
+          </p>
           }
 
         </div>
@@ -109,162 +95,166 @@
 
       <!-- Loading -->
       @if (loading()) {
-        <div class="flex items-center justify-center py-20">
-          <div class="flex flex-col items-center gap-4">
-            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-            <p class="text-sm text-on-surface-variant font-label">Loading bills...</p>
-          </div>
+      <div class="flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+          <p class="text-sm text-on-surface-variant font-label">Loading bills...</p>
         </div>
+      </div>
       }
 
       <!-- Table -->
       @if (!loading()) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead>
-              <tr class="bg-surface-container-low">
-                <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit Date</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase">Insurance</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due Date</th>
-                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
-              </tr>
-            </thead>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="bg-surface-container-low">
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit Date</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Insurance</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due Date</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
+            </tr>
+          </thead>
 
-            <tbody class="divide-y divide-outline-variant/10">
+          <tbody class="divide-y divide-outline-variant/10">
 
-              @if (!bills().data?.length) {
-                <tr>
-                  <td colspan="10" class="px-5 py-16 text-center">
-                    <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">receipt_long</span>
-                    <p class="text-sm font-bold text-on-surface-variant">No bills found</p>
-                    <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try adjusting your filters</p>
-                  </td>
-                </tr>
-              }
+            @if (!bills().data?.length) {
+            <tr>
+              <td colspan="10" class="px-5 py-16 text-center">
+                <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">receipt_long</span>
+                <p class="text-sm font-bold text-on-surface-variant">No bills found</p>
+                <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try adjusting your filters</p>
+              </td>
+            </tr>
+            }
 
-              @for (bill of bills().data; track bill.id) {
-                <tr class="hover:bg-surface-container-low transition">
+            @for (bill of bills().data; track bill.id) {
+            <tr class="hover:bg-surface-container-low transition">
 
-                  <!-- Bill Number -->
-                  <td class="px-5 py-4">
-                    <p class="font-bold">{{ bill.bill_number }}</p>
-                    <p class="text-xs text-on-surface-variant">#{{ bill.id }}</p>
-                  </td>
+              <!-- Bill Number -->
+              <td class="px-5 py-4">
+                <p class="font-bold">{{ bill.bill_number }}</p>
+                <p class="text-xs text-on-surface-variant">#{{ bill.id }}</p>
+              </td>
 
-                  <!-- Patient -->
-                  <td class="px-5 py-4">
-                    <p class="font-bold">
-                      {{ bill.visit.appointment.patient_case.patient.full_name }}
-                    </p>
-                  </td>
+              <!-- Patient -->
+              <td class="px-5 py-4">
+                <p class="font-bold">
+                  {{ bill.visit.appointment.patient_case.patient.full_name }}
+                </p>
+              </td>
 
-                  <!-- Visit Date -->
-                  <td class="px-5 py-4 whitespace-nowrap">
-                    {{ bill.visit.visit_date | date }}
-                  </td>
+              <!-- Visit Date -->
+              <td class="px-5 py-4 whitespace-nowrap">
+                {{ bill.visit.visit_date | date }}
+              </td>
 
-                  <!-- Insurance -->
-                  <td class="px-5 py-4">
-                    <span
-                      class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
-                      [ngClass]="bill.visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
-                      {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' : 'Standard' }}
-                    </span>
-                  </td>
+              <!-- Insurance -->
+              <td class="px-5 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
+                  [ngClass]="bill.visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
+                  {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' : 'Standard' }}
+                </span>
+              </td>
 
-                  <!-- Total -->
-                  <td class="px-5 py-4 text-right font-semibold">
-                    ${{ bill.bill_amount }}
-                  </td>
+              <!-- Total -->
+              <td class="px-5 py-4 text-right font-semibold">
+                ${{ bill.bill_amount }}
+              </td>
 
-                  <!-- Paid -->
-                  <td class="px-5 py-4 text-right text-green-600 font-semibold">
-                    ${{ bill.paid_amount }}
-                  </td>
+              <!-- Paid -->
+              <td class="px-5 py-4 text-right text-green-600 font-semibold">
+                ${{ bill.paid_amount }}
+              </td>
 
-                  <!-- Due -->
-                  <td class="px-5 py-4 text-right text-red-600 font-semibold">
-                    ${{ bill.outstanding_amount }}
-                  </td>
+              <!-- Due -->
+              <td class="px-5 py-4 text-right text-red-600 font-semibold">
+                ${{ bill.outstanding_amount }}
+              </td>
 
-                  <!-- Status -->
-                  <td class="px-5 py-4 text-center">
-                    <span class="px-2.5 py-1 rounded-full text-xs font-bold"
-                      [class]="getBillStatusClass(bill.status)">
-                      {{ bill.status }}
-                    </span>
-                  </td>
+              <!-- Status -->
+              <td class="px-5 py-4 text-center">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold" [class]="getBillStatusClass(bill.status)">
+                  {{ bill.status }}
+                </span>
+              </td>
 
-                  <!-- Due Date -->
-                  <td class="px-5 py-4 text-center">
-                    <span [class.text-red-600]="isOverdue(bill.due_date)">
-                      {{ bill.due_date | date }}
-                    </span>
-                  </td>
+              <!-- Due Date -->
+              <td class="px-5 py-4 text-center">
+                <span [class.text-red-600]="isOverdue(bill.due_date)">
+                  {{ bill.due_date | date }}
+                </span>
+              </td>
 
-                  <!-- Actions -->
-                  <td class="px-5 py-4 text-right space-x-2">
-                    <button
-                      [routerLink]="['/bills/invoice', bill.id]"
-                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
-                      View
-                    </button>
-                    <button
-                      [routerLink]="['/bills/edit', bill.id]"
-                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
-                      Edit
-                    </button>
-                    <button
-                      [routerLink]="['/bills', bill.id, 'pay']"
-                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
-                      Post Payment
-                    </button>
-                  </td>
+              <!-- Actions -->
+              <td class="px-5 py-4 text-right space-x-2">
 
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                <!-- View — all roles -->
+                <button [routerLink]="['/bills/invoice', bill.id]"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
+                  View
+                </button>
 
-        <!-- Pagination -->
-        @if (totalPages() > 1) {
-          <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
-            <p class="text-xs text-on-surface-variant font-label">
-              Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
-            </p>
-            <div class="flex items-center gap-1">
-              <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
-                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
-              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
-                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
-
-              @for (page of visiblePages(); track $index) {
-                @if (page === '...') {
-                  <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
-                } @else {
-                  <button
-                    (click)="goToPage(+page)"
-                    class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
-                    [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
-                    {{ page }}
-                  </button>
+                <!-- Edit — Biller and Admin only -->
+                @if (role() === 'Biller' || role() === 'Admin') {
+                <button [routerLink]="['/bills/edit', bill.id]"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                  Edit
+                </button>
                 }
-              }
 
-              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
-                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
-              <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
-                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
-            </div>
-          </div>
-        }
+                <!-- Post Payment — Payment Poster and Admin only -->
+                @if (role() === 'Payment Poster' || role() === 'Admin') {
+                <button [routerLink]="['/bills', bill.id, 'pay']"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
+                  Post Payment
+                </button>
+                }
+
+              </td>
+
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+      <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+        <p class="text-xs text-on-surface-variant font-label">
+          Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
+        </p>
+        <div class="flex items-center gap-1">
+          <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
+            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
+          <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
+
+          @for (page of visiblePages(); track $index) {
+          @if (page === '...') {
+          <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
+          } @else {
+          <button (click)="goToPage(+page)" class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+            [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
+            {{ page }}
+          </button>
+          }
+          }
+
+          <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
+          <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
+        </div>
+      </div>
+      }
       }
 
     </section>
