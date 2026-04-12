@@ -27,7 +27,7 @@ export const routes: Routes = [
     { path: 'bills/edit/:billId', loadComponent: () => import('./features/bills/edit-bill/edit-bill.component').then(m => m.EditBillComponent)},
     { path: 'documents', loadComponent: () => import('./features/documents/document-list/document-list.component').then(m => m.DocumentListComponent)},
     { path: 'payment-poster', loadComponent: () => import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-    {path: 'payment-list',loadComponent: () =>import('./features/payments/payment-list/payment-list.component').then(m => m.PaymentListComponent)},
+    {path: 'payments/payment-list',loadComponent: () =>import('./features/payments/payment-list/payment-list.component').then(m => m.PaymentListComponent)},
     { path: 'bills/:billId/pay', loadComponent: () => import('./features/payment-poster/create-payment/create-payment.component').then(m => m.CreatePaymentComponent)},
     { path: 'payments/edit/:id',  loadComponent: () => import('./features/payment-poster/create-payment/create-payment.component').then(m => m.CreatePaymentComponent)},
     { path: '**', redirectTo: 'login', pathMatch: 'full' }
