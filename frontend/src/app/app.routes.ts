@@ -35,6 +35,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
       },
+      {
+      path: 'settings',
+      loadComponent: () =>
+      import('./features/admin/settings/settings.component').then(m => m.SettingsComponent)
+  },
     ]
   },
 

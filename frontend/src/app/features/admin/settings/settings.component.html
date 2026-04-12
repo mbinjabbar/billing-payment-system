@@ -1,0 +1,484 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <div class="pt-10 px-10 pb-12 space-y-8 w-full">
+
+    <!-- Page Header -->
+    <section>
+      <h2 class="text-4xl font-extrabold tracking-tight font-headline">Settings</h2>
+      <p class="text-on-surface-variant mt-2 font-body">
+        Manage master data, system configuration and application preferences.
+      </p>
+    </section>
+
+    <!-- Alerts -->
+    @if (error()) {
+      <div class="flex items-center gap-3 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+        <span class="material-symbols-outlined icon-md">error_outline</span>
+        {{ error() }}
+      </div>
+    }
+    @if (success()) {
+      <div class="flex items-center gap-3 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm font-semibold">
+        <span class="material-symbols-outlined icon-md">check_circle</span>
+        {{ success() }}
+      </div>
+    }
+
+    <!-- Tab Navigation -->
+    <div class="flex gap-1 border-b border-outline-variant/20">
+      <button (click)="setTab('procedures')"
+        class="px-5 py-3 text-sm font-bold font-headline transition-all border-b-2 -mb-px"
+        [class]="activeTab() === 'procedures'
+          ? 'border-primary text-primary'
+          : 'border-transparent text-on-surface-variant hover:text-on-surface'">
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined icon-sm">medical_services</span>
+          Procedure Codes
+        </span>
+      </button>
+      <button (click)="setTab('insurance')"
+        class="px-5 py-3 text-sm font-bold font-headline transition-all border-b-2 -mb-px"
+        [class]="activeTab() === 'insurance'
+          ? 'border-primary text-primary'
+          : 'border-transparent text-on-surface-variant hover:text-on-surface'">
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined icon-sm">business</span>
+          Insurance Firms
+        </span>
+      </button>
+      <button (click)="setTab('config')"
+        class="px-5 py-3 text-sm font-bold font-headline transition-all border-b-2 -mb-px"
+        [class]="activeTab() === 'config'
+          ? 'border-primary text-primary'
+          : 'border-transparent text-on-surface-variant hover:text-on-surface'">
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined icon-sm">tune</span>
+          App Configuration
+        </span>
+      </button>
+    </div>
+
+    <!-- ══ TAB: PROCEDURE CODES ══ -->
+    @if (activeTab() === 'procedures') {
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- List -->
+        <div class="lg:col-span-7">
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant/10 flex justify-between items-center">
+              <h3 class="text-lg font-bold font-headline">Procedure Codes</h3>
+              <p class="text-xs text-on-surface-variant font-label">{{ procedures().length }} codes</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="bg-surface-container-low">
+                    <th class="px-5 py-3 text-xs font-bold uppercase">Code</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase">Name</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase text-right">Charge</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase text-center">Active</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/10">
+                  @if (procedures().length === 0) {
+                    <tr>
+                      <td colspan="5" class="px-5 py-12 text-center text-sm text-on-surface-variant">
+                        No procedure codes yet
+                      </td>
+                    </tr>
+                  }
+                  @for (p of procedures(); track p.id) {
+                    <tr class="hover:bg-surface-container-low transition"
+  [class]="editingProcedure()?.id === p.id ? 'bg-primary/5' : ''">
+                      <td class="px-5 py-3.5">
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-primary/10 text-primary font-headline">
+                          {{ p.code }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-3.5 font-medium">{{ p.name }}</td>
+                      <td class="px-5 py-3.5 text-right font-bold">${{ p.standard_charge }}</td>
+                      <td class="px-5 py-3.5 text-center">
+                        @if (p.is_active) {
+                          <span class="material-symbols-outlined text-green-600 icon-sm">check_circle</span>
+                        } @else {
+                          <span class="material-symbols-outlined text-on-surface-variant/40 icon-sm">cancel</span>
+                        }
+                      </td>
+                      <td class="px-5 py-3.5 text-right space-x-2">
+                        <button (click)="editProcedure(p)"
+                          class="px-3 py-1 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                          Edit
+                        </button>
+                        <button (click)="confirmDelete(p.id, 'procedure')"
+                          class="px-3 py-1 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="lg:col-span-5">
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 sticky top-24">
+            <h3 class="text-lg font-bold font-headline mb-5">
+              {{ editingProcedure() ? 'Edit Procedure Code' : 'Add Procedure Code' }}
+            </h3>
+
+            <div class="space-y-4" [formGroup]="procedureForm">
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+                  Code <span class="text-error">*</span>
+                </label>
+                <input type="text" formControlName="code" placeholder="e.g. CPT-99213"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition"
+                  [class.border-error]="procedureForm.get('code')?.invalid && procedureForm.get('code')?.touched" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+                  Name <span class="text-error">*</span>
+                </label>
+                <input type="text" formControlName="name" placeholder="e.g. Office Visit"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition"
+                  [class.border-error]="procedureForm.get('name')?.invalid && procedureForm.get('name')?.touched" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+                  Standard Charge ($) <span class="text-error">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">$</span>
+                  <input type="number" formControlName="standard_charge" placeholder="0.00"
+                    class="w-full pl-7 pr-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition"
+                    [class.border-error]="procedureForm.get('standard_charge')?.invalid && procedureForm.get('standard_charge')?.touched" />
+                </div>
+              </div>
+
+              <!-- Active toggle -->
+              <div class="flex items-center justify-between py-2">
+                <label class="text-sm font-semibold text-on-surface-variant font-label">Active</label>
+                <button type="button"
+                  (click)="procedureForm.get('is_active')?.setValue(!procedureForm.get('is_active')?.value)"
+                  class="relative w-11 h-6 rounded-full transition-colors duration-200"
+                  [class]="procedureForm.get('is_active')?.value ? 'bg-primary' : 'bg-surface-container-high'">
+                  <span class="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200"
+                    [class]="procedureForm.get('is_active')?.value ? 'translate-x-5' : 'translate-x-0.5'">
+                  </span>
+                </button>
+              </div>
+
+            </div>
+
+            <div class="flex gap-3 mt-6">
+              <button (click)="saveProcedure()" [disabled]="loading()"
+                class="flex-1 py-2.5 rounded-lg text-sm font-bold text-white disabled:opacity-50 transition font-headline"
+                style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+                {{ loading() ? 'Saving...' : (editingProcedure() ? 'Save Changes' : 'Add Code') }}
+              </button>
+              @if (editingProcedure()) {
+                <button (click)="cancelProcedureEdit()"
+                  class="px-4 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+                  Cancel
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- ══ TAB: INSURANCE FIRMS ══ -->
+    @if (activeTab() === 'insurance') {
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- List -->
+        <div class="lg:col-span-7">
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant/10 flex justify-between items-center">
+              <h3 class="text-lg font-bold font-headline">Insurance Firms</h3>
+              <p class="text-xs text-on-surface-variant font-label">{{ insuranceFirms().length }} firms</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="bg-surface-container-low">
+                    <th class="px-5 py-3 text-xs font-bold uppercase">Name</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase text-center">Type</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase">Carrier Code</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase text-center">Active</th>
+                    <th class="px-5 py-3 text-xs font-bold uppercase text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/10">
+                  @if (insuranceFirms().length === 0) {
+                    <tr>
+                      <td colspan="5" class="px-5 py-12 text-center text-sm text-on-surface-variant">
+                        No insurance firms yet
+                      </td>
+                    </tr>
+                  }
+                  @for (f of insuranceFirms(); track f.id) {
+                    <tr class="hover:bg-surface-container-low transition"
+  [class]="editingInsurance()?.id === f.id ? 'bg-primary/5' : ''">
+                      <td class="px-5 py-3.5">
+                        <p class="font-bold">{{ f.name }}</p>
+                        @if (f.contact_person) {
+                          <p class="text-xs text-on-surface-variant font-label">{{ f.contact_person }}</p>
+                        }
+                      </td>
+                      <td class="px-5 py-3.5 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                          [class]="getFirmTypeClass(f.firm_type)">
+                          {{ f.firm_type }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-3.5 text-on-surface-variant text-xs">
+                        {{ f.carrier_code || '—' }}
+                      </td>
+                      <td class="px-5 py-3.5 text-center">
+                        @if (f.is_active) {
+                          <span class="material-symbols-outlined text-green-600 icon-sm">check_circle</span>
+                        } @else {
+                          <span class="material-symbols-outlined text-on-surface-variant/40 icon-sm">cancel</span>
+                        }
+                      </td>
+                      <td class="px-5 py-3.5 text-right space-x-2">
+                        <button (click)="editInsurance(f)"
+                          class="px-3 py-1 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                          Edit
+                        </button>
+                        <button (click)="confirmDelete(f.id, 'insurance')"
+                          class="px-3 py-1 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="lg:col-span-5">
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 sticky top-24 space-y-4">
+            <h3 class="text-lg font-bold font-headline">
+              {{ editingInsurance() ? 'Edit Insurance Firm' : 'Add Insurance Firm' }}
+            </h3>
+
+            <div class="space-y-4" [formGroup]="insuranceForm">
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+                  Firm Name <span class="text-error">*</span>
+                </label>
+                <input type="text" formControlName="name" placeholder="e.g. Blue Cross"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition"
+                  [class.border-error]="insuranceForm.get('name')?.invalid && insuranceForm.get('name')?.touched" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">
+                  Type <span class="text-error">*</span>
+                </label>
+                <select formControlName="firm_type"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition">
+                  <option value="Health">Health</option>
+                  <option value="Auto">Auto</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Carrier Code</label>
+                  <input type="text" formControlName="carrier_code" placeholder="Optional"
+                    class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Phone</label>
+                  <input type="text" formControlName="phone" placeholder="Optional"
+                    class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Contact Person</label>
+                <input type="text" formControlName="contact_person" placeholder="Optional"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Email</label>
+                <input type="email" formControlName="email" placeholder="Optional"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition"
+                  [class.border-error]="insuranceForm.get('email')?.invalid && insuranceForm.get('email')?.touched" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1.5">Address</label>
+                <textarea formControlName="address" rows="2" placeholder="Optional"
+                  class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition resize-none">
+                </textarea>
+              </div>
+
+              <!-- Active toggle -->
+              <div class="flex items-center justify-between py-1">
+                <label class="text-sm font-semibold text-on-surface-variant font-label">Active</label>
+                <button type="button"
+                  (click)="insuranceForm.get('is_active')?.setValue(!insuranceForm.get('is_active')?.value)"
+                  class="relative w-11 h-6 rounded-full transition-colors duration-200"
+                  [class]="insuranceForm.get('is_active')?.value ? 'bg-primary' : 'bg-surface-container-high'">
+                  <span class="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200"
+                    [class]="insuranceForm.get('is_active')?.value ? 'translate-x-5' : 'translate-x-0.5'">
+                  </span>
+                </button>
+              </div>
+
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button (click)="saveInsurance()" [disabled]="loading()"
+                class="flex-1 py-2.5 rounded-lg text-sm font-bold text-white disabled:opacity-50 transition font-headline"
+                style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+                {{ loading() ? 'Saving...' : (editingInsurance() ? 'Save Changes' : 'Add Firm') }}
+              </button>
+              @if (editingInsurance()) {
+                <button (click)="cancelInsuranceEdit()"
+                  class="px-4 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+                  Cancel
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- ══ TAB: APP CONFIGURATION ══ -->
+    @if (activeTab() === 'config') {
+      <div class="max-w-2xl space-y-6">
+
+        <!-- App Info -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 space-y-5">
+          <h3 class="text-lg font-bold font-headline">Application Info</h3>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">App Name</p>
+              <p class="font-bold font-headline">MedBilling</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Version</p>
+              <p class="font-bold font-headline">1.0.0</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Frontend</p>
+              <p class="font-bold font-headline">Angular 19</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Backend</p>
+              <p class="font-bold font-headline">Laravel 11 + Node.js</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Auth Backend</p>
+              <p class="font-bold font-headline">http://localhost:3000</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">API Backend</p>
+              <p class="font-bold font-headline">http://localhost:8000</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Rules -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 space-y-4">
+          <h3 class="text-lg font-bold font-headline">System Rules</h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
+              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
+              <div>
+                <p class="font-semibold">One bill per visit</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">Each visit can only have one bill generated.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
+              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
+              <div>
+                <p class="font-semibold">Soft deletes only</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">No records are permanently deleted from the database.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
+              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
+              <div>
+                <p class="font-semibold">File upload limit</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">Max 5MB per file. Accepted: PDF, JPG, PNG, DOCX.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
+              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
+              <div>
+                <p class="font-semibold">Auto-generated numbers</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">Bill and payment numbers are auto-generated and unique.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
+              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
+              <div>
+                <p class="font-semibold">NF2 form for car accidents</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">NF2 PDF is auto-generated when a visit is linked to a car accident case.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-low">
+              <span class="material-symbols-outlined text-primary icon-sm mt-0.5">check_circle</span>
+              <div>
+                <p class="font-semibold">JWT session — 8 hours</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">Sessions expire after 8 hours of inactivity. Logout blacklists the token.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+@if (confirmDeleteId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
+      <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-error icon-xl">delete_forever</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold font-headline">Confirm Delete</h3>
+          <p class="text-sm text-on-surface-variant font-body mt-1">
+            This record will be soft-deleted. If it is linked to existing bills it cannot be removed.
+          </p>
+        </div>
+        <div class="flex gap-3 w-full mt-2">
+          <button (click)="cancelDelete()"
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+            Cancel
+          </button>
+          <button (click)="executeDelete()"
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-error text-white hover:bg-error/90 transition font-headline">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

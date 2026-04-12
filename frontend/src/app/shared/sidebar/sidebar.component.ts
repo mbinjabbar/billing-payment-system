@@ -30,6 +30,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'Payments',  icon: 'payments',       route: '/payments/payment-list' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
   { label: 'Users',     icon: 'group',           route: '/admin/users' },
+  { label: 'Settings', icon: 'settings', route: '/admin/settings' },
 ];
 
 @Component({
