@@ -12,27 +12,38 @@ import { VisitService } from '../../../core/services/visit.service';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
-  private billService    = inject(BillService);
+  private billService = inject(BillService);
   private paymentService = inject(PaymentPosterService);
-  private visitService   = inject(VisitService);
+  private visitService = inject(VisitService);
 
-  bills    = signal<any[]>([]);
+  bills = signal<any[]>([]);
   payments = signal<any[]>([]);
   visitStats = signal<any>({ total_visits: 0, billed: 0, unbilled: 0 });
-  recentBills    = signal<any[]>([]);
+  recentBills = signal<any[]>([]);
   recentPayments = signal<any[]>([]);
+
+  stats = signal<any>({
+    total_bill_amount: 0,
+    total_paid_amount: 0,
+    total_outstanding: 0,
+    pending_count: 0,
+    partial_count: 0,
+    paid_count: 0,
+  });
 
   loading = signal(true);
 
   ngOnInit() {
     let loaded = 0;
-    const done = () => { if (++loaded === 3) this.loading.set(false); };
+    const done = () => {
+      if (++loaded === 3) this.loading.set(false);
+    };
 
     // Bills — for billing stats + recent bills table
     this.billService.getBills({}).subscribe({
       next: (res: any) => {
-        this.bills.set(res.data ?? []);
         this.recentBills.set((res.data ?? []).slice(0, 5));
+        if (res.stats) this.stats.set(res.stats);
         done();
       },
       error: () => done(),
@@ -51,7 +62,9 @@ export class DashboardComponent {
     // Visits — for visit stats from the stats key
     this.visitService.getVisits(1).subscribe({
       next: (res: any) => {
-        this.visitStats.set(res.stats ?? { total_visits: 0, billed: 0, unbilled: 0 });
+        this.visitStats.set(
+          res.stats ?? { total_visits: 0, billed: 0, unbilled: 0 },
+        );
         done();
       },
       error: () => done(),
@@ -59,36 +72,19 @@ export class DashboardComponent {
   }
 
   // ── Bill stats ────────────────────────────────────────────────────────────
-  totalBilled = computed(() =>
-    this.bills().reduce((sum, b) => sum + Number(b.bill_amount), 0)
-  );
+totalBilled      = computed(() => Number(this.stats().total_bill_amount));
+totalCollected   = computed(() => Number(this.stats().total_paid_amount));
+totalOutstanding = computed(() => Number(this.stats().total_outstanding));
+pendingBillsCount = computed(() => this.stats().pending_count);
+partialBillsCount = computed(() => this.stats().partial_count);
+paidBillsCount    = computed(() => this.stats().paid_count);
 
-  totalOutstanding = computed(() =>
-    this.bills().reduce((sum, b) => sum + Number(b.outstanding_amount), 0)
-  );
-
-  totalCollected = computed(() =>
-    this.bills().reduce((sum, b) => sum + Number(b.paid_amount), 0)
-  );
-
-  paidBillsCount = computed(() =>
-    this.bills().filter(b => b.status === 'Paid').length
-  );
-
-  pendingBillsCount = computed(() =>
-    this.bills().filter(b => b.status === 'Pending').length
-  );
-
-  partialBillsCount = computed(() =>
-    this.bills().filter(b => b.status === 'Partial').length
-  );
-
-  collectionProgress = computed(() => {
-    const total = this.totalBilled();
-    if (!total) return 0;
-    const pct = (this.totalCollected() / total) * 100;
-    return pct > 100 ? 100 : pct;
-  });
+collectionProgress = computed(() => {
+  const total = this.totalBilled();
+  if (!total) return 0;
+  const pct = (this.totalCollected() / total) * 100;
+  return pct > 100 ? 100 : pct;
+});
 
   // ── Payment stats ────────────────────────────────────────────────────────
   totalPaymentsCount = computed(() => this.payments().length);
@@ -96,23 +92,35 @@ export class DashboardComponent {
   // ── UI helpers ───────────────────────────────────────────────────────────
   getBillStatusClass(status: string): string {
     switch (status) {
-      case 'Paid':        return 'bg-green-100 text-green-700';
-      case 'Pending':     return 'bg-orange-100 text-orange-700';
-      case 'Partial':     return 'bg-blue-100 text-blue-700';
-      case 'Cancelled':   return 'bg-gray-200 text-gray-600';
-      case 'Draft':       return 'bg-purple-100 text-purple-700';
-      case 'Written Off': return 'bg-red-100 text-red-700';
-      default:            return 'bg-gray-100 text-gray-700';
+      case 'Paid':
+        return 'bg-green-100 text-green-700';
+      case 'Pending':
+        return 'bg-orange-100 text-orange-700';
+      case 'Partial':
+        return 'bg-blue-100 text-blue-700';
+      case 'Cancelled':
+        return 'bg-gray-200 text-gray-600';
+      case 'Draft':
+        return 'bg-purple-100 text-purple-700';
+      case 'Written Off':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   }
 
   getPaymentStatusClass(status: string): string {
     switch (status) {
-      case 'Completed': return 'bg-green-100 text-green-700';
-      case 'Pending':   return 'bg-orange-100 text-orange-700';
-      case 'Failed':    return 'bg-red-100 text-red-700';
-      case 'Refunded':  return 'bg-gray-200 text-gray-600';
-      default:          return 'bg-gray-100 text-gray-700';
+      case 'Completed':
+        return 'bg-green-100 text-green-700';
+      case 'Pending':
+        return 'bg-orange-100 text-orange-700';
+      case 'Failed':
+        return 'bg-red-100 text-red-700';
+      case 'Refunded':
+        return 'bg-gray-200 text-gray-600';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   }
 }
