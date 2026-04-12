@@ -12,9 +12,10 @@ use App\Http\Controllers\SettingsController;
 
 Route::get('/bills/stats', [billController::class, 'stats']);
 Route::post('/bills/export', [billController::class, 'export']);
-Route::get('/bills/pdf/{id}', [billController::class, 'downloadPDF']);
 Route::apiResource('/bills', billController::class);
 Route::patch('/bills/{id}/status', [billController::class, 'updateStatus']);
+Route::get('/bills/invoice/{id}', [documentController::class, 'downloadInvoice']);
+Route::get('/bills/nf2/{id}', [documentController::class, 'downloadNF2']);
 
 Route::post('/payments/export', [paymentController::class, 'export']);
 Route::apiResource('/payments', paymentController::class);

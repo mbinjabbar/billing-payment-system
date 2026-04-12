@@ -254,20 +254,6 @@ class billController extends Controller
             return $this->error('Failed to delete the bill.');
         }
     }
-    public function downloadPDF($id)
-    {
-        try {
-            $bill = Bill::with(['visit.appointment.patientCase.patient'])->findOrFail($id);
-            $filePath = storage_path('app/private/' . $bill->generated_document_path);
-            if (!file_exists($filePath)) {
-                return $this->error('PDF file not found.');
-            }
-            return response()->download($filePath);
-        } catch (Exception $e) {
-            return $this->error('Failed to generate PDF.');
-        }
-    }
-
     public function export(Request $request)
     {
         try {
