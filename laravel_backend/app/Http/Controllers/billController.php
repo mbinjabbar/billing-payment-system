@@ -39,13 +39,24 @@ class billController extends Controller
                 return $q->whereHas('visit.appointment.patientCase.patient', function ($sub) use ($request) {
                     return $sub->where('first_name', 'like', '%' . $request->patient_name . '%')
                         ->orWhere('middle_name', 'like', '%' . $request->patient_name . '%')
-                        ->orWhere('last_name', 'like', '%' . $request->patient_name . '%');
+                        ->orWhere('last_name',   'like', '%' . $request->patient_name . '%');
                 });
             });
 
+            // Stats calculated on full dataset before pagination
+            $stats = [
+                'total_bill_amount'  => (clone $query)->sum('bill_amount'),
+                'total_paid_amount'  => (clone $query)->sum('paid_amount'),
+                'total_outstanding'  => (clone $query)->sum('outstanding_amount'),
+                'total_bills'        => (clone $query)->count(),
+                'pending_count'      => (clone $query)->where('status', 'Pending')->count(),
+                'partial_count'      => (clone $query)->where('status', 'Partial')->count(),
+                'paid_count'         => (clone $query)->where('status', 'Paid')->count(),
+            ];
+
             $bills = $query->latest('bill_date')->paginate(10);
 
-            return $this->success($bills, 'Bills retrieved successfully');
+            return $this->success($bills, 'Bills retrieved successfully', 200, $stats);
         } catch (Exception $e) {
             return $this->error('Unable to fetch bills.');
         }
@@ -180,47 +191,47 @@ class billController extends Controller
 
             $bill->save();
 
-              $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
+            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
 
-        $pdf = Pdf::loadView('Invoice_pdf', compact('bill'));
+            $pdf = Pdf::loadView('Invoice_pdf', compact('bill'));
 
-        $fileName = 'Invoice_' . $bill->bill_number . '.pdf';
-        $path = 'bills/' . $fileName;
+            $fileName = 'Invoice_' . $bill->bill_number . '.pdf';
+            $path = 'bills/' . $fileName;
 
-        Storage::put($path, $pdf->output());
+            Storage::put($path, $pdf->output());
 
-        $fileSize = Storage::size($path);
-        // Update or Create Document
-        // ---------------------------
-        $document = Document::where('bill_id', $bill->id)
-            ->where('document_type', 'Invoice')
-            ->first();
+            $fileSize = Storage::size($path);
+            // Update or Create Document
+            // ---------------------------
+            $document = Document::where('bill_id', $bill->id)
+                ->where('document_type', 'Invoice')
+                ->first();
 
-        if ($document) {
-            $version = $document->version + 1;
+            if ($document) {
+                $version = $document->version + 1;
 
-            $document->update([
-                'file_name' => $fileName,
-                'file_type' => Storage::mimeType($path),
-                'file_path' => $path,
-                'file_size' => $fileSize,
-                'upload_date' => now(),
-                'uploaded_by' => auth()->id() ?? $bill->created_by,
-                'version' => $version
-            ]);
-        } else {
-            Document::create([
-                'bill_id' => $bill->id,
-                'document_type' => 'Invoice',
-                'file_name' => $fileName,
-                'file_type' => Storage::mimeType($path),
-                'file_path' => $path,
-                'file_size' => $fileSize,
-                'upload_date' => now(),
-                'uploaded_by' => auth()->id() ?? $bill->created_by,
-                'version' => 1
-            ]);
-        }
+                $document->update([
+                    'file_name' => $fileName,
+                    'file_type' => Storage::mimeType($path),
+                    'file_path' => $path,
+                    'file_size' => $fileSize,
+                    'upload_date' => now(),
+                    'uploaded_by' => auth()->id() ?? $bill->created_by,
+                    'version' => $version
+                ]);
+            } else {
+                Document::create([
+                    'bill_id' => $bill->id,
+                    'document_type' => 'Invoice',
+                    'file_name' => $fileName,
+                    'file_type' => Storage::mimeType($path),
+                    'file_path' => $path,
+                    'file_size' => $fileSize,
+                    'upload_date' => now(),
+                    'uploaded_by' => auth()->id() ?? $bill->created_by,
+                    'version' => 1
+                ]);
+            }
             return $this->success($bill, 'Bill updated and recalculated successfully.');
         } catch (Exception $e) {
             return $this->error('Failed to update bill.');
@@ -252,14 +263,14 @@ class billController extends Controller
     }
 
     public function export(Request $request)
-{
-    try {
-        return Excel::download(
-            new BillsExport($request->all()),
-            'bills.xlsx'
-        );
-    } catch (Exception $e) {
-        return $this->error($e->getMessage());
+    {
+        try {
+            return Excel::download(
+                new BillsExport($request->all()),
+                'bills.xlsx'
+            );
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
- }
 }

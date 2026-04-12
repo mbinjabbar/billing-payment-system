@@ -26,11 +26,11 @@
               <!-- Progress Bar -->
 <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
   <div class="bg-primary h-full rounded-full"
-       [style.width.%]="totalBillProgress()">
+      [style.width.%]="collectionProgress()">
   </div>
 </div>
 <p class="text-xs text-on-surface-variant font-label mt-2 text-right">
-  {{ totalBillProgress() | number:'1.0-0' }}% Goal
+  {{ collectionProgress() | number:'1.0-0' }}% collected
 </p>
             </div>
 
@@ -62,9 +62,11 @@
             <!-- Table Header -->
             <div class="flex justify-between items-center px-6 py-5 border-b border-outline-variant/10">
               <h3 class="text-xl font-bold text-on-surface font-headline">Recent Billing Activity</h3>
-              <button class="text-primary text-sm font-bold font-label hover:underline flex items-center gap-1">
-                View All Bills
-              </button>
+          <a [routerLink]="['/bills/bill-list']"
+  class="text-primary text-sm font-bold font-label hover:underline flex items-center gap-1">
+  View All Bills
+  <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+</a>
             </div>
 
             <!-- Table -->
