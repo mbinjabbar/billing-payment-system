@@ -19,6 +19,7 @@ Route::get('/documents/cheque/{id}', [documentController::class, 'downloadCheque
 Route::get('/bills/invoice/{id}', [documentController::class, 'downloadInvoice']);
 Route::get('/bills/nf2/{id}', [documentController::class, 'downloadNF2']);
 
+Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloadReceipt']);
 Route::post('/payments/export', [paymentController::class, 'export']);
 Route::apiResource('/payments', paymentController::class);
 

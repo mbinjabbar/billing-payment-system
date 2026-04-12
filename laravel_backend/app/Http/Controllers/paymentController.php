@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Document;
 use App\Exports\PaymentsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Setting;
 
 
 class paymentController extends Controller
@@ -111,6 +114,32 @@ class paymentController extends Controller
                 $bill->status = 'Partial';
             }
             $bill->save();
+
+            $settings = Setting::all()->pluck('value', 'key')->toArray();
+
+            $payment->load([
+                'bill.visit.appointment.patientCase.patient',
+                'receiver'
+            ]);
+
+            $receiptPdf      = Pdf::loadView('Receipt_pdf', compact('payment', 'settings'));
+            $receiptFileName = 'Receipt_' . $payment->payment_number . '.pdf';
+            $receiptPath     = 'bills/' . $receiptFileName;
+
+            Storage::put($receiptPath, $receiptPdf->output());
+
+            Document::create([
+                'bill_id'       => $bill->id,
+                'payment_id'    => $payment->id,
+                'document_type' => 'Receipt',
+                'file_name'     => $receiptFileName,
+                'file_type'     => 'application/pdf',
+                'file_path'     => $receiptPath,
+                'file_size'     => Storage::size($receiptPath),
+                'upload_date'   => now(),
+                'uploaded_by'   => $data['received_by'] ?? 1,
+                'version'       => 1,
+            ]);
 
             if ($request->hasFile('cheque_file')) {
                 Document::create([

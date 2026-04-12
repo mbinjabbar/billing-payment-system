@@ -20,7 +20,7 @@ class documentController extends Controller
         if ($role === 'Biller') {
             $query->whereIn('document_type', ['Invoice', 'NF2 Form']);
         } elseif ($role === 'Payment Poster') {
-            $query->whereIn('document_type', ['Invoice', 'Cheque Image']);
+            $query->whereIn('document_type', ['Invoice', 'Cheque Image', 'Receipt']);
         }
         // Admin gets everything
 
@@ -89,24 +89,44 @@ class documentController extends Controller
     }
 
     public function downloadCheque($id)
-{
-    try {
-        $document = Document::findOrFail($id);
+    {
+        try {
+            $document = Document::findOrFail($id);
 
-        if ($document->document_type !== 'Cheque Image') {
-            return $this->error('Not a cheque document.');
+            if ($document->document_type !== 'Cheque Image') {
+                return $this->error('Not a cheque document.');
+            }
+
+            // Cheque files stored in public storage
+            $filePath = storage_path('app/public/' . $document->file_path);
+
+            if (!file_exists($filePath)) {
+                return $this->error('Cheque file not found.');
+            }
+
+            return response()->download($filePath);
+        } catch (Exception $e) {
+            return $this->error('Failed to download cheque.');
         }
-
-        // Cheque files stored in public storage
-        $filePath = storage_path('app/public/' . $document->file_path);
-
-        if (!file_exists($filePath)) {
-            return $this->error('Cheque file not found.');
-        }
-
-        return response()->download($filePath);
-    } catch (Exception $e) {
-        return $this->error('Failed to download cheque.');
     }
-}
+
+    public function downloadReceipt($paymentId)
+    {
+        try {
+            $document = Document::where('payment_id', $paymentId)
+                ->where('document_type', 'Receipt')
+                ->latest()
+                ->firstOrFail();
+
+            $filePath = storage_path('app/private/' . $document->file_path);
+
+            if (!file_exists($filePath)) {
+                return $this->error('Receipt file not found.');
+            }
+
+            return response()->download($filePath);
+        } catch (Exception $e) {
+            return $this->error('Receipt not found.');
+        }
+    }
 }

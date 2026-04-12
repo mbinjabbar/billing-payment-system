@@ -2,16 +2,20 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DocumentService {
   private apiUrl = 'http://localhost:8000/api';
-  private http   = inject(HttpClient);
+  private http = inject(HttpClient);
 
   getDocuments(params: any = {}) {
     const stringParams: any = {};
-    Object.keys(params).forEach(key => {
-      if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+    Object.keys(params).forEach((key) => {
+      if (
+        params[key] !== null &&
+        params[key] !== undefined &&
+        params[key] !== ''
+      ) {
         stringParams[key] = String(params[key]);
       }
     });
@@ -19,22 +23,25 @@ export class DocumentService {
   }
 
   downloadDocument(document: any) {
-  let url = '';
-  switch (document.document_type) {
-    case 'Invoice':
-      url = `${this.apiUrl}/bills/invoice/${document.bill_id}`;
-      break;
-    case 'NF2 Form':
-      url = `${this.apiUrl}/bills/nf2/${document.bill_id}`;
-      break;
-    case 'Cheque Image':
-      url = `${this.apiUrl}/documents/cheque/${document.id}`;
-      break;
-    default:
-      url = `${this.apiUrl}/documents/cheque/${document.id}`;
+    let url = '';
+    switch (document.document_type) {
+      case 'Invoice':
+        url = `${this.apiUrl}/bills/invoice/${document.bill_id}`;
+        break;
+      case 'NF2 Form':
+        url = `${this.apiUrl}/bills/nf2/${document.bill_id}`;
+        break;
+      case 'Cheque Image':
+        url = `${this.apiUrl}/documents/cheque/${document.id}`;
+        break;
+      case 'Receipt':
+        url = `${this.apiUrl}/payments/receipt/${document.payment_id}`;
+        break;
+      default:
+        url = `${this.apiUrl}/documents/cheque/${document.id}`;
+    }
+    const link = window.document.createElement('a');
+    link.href = url;
+    link.click();
   }
-  const link = window.document.createElement('a');
-  link.href = url;
-  link.click();
-}
 }

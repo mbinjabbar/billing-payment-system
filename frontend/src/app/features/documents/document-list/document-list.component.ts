@@ -34,9 +34,9 @@ export class DocumentListComponent {
       case 'Biller':
         return ['Invoice', 'NF2 Form'];
       case 'Payment Poster':
-        return ['Invoice', 'Cheque Image'];
+        return ['Invoice', 'Cheque Image', 'Receipt'];
       default:
-        return ['Invoice', 'NF2 Form', 'Cheque Image', 'Supporting Document'];
+        return ['Invoice', 'NF2 Form', 'Cheque Image', 'Receipt'];
     }
   });
 
