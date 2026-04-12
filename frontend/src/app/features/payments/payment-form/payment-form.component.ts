@@ -7,7 +7,7 @@ import { BillService } from '../../../core/services/bill.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-create-payment',
+  selector: 'app-payment-form',
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, CommonModule],
   templateUrl: './payment-form.component.html',
