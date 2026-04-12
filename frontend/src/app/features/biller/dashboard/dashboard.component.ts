@@ -15,7 +15,7 @@ export class DashboardComponent {
   billingGoal = 1000;
 
   ngOnInit() {
-    this.billService.getBills().subscribe((data) => {
+    this.billService.getBills({}).subscribe((data) => {
       this.bills.set(data);
     });
   }
