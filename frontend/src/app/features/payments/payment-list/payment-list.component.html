@@ -240,11 +240,18 @@
 
               <!-- Actions -->
               <td class="px-5 py-4 text-right space-x-2">
-                <button
-                  [routerLink]="['/payments/edit', payment.id]"
+                @if (payment.payment_status === 'Pending' ||
+                payment.payment_status === 'Failed') {
+                <button [routerLink]="['/payments/edit', payment.id]"
                   class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
                   Edit
                 </button>
+                } @else {
+                <span
+                  class="px-3 py-1.5 rounded-md text-xs font-bold text-on-surface-variant/40 cursor-not-allowed">
+                  Edit
+                </span>
+                }
                 <button
                   (click)="confirmDelete(payment.id)"
                   class="px-3 py-1.5 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition">

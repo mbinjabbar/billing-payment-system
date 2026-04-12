@@ -150,6 +150,10 @@ class paymentController extends Controller
     {
         try {
             $payment = Payment::findOrFail($id);
+
+            if (!in_array($payment->payment_status, ['Pending', 'Failed'])) {
+                return $this->error('Only Pending or Failed payments can be edited.', 422);
+            }
             $bill = Bill::findOrFail($request->bill_id);
 
             $filePath = $payment->cheque_file_path;
