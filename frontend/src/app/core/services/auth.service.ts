@@ -22,6 +22,10 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, { email, password });
   }
 
+  logout(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/logout`, {});
+  }
+
   getToken(): string | null {
     return localStorage.getItem('token');
   }

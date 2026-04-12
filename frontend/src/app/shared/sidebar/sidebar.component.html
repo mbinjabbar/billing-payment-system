@@ -2,7 +2,7 @@
   <nav class="flex flex-col gap-1 p-6 h-full">
 
     <!-- Nav Items -->
-    @for (item of navItems; track item.route) {
+    @for (item of navItems(); track item.route) {
       <a
         [routerLink]="item.route"
         routerLinkActive="bg-surface-container-low text-primary font-bold"
