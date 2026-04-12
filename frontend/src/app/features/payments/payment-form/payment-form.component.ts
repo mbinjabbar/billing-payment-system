@@ -20,12 +20,15 @@ export class PaymentFormComponent {
   private authService    = inject(AuthService);
 
   // ── State ────────────────────────────────────────────────────────────────
-  bill          = signal<any>(null);
-  selectedFile  = signal<File | null>(null);
-  submitting    = signal(false);
-  error         = signal('');
-  billId        = 0;
-  paymentId     = 0;
+  bill         = signal<any>(null);
+  selectedFile = signal<File | null>(null);
+  submitting   = signal(false);
+  error        = signal('');
+  billId       = 0;
+  paymentId    = 0;
+
+  // Tracks selected payment mode for conditional rendering
+  paymentMode  = signal('');
 
   paymentForm = new FormGroup({
     amount_paid:           new FormControl('', [Validators.required, Validators.min(0.01)]),
@@ -38,7 +41,7 @@ export class PaymentFormComponent {
     notes:                 new FormControl(''),
   });
 
-  // ── Computed summary values ───────────────────────────────────────────────
+  // ── Computed ─────────────────────────────────────────────────────────────
   outstanding = computed(() => Number(this.bill()?.outstanding_amount ?? 0));
 
   payingNow = computed(() => {
@@ -52,6 +55,9 @@ export class PaymentFormComponent {
   });
 
   isEdit = computed(() => this.paymentId > 0);
+
+  // ── Conditional field visibility ─────────────────────────────────────────
+  showCheckFields = computed(() => this.paymentMode() === 'Check');
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit() {
@@ -67,6 +73,18 @@ export class PaymentFormComponent {
       this.paymentId = parseInt(editId, 10);
       this.loadPayment(this.paymentId);
     }
+
+    // Track payment mode changes for conditional rendering
+    this.paymentForm.get('payment_mode')?.valueChanges.subscribe(val => {
+      this.paymentMode.set(val ?? '');
+      // Clear mode-specific fields when switching modes
+      this.selectedFile.set(null);
+      this.paymentForm.patchValue({
+        check_number:          '',
+        bank_name:             '',
+        transaction_reference: '',
+      }, { emitEvent: false });
+    });
   }
 
   loadBill(id: number) {
@@ -86,6 +104,8 @@ export class PaymentFormComponent {
         this.billId = data.bill_id;
         this.loadBill(data.bill_id);
         this.paymentForm.patchValue(data);
+        // Set paymentMode signal when editing so conditional fields render
+        this.paymentMode.set(data.payment_mode ?? '');
       },
       error: () => this.error.set('Failed to load payment details.'),
     });
@@ -94,9 +114,31 @@ export class PaymentFormComponent {
   // ── File ─────────────────────────────────────────────────────────────────
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.selectedFile.set(input.files[0]);
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    const allowedTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      this.error.set('Invalid file type. Allowed: PDF, JPG, PNG, DOCX');
+      input.value = '';
+      return;
     }
+
+    if (file.size > maxSize) {
+      this.error.set('File size cannot exceed 5MB');
+      input.value = '';
+      return;
+    }
+
+    this.error.set('');
+    this.selectedFile.set(file);
   }
 
   clearFile() {
