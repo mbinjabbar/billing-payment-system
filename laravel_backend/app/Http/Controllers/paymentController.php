@@ -176,9 +176,12 @@ class paymentController extends Controller
                 'transaction_reference',
                 'payment_date',
                 'payment_status',
-                'cheque_file_path' => $filePath,
                 'notes'
             ]));
+
+             if ($request->hasFile('cheque_file')) {
+                $payment->cheque_file_path = $filePath;
+            }
             $payment->save();
             $difference = $newAmountPaid - $oldAmountPaid;
             $bill->increment('paid_amount', $difference);
