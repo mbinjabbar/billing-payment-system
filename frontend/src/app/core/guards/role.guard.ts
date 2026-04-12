@@ -12,7 +12,7 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
       return true;
     }
 
-    authService.clearSession();
+    authService.redirectByRole();
     return false;
   };
 };
