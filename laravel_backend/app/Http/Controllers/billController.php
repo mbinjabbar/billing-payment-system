@@ -165,6 +165,10 @@ class billController extends Controller
     {
         try {
             $bill = Bill::findOrFail($id);
+
+            if (in_array($bill->status, ['Cancelled', 'Written Off'])) {
+                return $this->error('Cannot edit a bill that is Cancelled or Written Off.', 403);
+            }
             // $user = $request->get('auth_user');
 
             // if($user->role === 'Payment Poster') {
@@ -276,18 +280,18 @@ class billController extends Controller
         }
     }
 
-public function updateStatus(Request $request, $id)
-{
-    try {
-        $bill = Bill::findOrFail($id);
-        $request->validate([
-            'status' => 'required|in:Cancelled,Written Off'
-        ]);
-        $bill->status = $request->status;
-        $bill->save();
-        return $this->success($bill, 'Bill status updated successfully.');
-    } catch (Exception $e) {
-        return $this->error('Failed to update bill status.');
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $bill = Bill::findOrFail($id);
+            $request->validate([
+                'status' => 'required|in:Cancelled,Written Off'
+            ]);
+            $bill->status = $request->status;
+            $bill->save();
+            return $this->success($bill, 'Bill status updated successfully.');
+        } catch (Exception $e) {
+            return $this->error('Failed to update bill status.');
+        }
     }
-}
 }

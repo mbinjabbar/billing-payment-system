@@ -65,6 +65,13 @@ class paymentController extends Controller
             $data = $request->all();
             $bill = Bill::findOrFail($data['bill_id']);
 
+            if (in_array($bill->status, ['Cancelled', 'Written Off', 'Paid'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot post payment against a ' . $bill->status . ' bill.'
+                ], 422);
+            }
+
             $name = null;
             $type = null;
             $filePath = null;
@@ -179,7 +186,7 @@ class paymentController extends Controller
                 'notes'
             ]));
 
-             if ($request->hasFile('cheque_file')) {
+            if ($request->hasFile('cheque_file')) {
                 $payment->cheque_file_path = $filePath;
             }
             $payment->save();
@@ -235,10 +242,27 @@ class paymentController extends Controller
     {
         try {
             $payment = Payment::findOrFail($id);
+            $bill    = Bill::findOrFail($payment->bill_id);
+
+            $bill->paid_amount -= $payment->amount_paid;
+            $insuranceAmount    = ($bill->charges * $bill->insurance_coverage) / 100;
+            $bill->bill_amount  = ($bill->charges - $insuranceAmount - $bill->discount_amount) + $bill->tax_amount;
+            $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
+
+            if ($bill->paid_amount <= 0) {
+                $bill->status = 'Pending';
+            } elseif ($bill->outstanding_amount > 0) {
+                $bill->status = 'Partial';
+            } else {
+                $bill->status = 'Paid';
+            }
+
+            $bill->save();
             $payment->delete();
-            return $this->success(null, 'Payment deleted successfully');
+
+            return $this->success(null, 'Payment deleted and bill updated successfully.');
         } catch (Exception $e) {
-            return $this->error('An error occurred while deleting the payment');
+            return $this->error('An error occurred while deleting the payment.');
         }
     }
 }
