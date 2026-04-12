@@ -101,7 +101,12 @@ class billController extends Controller
                 'notes' => $data['notes']
             ]);
 
-            $bill->load('visit.appointment.patientCase.patient', 'visit.appointment.patientCase.nf2Detail', 'insurance_firm');
+            $bill->load(
+                'visit.appointment.patientCase.patient',
+                'visit.appointment.patientCase.nf2Detail',
+                'insurance_firm',
+                'payments'
+            );
             $isCarAccident = $bill->visit->appointment->patientCase->car_accident;
 
 
@@ -197,9 +202,14 @@ class billController extends Controller
 
             $bill->save();
 
-            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm');
+            $bill->load(
+                'visit.appointment.patientCase.patient',
+                'insurance_firm',
+                'payments'
+            );
 
-            $pdf = Pdf::loadView('Invoice_pdf', compact('bill'));
+            $settings = Setting::all()->pluck('value', 'key')->toArray();
+            $pdf = Pdf::loadView('Invoice_pdf', compact('bill', 'settings'));
 
             $fileName = 'Invoice_' . $bill->bill_number . '.pdf';
             $path = 'bills/' . $fileName;
