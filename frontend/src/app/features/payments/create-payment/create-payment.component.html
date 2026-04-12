@@ -1,7 +1,7 @@
 <div class="bg-surface text-on-surface min-h-screen font-body">
   <main class="flex-1 p-8 md:p-12 mx-auto w-full">
 
-    <!-- HEADER -->
+    <!-- Header -->
     <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
         <a [routerLink]="['/bills/bill-list']"
@@ -9,222 +9,273 @@
           <span class="material-symbols-outlined mr-1 icon-md">arrow_back</span>
           Back to Bills
         </a>
-
         <h1 class="text-4xl font-headline font-extrabold tracking-tight">
-          {{ paymentId ? 'Edit Payment' : 'Add Payment' }}
+          {{ isEdit() ? 'Edit Payment' : 'Post Payment' }}
         </h1>
       </div>
 
-      <!-- Bill Summary -->
-      <div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-6 border border-outline-variant/15 shadow-sm">
-        <div>
-          <p class="text-xs font-label text-on-surface-variant uppercase">Bill #</p>
-          <p class="font-headline font-bold"></p>
+      <!-- Bill Info Card -->
+      @if (bill()) {
+        <div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-6 border border-outline-variant/15 shadow-sm">
+          <div>
+            <p class="text-xs font-label text-on-surface-variant uppercase tracking-widest mb-1">Bill #</p>
+            <p class="font-headline font-bold">{{ bill().bill_number }}</p>
+          </div>
+          <div class="h-10 w-px bg-outline-variant/30"></div>
+          <div>
+            <p class="text-xs font-label text-on-surface-variant uppercase tracking-widest mb-1">Patient</p>
+            <p class="font-headline font-bold">
+              {{ bill().visit?.appointment?.patient_case?.patient?.full_name ?? '—' }}
+            </p>
+          </div>
+          <div class="h-10 w-px bg-outline-variant/30"></div>
+          <div>
+            <p class="text-xs font-label text-on-surface-variant uppercase tracking-widest mb-1">Outstanding</p>
+            <p class="font-headline font-bold text-error">${{ bill().outstanding_amount }}</p>
+          </div>
         </div>
-        <div class="h-10 w-px bg-outline-variant/30"></div>
-        <div>
-          <p class="text-xs font-label text-on-surface-variant uppercase">Outstanding</p>
-          <p class="font-headline font-bold text-error"></p>
-        </div>
-      </div>
+      }
     </div>
 
-    <!-- GRID -->
+    <!-- Error Banner -->
+    @if (error()) {
+      <div class="mb-6 flex items-center gap-3 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+        <span class="material-symbols-outlined icon-md">error_outline</span>
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-      <!-- LEFT -->
-      <div class="lg:col-span-8 space-y-8">
-
+      <!-- LEFT — Form -->
+      <div class="lg:col-span-8">
         <form [formGroup]="paymentForm" id="postPaymentForm" (ngSubmit)="onSubmit()">
-        <!-- PAYMENT DETAILS -->
-        <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 shadow-sm">
 
-          <h2 class="text-xl font-headline font-bold mb-6">Payment Details</h2>
+          <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 shadow-sm space-y-6">
+            <h2 class="text-xl font-headline font-bold">Payment Details</h2>
 
-          <!-- AMOUNT + MODE -->
-          <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <!-- Amount + Mode -->
+            <div class="grid md:grid-cols-2 gap-6">
 
-            <!-- Amount -->
-            <div>
-              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
-                Amount Paid <span class="text-error">*</span>
-              </label>
+              <!-- Amount -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Amount Paid <span class="text-error">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">$</span>
+                  <input
+                    type="number"
+                    formControlName="amount_paid"
+                    placeholder="0.00"
+                    class="w-full bg-surface-container-low rounded-lg p-4 pl-8 text-lg font-bold border border-outline-variant/20 focus:border-primary outline-none transition-colors"
+                    [class.border-error]="paymentForm.get('amount_paid')?.invalid && paymentForm.get('amount_paid')?.touched" />
+                </div>
+                @if (paymentForm.get('amount_paid')?.invalid && paymentForm.get('amount_paid')?.touched) {
+                  <p class="text-xs text-error font-label mt-1">Valid amount is required</p>
+                }
+              </div>
 
-              <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
-                <input
-                  type="number"
-                  formControlName="amount_paid" required
-                  class="w-full bg-surface-container-low rounded-lg p-4 pl-8 text-lg font-bold border border-outline-variant/20 focus:border-primary outline-none transition-colors" />
+              <!-- Payment Mode -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Payment Mode <span class="text-error">*</span>
+                </label>
+                <select
+                  formControlName="payment_mode"
+                  class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none transition-colors"
+                  [class.border-error]="paymentForm.get('payment_mode')?.invalid && paymentForm.get('payment_mode')?.touched">
+                  <option value="">Select payment mode</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Check">Check</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Debit Card">Debit Card</option>
+                  <option value="Insurance">Insurance</option>
+                  <option value="Online Payment">Online Payment</option>
+                </select>
+                @if (paymentForm.get('payment_mode')?.invalid && paymentForm.get('payment_mode')?.touched) {
+                  <p class="text-xs text-error font-label mt-1">Payment mode is required</p>
+                }
+              </div>
+
+            </div>
+
+            <!-- Check Number + Bank Name -->
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-label text-on-surface-variant mb-2">Check Number</label>
+                <input type="text" formControlName="check_number"
+                  placeholder="Optional"
+                  class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none transition-colors" />
+              </div>
+              <div>
+                <label class="block text-sm font-label text-on-surface-variant mb-2">Bank Name</label>
+                <input type="text" formControlName="bank_name"
+                  placeholder="Optional"
+                  class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none transition-colors" />
               </div>
             </div>
 
-            <!-- Payment Mode -->
+            <!-- Transaction Reference + File Upload -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+              <div>
+                <label class="block text-sm font-label text-on-surface-variant mb-2">Transaction Reference</label>
+                <input type="text" formControlName="transaction_reference"
+                  placeholder="Optional"
+                  class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none transition-colors" />
+              </div>
+
+              <!-- File Upload -->
+              <div>
+                <label class="block text-sm font-label text-on-surface-variant mb-2">
+                  Upload Receipt / Cheque
+                </label>
+                @if (!selectedFile()) {
+                  <label
+                    class="flex items-center gap-3 w-full bg-surface-container-low rounded-lg p-4 border border-dashed border-outline-variant/30 hover:border-primary cursor-pointer transition-colors">
+                    <span class="material-symbols-outlined text-on-surface-variant icon-md">upload_file</span>
+                    <div>
+                      <p class="text-sm font-semibold text-on-surface-variant">Click to upload</p>
+                      <p class="text-xs text-on-surface-variant/60 font-label">PDF, JPG, PNG — max 5MB</p>
+                    </div>
+                    <input type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png"
+                      (change)="onFileSelected($event)" />
+                  </label>
+                } @else {
+                  <div class="flex items-center justify-between w-full bg-surface-container-low rounded-lg p-4 border border-primary/30">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-primary icon-md">description</span>
+                      <div>
+                        <p class="text-sm font-semibold text-on-surface">{{ selectedFile()!.name }}</p>
+                        <p class="text-xs text-on-surface-variant font-label">
+                          {{ (selectedFile()!.size / 1024).toFixed(1) }} KB
+                        </p>
+                      </div>
+                    </div>
+                    <button type="button" (click)="clearFile()"
+                      class="text-error hover:text-error/70 transition">
+                      <span class="material-symbols-outlined icon-sm">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+
+            </div>
+
+            <!-- Payment Date + Status -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Payment Date <span class="text-error">*</span>
+                </label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant icon-md">calendar_today</span>
+                  <input type="date" formControlName="payment_date"
+                    class="w-full bg-surface-container-low rounded-lg p-4 pl-12 border border-outline-variant/20 focus:border-primary outline-none transition-colors"
+                    [class.border-error]="paymentForm.get('payment_date')?.invalid && paymentForm.get('payment_date')?.touched" />
+                </div>
+                @if (paymentForm.get('payment_date')?.invalid && paymentForm.get('payment_date')?.touched) {
+                  <p class="text-xs text-error font-label mt-1">Payment date is required</p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-label text-on-surface-variant mb-2">Payment Status</label>
+                <select formControlName="payment_status"
+                  class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none transition-colors">
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Refunded">Refunded</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- Notes -->
             <div>
-              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
-                Payment Mode <span class="text-error">*</span>
+              <label class="block text-sm font-label text-on-surface-variant mb-2">
+                Notes <span class="text-on-surface-variant/50 font-normal">(optional)</span>
               </label>
-
-              <select
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none"
-                formControlName="payment_mode" required
-                >
-                <option value="">Select payment mode</option>
-                <option value="cash">Cash</option>
-                <option value="cheque">Cheque</option>
-                <option value="bank transfer">Bank Transfer</option>
-                <option value="Credit Card">Credit Card</option>
-                <option value="Debit Card">Debit Card</option>
-                <option value="Insurance">Insurance</option>
-                <option value="Online Payment">Online Payment</option>
-
-              </select>
+              <textarea rows="2" formControlName="notes"
+                placeholder="Any additional notes..."
+                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none resize-none transition-colors">
+              </textarea>
             </div>
 
           </div>
-
-          <!-- CONDITIONAL CHECK FIELDS -->
-          <div class="grid md:grid-cols-2 gap-6 mb-6">
-
-            <div>
-              <label class="block text-sm font-label text-on-surface-variant mb-2">
-                Check Number
-              </label>
-              <input type="text"
-               formControlName="check_number" required
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
-            </div>
-
-            <div>
-              <label class="block text-sm font-label text-on-surface-variant mb-2">
-                Bank Name
-              </label>
-              <input type="text"
-               formControlName="bank_name" required
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
-            </div>
-
-          </div>
-
-          <!-- TRANSACTION + FILE UPLOAD -->
-          <div class="grid md:grid-cols-2 gap-6 mb-6">
-
-            <!-- Transaction Reference -->
-            <div>
-              <label class="block text-sm font-label text-on-surface-variant mb-2">
-                Transaction Reference
-              </label>
-              <input type="text"
-               formControlName="transaction_reference" required
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
-            </div>
-
-            <!-- File Upload -->
-            <div>
-              <label class="block text-sm font-label text-on-surface-variant mb-2">
-                Upload Receipt / Check
-              </label>
-
-              <input type="file"
-              #filename (change)="onfileselected($event)" !required
-                class="w-full bg-surface-container-low rounded-lg p-3 border border-outline-variant/20 focus:border-primary outline-none text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:font-semibold hover:file:bg-primary/20 transition-all" />
-
-              <p class="text-[10px] text-on-surface-variant font-label mt-1">
-                Accepted: PDF, JPG, PNG
-              </p>
-            </div>
-
-          </div>
-
-          <!-- DATE + STATUS -->
-          <div class="grid md:grid-cols-2 gap-6 mb-6">
-
-            <!-- Date -->
-            <div>
-              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
-                Payment Date <span class="text-error">*</span>
-              </label>
-
-              <input type="date"
-               formControlName="payment_date" required
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none" />
-            </div>
-
-            <!-- Status -->
-            <div>
-              <label class="block text-sm font-label text-on-surface-variant mb-2">
-                Payment Status
-              </label>
-
-              <select
-                  formControlName="payment_status"
-                class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none">
-                
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-                <option value="failed">Failed</option>
-              </select>
-            </div>
-
-          </div>
-
-          <!-- NOTES -->
-          <div>
-            <label class="block text-sm font-label text-on-surface-variant mb-2">
-              Notes
-            </label>
-            <textarea rows="2"
-            formControlName="notes" 
-              class="w-full bg-surface-container-low rounded-lg p-4 border border-outline-variant/20 focus:border-primary outline-none resize-none"></textarea>
-          </div>
-
-        </div>
-      </form>
-
+        </form>
       </div>
 
-      <!-- RIGHT SUMMARY -->
+      <!-- RIGHT — Summary -->
       <div class="lg:col-span-4">
-        <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 sticky top-24">
+        <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 sticky top-24 space-y-5">
 
-          <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">
+          <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label">
             Payment Summary
           </h3>
 
-          <div class="space-y-4">
-
-            <div class="flex justify-between">
-              <span class="text-sm text-on-surface-variant">Outstanding</span>
-              <span class="font-bold"></span>
+          <!-- Bill amount -->
+          @if (bill()) {
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant font-body">Total Bill</span>
+              <span class="font-bold font-headline">${{ bill().bill_amount }}</span>
             </div>
-
-            <div class="flex justify-between">
-              <span class="text-sm text-on-surface-variant">Paying Now</span>
-              <span class="font-bold text-primary"></span>
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant font-body">Already Paid</span>
+              <span class="font-bold font-headline text-green-600">${{ bill().paid_amount }}</span>
             </div>
+          }
 
-            <div class="border-t border-outline-variant/10 pt-4">
-              <span class="text-xs uppercase font-label text-primary">Remaining</span>
-              <div class="text-3xl font-extrabold font-headline"></div>
-            </div>
-
-            <!-- ACTION -->
-            <button type="submit" form="postPaymentForm"
-              class="w-full mt-6 text-white font-bold py-4 rounded-lg shadow-lg font-headline transition-all hover:scale-[1.01]"
-              style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
-
-              <span class="flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined">payments</span>
-                 {{ paymentId ? 'Update Payment' : 'Post Payment' }}
-              </span>
-            </button>
-
+          <div class="flex justify-between text-sm border-t border-outline-variant/10 pt-4">
+            <span class="text-on-surface-variant font-body">Outstanding</span>
+            <span class="font-bold font-headline text-error">${{ outstanding().toFixed(2) }}</span>
           </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-on-surface-variant font-body">Paying Now</span>
+            <span class="font-bold font-headline text-primary">${{ payingNow().toFixed(2) }}</span>
+          </div>
+
+          <!-- Remaining -->
+          <div class="border-t border-outline-variant/20 pt-4">
+            <span class="text-xs uppercase font-label text-primary">Remaining After Payment</span>
+            <div class="text-3xl font-extrabold font-headline mt-1">
+              ${{ remaining().toFixed(2) }}
+            </div>
+            @if (payingNow() > outstanding() && outstanding() > 0) {
+              <p class="text-xs text-error font-label mt-1">
+                Exceeds outstanding amount
+              </p>
+            }
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" form="postPaymentForm"
+            [disabled]="submitting() || paymentForm.invalid"
+            class="w-full mt-2 text-white font-bold py-4 rounded-lg shadow-lg font-headline transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+            <span class="flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined icon-md">
+                {{ submitting() ? 'hourglass_top' : 'payments' }}
+              </span>
+              {{ submitting() ? 'Processing...' : (isEdit() ? 'Update Payment' : 'Post Payment') }}
+            </span>
+          </button>
+
+          <!-- Cancel -->
+          <a [routerLink]="['/payments/payment-list']"
+            class="w-full block text-center bg-surface-container-high font-bold py-3 rounded-lg font-headline hover:bg-surface-container-highest transition-colors text-sm">
+            Cancel
+          </a>
 
         </div>
       </div>
 
     </div>
-
   </main>
 </div>
