@@ -16,17 +16,12 @@
       <div class="px-6 py-4 border-b border-outline-variant/10">
         <div class="flex flex-wrap items-center gap-2" [formGroup]="filterForm">
 
-          <!-- Title -->
           <h3 class="text-lg font-bold font-headline mr-1">Billing Overview</h3>
-
-          <!-- Divider -->
           <div class="w-px h-5 bg-outline-variant/30 mx-1"></div>
 
-          <!-- Patient Name -->
           <input type="text" formControlName="patient_name" placeholder="Patient name"
             class="w-32 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body" />
 
-          <!-- Status -->
           <select formControlName="status"
             class="px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body">
             <option value="">All Statuses</option>
@@ -38,67 +33,49 @@
             <option value="Written Off">Written Off</option>
           </select>
 
-          <!-- From Date -->
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">From</span>
             <input type="date" formControlName="start_date" class="bg-transparent text-xs outline-none font-body" />
           </div>
 
-          <!-- To Date -->
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">To</span>
             <input type="date" formControlName="end_date" class="bg-transparent text-xs outline-none font-body" />
           </div>
 
-          <!-- Min Amount -->
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label">$</span>
             <input type="number" formControlName="min_amount" placeholder="Min"
               class="w-16 bg-transparent text-xs outline-none font-body" />
           </div>
 
-          <!-- Max Amount -->
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
             <span class="text-xs text-on-surface-variant font-bold font-label">$</span>
             <input type="number" formControlName="max_amount" placeholder="Max"
               class="w-16 bg-transparent text-xs outline-none font-body" />
           </div>
 
-          <!-- Apply -->
           <button (click)="applyFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
             Filter
           </button>
 
-          <!-- Reset -->
           <button (click)="resetFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
             Reset
           </button>
 
-          <!-- Push rest right -->
           <div class="flex-1"></div>
 
-          <!-- Record count -->
           @if (totalItems() > 0) {
-          <p class="text-xs text-on-surface-variant font-label">
-            {{ from() }}–{{ to() }} of {{ totalItems() }}
-          </p>
+            <p class="text-xs text-on-surface-variant font-label">{{ from() }}–{{ to() }} of {{ totalItems() }}</p>
           }
 
-          <!-- Divider -->
           <div class="w-px h-5 bg-outline-variant/30"></div>
 
-          <!-- Export -->
           <button (click)="exportBills()" [disabled]="exporting()"
             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-50 transition font-headline">
-            <span class="material-symbols-outlined icon-sm">
-              {{ exporting() ? 'hourglass_top' : 'download' }}
-            </span>
+            <span class="material-symbols-outlined icon-sm">{{ exporting() ? 'hourglass_top' : 'download' }}</span>
             {{ exporting() ? 'Exporting...' : 'Export Excel' }}
           </button>
 
@@ -107,181 +84,182 @@
 
       <!-- Loading -->
       @if (loading()) {
-      <div class="flex items-center justify-center py-20">
-        <div class="flex flex-col items-center gap-4">
-          <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-          <p class="text-sm text-on-surface-variant font-label">Loading bills...</p>
+        <div class="flex items-center justify-center py-20">
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+            <p class="text-sm text-on-surface-variant font-label">Loading bills...</p>
+          </div>
         </div>
-      </div>
       }
 
-      <!-- Table -->
       @if (!loading()) {
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead>
-            <tr class="bg-surface-container-low">
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit Date</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Insurance</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due Date</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
-            </tr>
-          </thead>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap">Bill #</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap">Patient</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap">Visit Date</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap text-right">Total</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap text-right">Paid</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap text-right">Outstanding</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap text-center">Status</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap text-center">Due Date</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase whitespace-nowrap text-center">Actions</th>
+              </tr>
+            </thead>
 
-          <tbody class="divide-y divide-outline-variant/10">
+            <tbody class="divide-y divide-outline-variant/10">
 
-            @if (!bills().data?.length) {
-            <tr>
-              <td colspan="10" class="px-5 py-16 text-center">
-                <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">receipt_long</span>
-                <p class="text-sm font-bold text-on-surface-variant">No bills found</p>
-                <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try adjusting your filters</p>
-              </td>
-            </tr>
-            }
+              @if (!bills().data?.length) {
+                <tr>
+                  <td colspan="9" class="px-5 py-16 text-center">
+                    <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">receipt_long</span>
+                    <p class="text-sm font-bold text-on-surface-variant">No bills found</p>
+                    <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try adjusting your filters</p>
+                  </td>
+                </tr>
+              }
 
-            @for (bill of bills().data; track bill.id) {
-            <tr class="hover:bg-surface-container-low transition">
+              @for (bill of bills().data; track bill.id) {
+                <tr class="hover:bg-surface-container-low transition">
 
-              <!-- Bill Number -->
-              <td class="px-5 py-4">
-                <p class="font-bold">{{ bill.bill_number }}</p>
-                <p class="text-xs text-on-surface-variant">#{{ bill.id }}</p>
-              </td>
+                  <!-- Bill Number -->
+                  <td class="px-5 py-4 whitespace-nowrap">
+                    <p class="font-bold text-xs">{{ bill.bill_number }}</p>
+                    <p class="text-xs text-on-surface-variant">#{{ bill.id }}</p>
+                  </td>
 
-              <!-- Patient -->
-              <td class="px-5 py-4">
-                <p class="font-bold">
-                  {{ bill.visit.appointment.patient_case.patient.full_name }}
-                </p>
-              </td>
+                  <!-- Patient -->
+                  <td class="px-5 py-4 whitespace-nowrap">
+                    <p class="font-bold">{{ bill.visit.appointment.patient_case.patient.full_name }}</p>
+                  </td>
 
-              <!-- Visit Date -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                {{ bill.visit.visit_date | date }}
-              </td>
+                  <!-- Visit Date -->
+                  <td class="px-5 py-4 whitespace-nowrap text-sm">
+                    {{ bill.visit.visit_date | date }}
+                  </td>
 
-              <!-- Insurance -->
-              <td class="px-5 py-4">
-                <span class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
-                  [ngClass]="bill.visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
-                  {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' : 'Standard' }}
-                </span>
-              </td>
+                  <!-- Total -->
+                  <td class="px-5 py-4 text-right font-semibold whitespace-nowrap">
+                    ${{ bill.bill_amount }}
+                  </td>
 
-              <!-- Total -->
-              <td class="px-5 py-4 text-right font-semibold">
-                ${{ bill.bill_amount }}
-              </td>
+                  <!-- Paid -->
+                  <td class="px-5 py-4 text-right text-green-600 font-semibold whitespace-nowrap">
+                    ${{ bill.paid_amount }}
+                  </td>
 
-              <!-- Paid -->
-              <td class="px-5 py-4 text-right text-green-600 font-semibold">
-                ${{ bill.paid_amount }}
-              </td>
+                  <!-- Outstanding -->
+                  <td class="px-5 py-4 text-right text-red-600 font-semibold whitespace-nowrap">
+                    ${{ bill.outstanding_amount }}
+                  </td>
 
-              <!-- Due -->
-              <td class="px-5 py-4 text-right text-red-600 font-semibold">
-                ${{ bill.outstanding_amount }}
-              </td>
+                  <!-- Status -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                      [class]="getBillStatusClass(bill.status)">
+                      {{ bill.status }}
+                    </span>
+                  </td>
 
-              <!-- Status -->
-              <td class="px-5 py-4 text-center">
-                <span class="px-2.5 py-1 rounded-full text-xs font-bold" [class]="getBillStatusClass(bill.status)">
-                  {{ bill.status }}
-                </span>
-              </td>
+                  <!-- Due Date -->
+                  <td class="px-5 py-4 text-center whitespace-nowrap text-sm">
+                    <span [class.text-red-600]="isOverdue(bill.due_date)">
+                      {{ bill.due_date | date }}
+                    </span>
+                  </td>
 
-              <!-- Due Date -->
-              <td class="px-5 py-4 text-center">
-                <span [class.text-red-600]="isOverdue(bill.due_date)">
-                  {{ bill.due_date | date }}
-                </span>
-              </td>
+                  <!-- Actions -->
+                  <td class="px-5 py-4">
+                    <div class="flex items-center justify-center gap-1">
 
-              <!-- Actions -->
-              <td class="px-5 py-4 text-right space-x-2">
+                      <!-- View — icon button -->
+                      <button
+                        [routerLink]="['/bills/invoice', bill.id]"
+                        title="View Invoice"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary hover:bg-primary-container transition">
+                        <span class="material-symbols-outlined icon-sm">visibility</span>
+                      </button>
 
-                <!-- View — all roles -->
-                <button [routerLink]="['/bills/invoice', bill.id]"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
-                  View
-                </button>
+                      <!-- Edit — icon button, Biller/Admin only -->
+                      @if ((role() === 'Biller' || role() === 'Admin') &&
+                           bill.status !== 'Cancelled' && bill.status !== 'Written Off') {
+                        <button
+                          [routerLink]="['/bills/edit', bill.id]"
+                          title="Edit Bill"
+                          class="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                          <span class="material-symbols-outlined icon-sm">edit</span>
+                        </button>
+                      }
 
-                <!-- Edit — Biller and Admin only -->
-                @if ((role() === 'Biller' || role() === 'Admin') &&
-                bill.status !== 'Cancelled' && bill.status !== 'Written Off') {
-                <button [routerLink]="['/bills/edit', bill.id]"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
-                  Edit
-                </button>
-                }
+                      <!-- Change Status — icon button with dropdown, Admin/Biller only -->
+                      @if ((role() === 'Admin' || role() === 'Biller') &&
+                           bill.status !== 'Paid' && bill.status !== 'Cancelled' && bill.status !== 'Written Off') {
+                        <div class="relative group">
+                          <select
+                            (change)="overrideStatus(bill.id, $event)"
+                            title="Change Status"
+                            class="w-8 h-8 opacity-0 absolute inset-0 cursor-pointer z-10">
+                            <option value="Cancelled">Cancel Bill</option>
+                            <option value="Written Off">Write Off</option>
+                          </select>
+                          <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition pointer-events-none">
+                            <span class="material-symbols-outlined icon-sm">tune</span>
+                          </div>
+                        </div>
+                      }
 
+                      <!-- Post Payment — text button, Payment Poster/Admin only -->
+                      @if ((role() === 'Payment Poster' || role() === 'Admin') &&
+                           bill.status !== 'Cancelled' && bill.status !== 'Written Off' && bill.status !== 'Paid') {
+                        <button
+                          [routerLink]="['/bills', bill.id, 'pay']"
+                          class="px-3 py-1.5 rounded-md text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 transition whitespace-nowrap">
+                          Post Payment
+                        </button>
+                      }
 
-                <!-- In bill-list actions td, after Edit button -->
-                @if (role() === 'Admin' || role() === 'Biller') {
-                @if (bill.status !== 'Paid' && bill.status !== 'Cancelled' && bill.status !== 'Written Off') {
-                <select (change)="overrideStatus(bill.id, $event)"
-                  class="px-2 py-1.5 rounded-md text-xs font-bold border border-outline-variant/20 bg-surface-container-low outline-none cursor-pointer">
-                  <option value="">Change Status</option>
-                  <option value="Cancelled">Cancel</option>
-                  <option value="Written Off">Write Off</option>
-                </select>
-                }
-                }
+                    </div>
+                  </td>
 
-                <!-- Post Payment — Payment Poster and Admin only -->
-                @if ((role() === 'Payment Poster' || role() === 'Admin') &&
-                bill.status !== 'Cancelled' && bill.status !== 'Written Off' && bill.status !== 'Paid') {
-                <button [routerLink]="['/bills', bill.id, 'pay']"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
-                  Post Payment
-                </button>
-                }
-
-              </td>
-
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      @if (totalPages() > 1) {
-      <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
-        <p class="text-xs text-on-surface-variant font-label">
-          Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
-        </p>
-        <div class="flex items-center gap-1">
-          <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
-            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
-          <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
-            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
-
-          @for (page of visiblePages(); track $index) {
-          @if (page === '...') {
-          <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
-          } @else {
-          <button (click)="goToPage(+page)" class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
-            [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
-            {{ page }}
-          </button>
-          }
-          }
-
-          <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
-            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
-          <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
-            class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-      </div>
-      }
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+            <p class="text-xs text-on-surface-variant font-label">
+              Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
+
+              @for (page of visiblePages(); track $index) {
+                @if (page === '...') {
+                  <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
+                } @else {
+                  <button (click)="goToPage(+page)"
+                    class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+                    [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
+              <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
+            </div>
+          </div>
+        }
       }
 
     </section>
