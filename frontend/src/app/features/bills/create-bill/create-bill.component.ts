@@ -7,6 +7,7 @@ import { VisitService } from '../../../core/services/visit.service';
 import { InsuranceFirmsService } from '../../../core/services/insurance-firms.service';
 import { BillService } from '../../../core/services/bill.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SettingsService } from '../../../core/services/settings.service';
 
 @Component({
   selector: 'app-create-bill',
@@ -21,6 +22,7 @@ export class CreateBillComponent {
   private visitService          = inject(VisitService);
   private billService           = inject(BillService);
   private authService           = inject(AuthService);
+  private settingsService       = inject(SettingsService);
 
   protected Number = Number;
 
@@ -46,6 +48,7 @@ export class CreateBillComponent {
     this.loadProcedureCodes();
     this.loadInsuranceFirms();
     this.loadVisitById(Number(id));
+    this.loadSettings();
   }
 
   loadProcedureCodes() {
@@ -65,6 +68,22 @@ export class CreateBillComponent {
       this.visit.set(res);
     });
   }
+
+  loadSettings() {
+  this.settingsService.getSettings().subscribe({
+    next: (res: any) => {
+      const s = res.data ?? res;
+
+      const taxRate = Number(s.default_tax_rate ?? 0);
+      this.billing.update((b) => ({ ...b, tax: taxRate }));
+      const dueDays = Number(s.default_due_days ?? 30);
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + dueDays);
+      this.dueDate = dueDate.toISOString().split('T')[0];
+    },
+    error: () => {}
+  });
+}
 
   toggleProcedureDropdown() {
     this.procedureDropdownOpen = !this.procedureDropdownOpen;

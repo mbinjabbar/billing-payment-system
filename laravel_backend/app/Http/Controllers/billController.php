@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Setting;
 
 class billController extends Controller
 {
@@ -112,7 +113,8 @@ class billController extends Controller
             }
 
             foreach ($filesToGenerate as $file) {
-                $pdf = PDF::loadView($file['view'], compact('bill'));
+                $settings = Setting::all()->pluck('value', 'key')->toArray();
+                $pdf = PDF::loadView($file['view'], compact('bill', 'settings'));
                 $fileName = $file['prefix'] . $bill->bill_number . '.pdf';
                 $path = 'bills/' . $fileName;
 

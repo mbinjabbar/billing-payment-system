@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AppointmentSeeder::class,
             VisitSeeder::class,
             Nf2DetailSeeder::class,
+            SettingSeeder::class,
         ]);
     }
 }

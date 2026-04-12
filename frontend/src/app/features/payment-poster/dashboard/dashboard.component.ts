@@ -14,42 +14,50 @@ export class DashboardComponent {
   private paymentService = inject(PaymentPosterService);
   private billService    = inject(BillService);
 
-  payments = signal<any[]>([]);
-  bills    = signal<any[]>([]);
-  loading  = signal(true);
+  payments  = signal<any[]>([]);
+  billStats = signal<any>({
+    total_bill_amount: 0,
+    total_paid_amount: 0,
+    total_outstanding: 0,
+    pending_count:     0,
+  });
+  loading = signal(true);
 
   ngOnInit() {
-    // Load recent payments (latest 5 for the table)
+    let loaded = 0;
+    const done = () => { if (++loaded === 2) this.loading.set(false); };
+
+    // Recent payments for the table only
     this.paymentService.getPayments({ per_page: 5 }).subscribe({
-      next: (res: any) => {
-        this.payments.set(res.data ?? []);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
+      next: (res: any) => { this.payments.set(res.data ?? []); done(); },
+      error: () => done(),
     });
 
-    // Load bills to calculate A/R stats
+    // Bills — stats from res.stats (full dataset aggregates)
     this.billService.getBills({}).subscribe({
-      next: (res: any) => this.bills.set(res.data ?? []),
-      error: () => {},
+      next: (res: any) => {
+        if (res.stats) this.billStats.set(res.stats);
+        done();
+      },
+      error: () => done(),
     });
   }
 
-  // ── Stats ────────────────────────────────────────────────────────────────
+  // ── Stats from full dataset ──────────────────────────────────────────────
   totalCollected = computed(() =>
-    this.payments().reduce((sum, p) => sum + Number(p.amount_paid), 0)
+    Number(this.billStats().total_paid_amount)
   );
 
   totalOutstanding = computed(() =>
-    this.bills().reduce((sum, b) => sum + Number(b.outstanding_amount), 0)
+    Number(this.billStats().total_outstanding)
   );
 
   totalBillAmount = computed(() =>
-    this.bills().reduce((sum, b) => sum + Number(b.bill_amount), 0)
+    Number(this.billStats().total_bill_amount)
   );
 
   pendingBillsCount = computed(() =>
-    this.bills().filter(b => b.status === 'Pending').length
+    this.billStats().pending_count
   );
 
   collectionProgress = computed(() => {
