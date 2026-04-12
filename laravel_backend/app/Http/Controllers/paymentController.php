@@ -115,12 +115,12 @@ class paymentController extends Controller
                     'file_path'     => $filePath,
                     'file_size'     => $file->getSize(),
                     'upload_date'   => now(),
-                    'uploaded_by'   => $data['created_by'] ?? 1,
+                    'uploaded_by'   => $request->created_by ?? 1,
                     'version'       => 1
                 ]);
             }
 
-            return $this->success($payment, 'Payment created and bill updated successfully');
+            return $this->success($payment, 'Payment Created and Bill updated successfully');
         } catch (Exception $e) {
 
             return $this->error($e->getMessage());
@@ -202,11 +202,11 @@ class paymentController extends Controller
                     'file_path'     => $filePath,
                     'file_size'     => $fileSize,
                     'upload_date'   => now(),
-                    'uploaded_by'   => $data['created_by'] ?? 1,
+                    'uploaded_by'   => $request->created_by ?? 1,
                     'version'       => 1
                 ]);
-                return $this->success($payment, 'Payment and Bill updated successfully');
             }
+            return $this->success($payment, 'Payment and Bill updated successfully');
         } catch (Exception $e) {
             \Log::error('UPDATE PAYMENT FAILED', [
                 'error' => $e->getMessage(),
