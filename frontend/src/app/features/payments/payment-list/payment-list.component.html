@@ -1,87 +1,336 @@
-<h1 class="mt-23 pt-24">payments</h1>
-<button (click)="exportPayments()" class="btn btn-success">
-  Export Excel
-</button>
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <div class="pt-10 px-10 pb-12 space-y-8 w-full">
 
-<form [formGroup]="filterForm" (ngSubmit)="getPayments()">
+    <!-- Header -->
+    <section class="flex justify-between items-end">
+      <div>
+        <h2 class="text-4xl font-extrabold tracking-tight font-headline">All Payments</h2>
+        <p class="text-on-surface-variant mt-2 max-w-2xl font-body">
+          View and manage all posted payments, filter by bill, mode, status, or date range.
+        </p>
+      </div>
 
-  <select formControlName="bill_id">
-  <option value="">All Bills</option>
+      <!-- Export Button -->
+      <button
+        (click)="exportPayments()"
+        [disabled]="exporting()"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 transition font-headline">
+        <span class="material-symbols-outlined icon-sm">
+          {{ exporting() ? 'hourglass_top' : 'download' }}
+        </span>
+        {{ exporting() ? 'Exporting...' : 'Export Excel' }}
+      </button>
+    </section>
 
-  @for (payment of paymentsList; track $index) {
-    <option [value]="payment.bill_id">
-      Bill #{{ payment.bill_id }}
-    </option>
-  }
-</select>
+    <!-- Filters -->
+    <section class="bg-surface-container-lowest rounded-xl border border-outline-variant/10 p-6">
+      <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant font-label mb-5">
+        Filter Payments
+      </h3>
 
-  <select formControlName="payment_mode">
-    <option value="">Select payment mode</option>
-    <option value="cash">Cash</option>
-    <option value="cheque">Cheque</option>
-    <option value="bank transfer">Bank Transfer</option>
-    <option value="Credit Card">Credit Card</option>
-    <option value="Debit Card">Debit Card</option>
-    <option value="Insurance">Insurance</option>
-    <option value="Online Payment">Online Payment</option>
-  </select>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" [formGroup]="filterForm">
 
-  <select formControlName="payment_status">
-    <option value="">All Status</option>
-    <option value="completed">Completed</option>
-    <option value="paid">Paid</option>
-    <option value="pending">Pending</option>
-  </select>
+        <!-- Bill ID -->
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label block mb-1.5">
+            Bill ID
+          </label>
+          <input
+            type="number"
+            formControlName="bill_id"
+            placeholder="e.g. 12"
+            class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition font-body" />
+        </div>
 
-  <input type="date" formControlName="from_date" />
-  <input type="date" formControlName="to_date" />
+        <!-- Payment Mode -->
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label block mb-1.5">
+            Payment Mode
+          </label>
+          <select
+            formControlName="payment_mode"
+            class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition font-body">
+            <option value="">All Modes</option>
+            <option value="Cash">Cash</option>
+            <option value="Check">Check</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Online Payment">Online Payment</option>
+          </select>
+        </div>
 
-  <button type="submit">Filter</button>
-  <button type="button" (click)="resetFilters()">Reset</button>
+        <!-- Payment Status -->
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label block mb-1.5">
+            Status
+          </label>
+          <select
+            formControlName="payment_status"
+            class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition font-body">
+            <option value="">All Statuses</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+            <option value="Failed">Failed</option>
+            <option value="Refunded">Refunded</option>
+          </select>
+        </div>
 
-</form>
+        <!-- From Date -->
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label block mb-1.5">
+            From Date
+          </label>
+          <input
+            type="date"
+            formControlName="from_date"
+            class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition font-body" />
+        </div>
 
-<h2>Payments List</h2>
+        <!-- To Date -->
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label block mb-1.5">
+            To Date
+          </label>
+          <input
+            type="date"
+            formControlName="to_date"
+            class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition font-body" />
+        </div>
 
-<table border="1">
-  <thead>
-    <tr>
-      <th>Amount Paid</th>
-      <th>Payment Mode</th>
-      <th>Cheque no</th>
-      <th>Bank No</th>
-      <th>Date</th>
-      <th>Payment Status</th>
-      <th>Transaction Reference</th>
-      <th>Notes</th>
-    </tr>
-  </thead>
+      </div>
 
-  <tbody>
-    @for (payment of paymentsList; track $index) {
-      <tr>
-        <td>{{ payment.amount_paid }}</td>
-        <td>{{ payment.payment_mode }}</td>
-        <td>{{ payment.check_number }}</td>
-        <td>{{ payment.bank_name }}</td>
-        <td>{{ payment.payment_date | date:'MMM d, y'}}</td>
-        <td>{{ payment.payment_status }}</td>
-        <td>{{ payment.transaction_reference }}</td>
-        <td>{{ payment.notes ? payment.notes : 'N/A' }}</td>
-         <button 
-  [routerLink]="['/payments/edit', payment.id]"
-  class="bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transform hover:scale-105 mr-2"
->
-  Edit
-</button>
+      <!-- Filter Actions -->
+      <div class="flex items-center gap-3 mt-5">
+        <button
+          (click)="applyFilters()"
+          class="px-5 py-2.5 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
+          Apply Filters
+        </button>
+        <button
+          (click)="resetFilters()"
+          class="px-5 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+          Reset
+        </button>
+      </div>
+    </section>
 
-<button 
-  (click)="deletePayment(payment.id)"
-  class="bg-red-500 text-white font-medium px-4 py-2 transform hover:scale-105 rounded-lg "
->
-  Delete
-</button>
-      </tr>
-    }  
-  </tbody>
-</table>
+    <!-- Table -->
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+
+      <!-- Table Header -->
+      <div class="px-6 py-5 border-b border-outline-variant/10 flex justify-between items-center">
+        <h3 class="text-xl font-bold font-headline">Payment Records</h3>
+        @if (totalItems() > 0) {
+          <p class="text-sm text-on-surface-variant font-label">
+            Showing <span class="font-bold text-on-surface">{{ from() }}–{{ to() }}</span>
+            of <span class="font-bold text-on-surface">{{ totalItems() }}</span> payments
+          </p>
+        }
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="flex items-center justify-center py-20">
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+            <p class="text-sm text-on-surface-variant font-label">Loading payments...</p>
+          </div>
+        </div>
+      }
+
+      <!-- Table -->
+      @if (!loading()) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Payment #</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Amount Paid</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Mode</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Reference</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Date</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-outline-variant/10">
+
+              @if (list().length === 0) {
+                <tr>
+                  <td colspan="9" class="px-5 py-16 text-center">
+                    <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">payments</span>
+                    <p class="text-sm font-bold text-on-surface-variant">No payments found</p>
+                    <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try adjusting your filters</p>
+                  </td>
+                </tr>
+              }
+
+              @for (payment of list(); track payment.id) {
+                <tr class="hover:bg-surface-container-low transition">
+
+                  <!-- Payment Number -->
+                  <td class="px-5 py-4">
+                    <p class="font-bold text-xs">{{ payment.payment_number }}</p>
+                    <p class="text-xs text-on-surface-variant">#{{ payment.id }}</p>
+                  </td>
+
+                  <!-- Patient -->
+                  <td class="px-5 py-4">
+                    <p class="font-bold">
+                      {{ payment.bill?.visit?.appointment?.patient_case?.patient?.full_name ?? '—' }}
+                    </p>
+                  </td>
+
+                  <!-- Bill -->
+                  <td class="px-5 py-4">
+                    <button
+                      [routerLink]="['/bills/invoice', payment.bill_id]"
+                      class="text-xs font-bold text-primary hover:underline">
+                      Bill #{{ payment.bill_id }}
+                    </button>
+                  </td>
+
+                  <!-- Amount -->
+                  <td class="px-5 py-4 text-right font-bold text-green-600">
+                    ${{ payment.amount_paid }}
+                  </td>
+
+                  <!-- Mode -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                      [class]="getPaymentModeClass(payment.payment_mode)">
+                      {{ payment.payment_mode }}
+                    </span>
+                  </td>
+
+                  <!-- Reference -->
+                  <td class="px-5 py-4">
+                    <p class="text-sm">{{ payment.transaction_reference || '—' }}</p>
+                    @if (payment.check_number) {
+                      <p class="text-xs text-on-surface-variant font-label">
+                        Chq: {{ payment.check_number }}
+                      </p>
+                    }
+                    @if (payment.bank_name) {
+                      <p class="text-xs text-on-surface-variant font-label">
+                        {{ payment.bank_name }}
+                      </p>
+                    }
+                  </td>
+
+                  <!-- Date -->
+                  <td class="px-5 py-4 text-center whitespace-nowrap text-sm">
+                    {{ payment.payment_date | date:'MMM d, y' }}
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                      [class]="getPaymentStatusClass(payment.payment_status)">
+                      {{ payment.payment_status }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-5 py-4 text-right space-x-2">
+                    <button
+                      [routerLink]="['/payments/edit', payment.id]"
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                      Edit
+                    </button>
+                    <button
+                      (click)="confirmDelete(payment.id)"
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition">
+                      Delete
+                    </button>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+            <p class="text-xs text-on-surface-variant font-label">
+              Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">
+                «
+              </button>
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">
+                ‹
+              </button>
+
+              @for (page of visiblePages(); track $index) {
+                @if (page === '...') {
+                  <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
+                } @else {
+                  <button
+                    (click)="goToPage(+page)"
+                    class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+                    [class]="currentPage() === page
+                      ? 'bg-primary text-white'
+                      : 'hover:bg-surface-container-low text-on-surface'">
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">
+                ›
+              </button>
+              <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">
+                »
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+    </section>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+@if (confirmDeleteId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
+      <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-error icon-xl">delete_forever</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold font-headline">Delete Payment?</h3>
+          <p class="text-sm text-on-surface-variant font-body mt-1">
+            This action cannot be undone. The payment record will be permanently removed.
+          </p>
+        </div>
+        <div class="flex gap-3 w-full mt-2">
+          <button
+            (click)="cancelDelete()"
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+            Cancel
+          </button>
+          <button
+            (click)="executeDelete()"
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-error text-white hover:bg-error/90 transition font-headline">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
