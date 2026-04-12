@@ -32,7 +32,7 @@ export const routes: Routes = [
       {
         path: 'visits',
         loadComponent: () =>
-          import('./features/biller/visit/visit.component').then(m => m.VisitComponent)
+          import('./features/bills/visit/visit.component').then(m => m.VisitComponent)
       }
     ]
   },

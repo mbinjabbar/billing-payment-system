@@ -6,13 +6,15 @@ import { inject, Injectable } from '@angular/core';
 })
 export class VisitService {
   private apiUrl = 'http://localhost:8000/api';
-  private http = inject(HttpClient);
+  private http   = inject(HttpClient);
 
-  getVisits(page: number = 1){
-    return this.http.get(`${this.apiUrl}/visits?page=${page}`)
+  getVisits(page: number = 1, filters: any = {}) {
+    return this.http.get(`${this.apiUrl}/visits`, {
+      params: { ...filters, page }
+    });
   }
 
-  getVisitById(visitId: number){
-    return this.http.get(`${this.apiUrl}/visits/${visitId}`)
+  getVisitById(visitId: number) {
+    return this.http.get(`${this.apiUrl}/visits/${visitId}`);
   }
 }
