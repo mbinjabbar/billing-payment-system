@@ -90,6 +90,20 @@
           </p>
           }
 
+          <!-- Divider -->
+  <div class="w-px h-5 bg-outline-variant/30"></div>
+ 
+  <!-- Export -->
+  <button
+    (click)="exportBills()"
+    [disabled]="exporting()"
+    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-50 transition font-headline">
+    <span class="material-symbols-outlined icon-sm">
+      {{ exporting() ? 'hourglass_top' : 'download' }}
+    </span>
+    {{ exporting() ? 'Exporting...' : 'Export Excel' }}
+  </button>
+
         </div>
       </div>
 

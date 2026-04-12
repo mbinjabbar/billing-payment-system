@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BillsExport;
 use Illuminate\Http\Request;
 use App\Models\Bill;
 use App\Models\Document;
@@ -11,7 +12,7 @@ use App\Traits\ApiResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class billController extends Controller
 {
@@ -249,4 +250,16 @@ class billController extends Controller
             return $this->error('Failed to generate PDF.');
         }
     }
+
+    public function export(Request $request)
+{
+    try {
+        return Excel::download(
+            new BillsExport($request->all()),
+            'bills.xlsx'
+        );
+    } catch (Exception $e) {
+        return $this->error($e->getMessage());
+    }
+ }
 }

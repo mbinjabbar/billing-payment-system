@@ -10,6 +10,7 @@ use App\Http\Controllers\insurancefirmsController;
 
 
 Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
+Route::post('/bills/export', [billController::class, 'export']);
 Route::apiResource('/bills', billController::class);
 Route::apiResource('/payments', paymentController::class);
 Route::apiResource('/procedurecodes', procedurecodesController::class);

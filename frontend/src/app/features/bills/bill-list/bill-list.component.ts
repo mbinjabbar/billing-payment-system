@@ -20,6 +20,7 @@ export class BillListComponent implements OnInit {
   loading     = signal(false);
   currentPage = signal(1);
   role = computed(() => this.authService.getRole());
+  exporting = signal(false);
 
   filterForm = new FormGroup({
     patient_name: new FormControl(''),
@@ -116,4 +117,25 @@ export class BillListComponent implements OnInit {
     if (!date) return false;
     return new Date(date) < new Date();
   }
+
+  exportBills() {
+  this.exporting.set(true);
+  const filters = this.cleanFilters(this.filterForm.value);
+ 
+  this.billService.exportBills(filters).subscribe({
+    next: (res: any) => {
+      const blob = new Blob([res], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = 'bills.xlsx';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.exporting.set(false);
+    },
+    error: () => this.exporting.set(false),
+  });
+}
 }

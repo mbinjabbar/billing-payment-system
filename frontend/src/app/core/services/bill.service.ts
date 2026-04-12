@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 @Injectable({
@@ -9,7 +9,13 @@ export class BillService {
   private http   = inject(HttpClient);
 
   getBills(filters: any = {}) {
-    return this.http.get(`${this.apiUrl}/bills`, { params: filters });
+    const params: any = {};
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== null && filters[key] !== '' && filters[key] !== undefined) {
+        params[key] = String(filters[key]);
+      }
+    });
+    return this.http.get(`${this.apiUrl}/bills`, { params });
   }
 
   getBillById(id: number) {
@@ -22,5 +28,11 @@ export class BillService {
 
   updateBill(id: number, payload: any) {
     return this.http.put(`${this.apiUrl}/bills/${id}`, payload);
+  }
+
+  exportBills(filters: any = {}) {
+    return this.http.post(`${this.apiUrl}/bills/export`, filters, {
+      responseType: 'blob'
+    });
   }
 }
