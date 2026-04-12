@@ -4,7 +4,8 @@
     <!-- Header -->
     <section class="flex justify-between items-end">
       <div>
-        <h2 class="text-4xl font-extrabold tracking-tight font-headline">All Bills</h2>
+        <h2 class="text-4xl font-extrabold tracking-tight font-headline">All
+          Bills</h2>
         <p class="text-on-surface-variant mt-2 max-w-2xl font-body">
           Manage all generated bills, payments, and outstanding balances.
         </p>
@@ -12,7 +13,8 @@
     </section>
 
     <!-- Table -->
-    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+    <section
+      class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
       <!-- Table Header -->
       <div class="px-6 py-5 border-b border-outline-variant/10">
@@ -25,14 +27,22 @@
             <tr class="bg-surface-container-low">
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit Date</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit
+                Date</th>
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Insurance</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due Date</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Action</th>
+              <th
+                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
+              <th
+                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
+              <th
+                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
+              <th
+                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
+              <th
+                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due
+                Date</th>
+              <th
+                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Action</th>
             </tr>
           </thead>
 
@@ -63,7 +73,8 @@
                 <span
                   class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
                   [ngClass]="bill.visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
-                  {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' : 'Standard' }}
+                  {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' :
+                  'Standard' }}
                 </span>
               </td>
 
@@ -106,7 +117,12 @@
                   class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container">
                   View
                 </button>
-                   <button
+                <button
+                  [routerLink]="['/bills/edit', bill.id]"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container">
+                  Edit
+                </button>
+                <button
                   [routerLink]="['/bills', bill.id, 'pay']"
                   class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container">
                   Post Payment

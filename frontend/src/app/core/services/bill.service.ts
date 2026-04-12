@@ -19,4 +19,8 @@ export class BillService {
   createBill(payload: any) {
     return this.http.post(`${this.apiUrl}/bills`, payload);
   }
+
+  updateBill(id: number, payload: any) {
+    return this.http.put(`${this.apiUrl}/bills/${id}`, payload);
+  }
 }

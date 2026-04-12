@@ -24,6 +24,7 @@ export const routes: Routes = [
     { path: 'bills/create/:visitId', loadComponent: () => import('./features/bills/create-bill/create-bill.component').then(m => m.CreateBillComponent)},
     { path: 'bills/invoice/:billId', loadComponent: () => import('./features/bills/bill-invoice/bill-invoice.component').then(m => m.BillInvoiceComponent)},
     { path: 'bills/bill-list', loadComponent: () => import('./features/bills/bill-list/bill-list.component').then(m => m.BillListComponent)},
+    { path: 'bills/edit/:billId', loadComponent: () => import('./features/bills/edit-bill/edit-bill.component').then(m => m.EditBillComponent)},
     { path: 'documents', loadComponent: () => import('./features/documents/document-list/document-list.component').then(m => m.DocumentListComponent)},
     { path: 'payment-poster', loadComponent: () => import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent) },
     {path: 'payment-list',loadComponent: () =>import('./features/payments/payment-list/payment-list.component').then(m => m.PaymentListComponent)},

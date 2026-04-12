@@ -1,0 +1,486 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <main class="flex-1 p-8 md:p-12 mx-auto w-full">
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="flex items-center justify-center min-h-[60vh]">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+          <p class="text-sm text-on-surface-variant font-label">Loading bill...</p>
+        </div>
+      </div>
+    }
+
+    @if (!loading() && bill()) {
+
+      <!-- Header -->
+      <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <a [routerLink]="['/bills/bill-list']"
+            class="inline-flex items-center text-primary text-sm font-semibold mb-4 hover:translate-x-1 transition-transform">
+            <span class="material-symbols-outlined mr-1 icon-md">arrow_back</span>
+            Back to Bills
+          </a>
+          <h1 class="text-4xl font-headline font-extrabold tracking-tight">Edit Bill</h1>
+        </div>
+
+        <!-- Bill Info Card (mirrors Patient Card from create-bill) -->
+        <div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-4 border border-outline-variant/15 shadow-sm">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label">Bill No.</div>
+            <div class="font-headline font-bold">{{ bill().bill_number }}</div>
+          </div>
+          <div class="h-10 w-px bg-outline-variant/30"></div>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label">Patient</div>
+            <div class="font-headline font-bold">
+              {{ bill().visit?.appointment?.patient_case?.patient?.full_name }}
+            </div>
+          </div>
+          <div class="h-10 w-px bg-outline-variant/30"></div>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label">Case Type</div>
+            <div class="font-headline font-bold capitalize">
+              {{ bill().visit?.appointment?.patient_case?.car_accident ? 'Auto' : 'Health' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Banner -->
+      @if (error()) {
+        <div class="mb-6 flex items-center gap-3 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+          <span class="material-symbols-outlined icon-md">error_outline</span>
+          {{ error() }}
+        </div>
+      }
+
+      <!-- GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- LEFT -->
+        <div class="lg:col-span-8 space-y-8">
+
+          <!-- Procedure Codes Section -->
+          <div class="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/15">
+            <div class="mb-6">
+              <h2 class="text-xl font-headline font-bold">Procedure Codes</h2>
+              <p class="text-sm text-on-surface-variant font-label mt-1">
+                Add or remove procedure codes. Charges will recalculate automatically.
+              </p>
+            </div>
+
+            <!-- Procedure Search Dropdown -->
+            <div class="relative mb-6">
+              <div
+                (click)="toggleProcedureDropdown()"
+                class="w-full flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-lg border border-outline-variant/20 cursor-pointer hover:border-primary transition-colors">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-on-surface-variant icon-md">medical_services</span>
+                  <span class="text-sm font-body text-on-surface-variant">Search procedure codes...</span>
+                </div>
+                <span class="material-symbols-outlined text-on-surface-variant icon-md">
+                  {{ procedureDropdownOpen ? 'expand_less' : 'expand_more' }}
+                </span>
+              </div>
+
+              <!-- Dropdown Panel -->
+              @if (procedureDropdownOpen) {
+                <div class="absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest rounded-lg border border-outline-variant/20 shadow-xl z-50 overflow-hidden">
+
+                  <!-- Search Input -->
+                  <div class="p-3 border-b border-outline-variant/10">
+                    <div class="relative">
+                      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant icon-sm">search</span>
+                      <input
+                        type="text"
+                        [(ngModel)]="procedureSearch"
+                        placeholder="Search by code or name..."
+                        (click)="$event.stopPropagation()"
+                        class="w-full pl-9 pr-4 py-2 bg-surface-container-low rounded-lg text-sm outline-none border border-outline-variant/10 focus:border-primary transition-colors font-body"
+                        autofocus />
+                    </div>
+                  </div>
+
+                  <!-- Results List -->
+                  <div class="max-h-56 overflow-y-auto">
+                    @if (filteredProcedures.length === 0) {
+                      <div class="px-4 py-6 text-center text-sm text-on-surface-variant font-label">
+                        No procedures found
+                      </div>
+                    }
+                    @for (p of filteredProcedures; track p.code) {
+                      <div
+                        (click)="addProcedure(p.code)"
+                        class="flex items-center justify-between px-4 py-3 hover:bg-surface-container-low cursor-pointer transition-colors"
+                        [class.opacity-40]="isProcedureSelected(p.code)"
+                        [class.pointer-events-none]="isProcedureSelected(p.code)">
+                        <div>
+                          <p class="text-sm font-bold font-headline text-on-surface">{{ p.code }} — {{ p.name }}</p>
+                          <p class="text-xs text-on-surface-variant font-label mt-0.5">{{ p.description }}</p>
+                        </div>
+                        <div class="flex items-center gap-3 ml-4">
+                          <span class="text-sm font-bold text-primary font-headline">${{ p.standard_charge }}</span>
+                          @if (isProcedureSelected(p.code)) {
+                            <span class="material-symbols-outlined text-primary icon-sm">check_circle</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                </div>
+              }
+            </div>
+
+            <!-- Selected Procedures Table -->
+            @if (selectedProcedures().length > 0) {
+              <div class="rounded-lg border border-outline-variant/10 overflow-hidden">
+                <div class="grid grid-cols-12 px-4 py-3 bg-surface-container-low text-xs font-bold uppercase text-on-surface-variant font-label">
+                  <div class="col-span-1"></div>
+                  <div class="col-span-7">Procedure / Code</div>
+                  <div class="col-span-2 text-right">Charge</div>
+                  <div class="col-span-2 text-right">Remove</div>
+                </div>
+                <div class="divide-y divide-outline-variant/10">
+                  @for (p of selectedProcedures(); track $index) {
+                    <div class="grid grid-cols-12 items-center px-4 py-4 hover:bg-surface-container-low/50 transition-colors">
+                      <div class="col-span-1">
+                        <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold font-headline">
+                          {{ $index + 1 }}
+                        </span>
+                      </div>
+                      <div class="col-span-7">
+                        <p class="font-bold font-headline text-on-surface text-sm">{{ p.code }} — {{ p.name }}</p>
+                        <p class="text-xs text-on-surface-variant font-label mt-0.5">{{ p.description }}</p>
+                      </div>
+                      <div class="col-span-2 text-right font-bold font-headline text-primary">
+                        ${{ Number(p.standard_charge).toFixed(2) }}
+                      </div>
+                      <div class="col-span-2 text-right">
+                        <button
+                          (click)="removeProcedure($index)"
+                          class="w-7 h-7 rounded-lg bg-error/10 text-error flex items-center justify-center ml-auto hover:bg-error/20 transition-colors">
+                          <span class="material-symbols-outlined icon-sm">close</span>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="rounded-lg border border-dashed border-outline-variant/30 py-10 text-center">
+                <span class="material-symbols-outlined text-outline-variant icon-xl mb-2">receipt_long</span>
+                <p class="text-sm text-on-surface-variant font-label mt-2">No procedures selected</p>
+                <p class="text-xs text-on-surface-variant/60 font-label">Search and select procedure codes above</p>
+              </div>
+            }
+
+          </div>
+
+          <!-- Insurance & Billing Section -->
+          <div class="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/15">
+            <h2 class="text-xl font-headline font-bold mb-6">Insurance & Billing</h2>
+
+            <!-- Insurance Firm Dropdown -->
+            <div class="mb-6">
+              <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                Insurance Provider
+                <span class="text-error ml-1">*</span>
+              </label>
+
+              <div class="relative">
+                <!-- Trigger -->
+                <div
+                  (click)="toggleInsuranceDropdown()"
+                  class="w-full flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-lg border cursor-pointer transition-colors"
+                  [class]="selectedInsuranceId() ? 'border-primary bg-primary/5' : 'border-outline-variant/20 hover:border-primary'">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined icon-md"
+                      [class]="selectedInsuranceId() ? 'text-primary' : 'text-on-surface-variant'">
+                      business
+                    </span>
+                    @if (selectedInsuranceId()) {
+                      <div>
+                        <p class="text-sm font-bold text-primary font-headline">{{ getSelectedInsuranceName() }}</p>
+                        <p class="text-[10px] text-on-surface-variant font-label">{{ getSelectedInsuranceType() }}</p>
+                      </div>
+                    } @else {
+                      <span class="text-sm text-on-surface-variant font-body">Select insurance provider...</span>
+                    }
+                  </div>
+                  <div class="flex items-center gap-2">
+                    @if (selectedInsuranceId()) {
+                      <span class="material-symbols-outlined text-primary icon-sm">check_circle</span>
+                    }
+                    <span class="material-symbols-outlined text-on-surface-variant icon-md">
+                      {{ insuranceDropdownOpen ? 'expand_less' : 'expand_more' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Dropdown Panel -->
+                @if (insuranceDropdownOpen) {
+                  <div class="absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest rounded-lg border border-outline-variant/20 shadow-xl z-50 overflow-hidden">
+
+                    <!-- Search -->
+                    <div class="p-3 border-b border-outline-variant/10">
+                      <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant icon-sm">search</span>
+                        <input
+                          type="text"
+                          [ngModel]="insuranceSearch()"
+                          (ngModelChange)="insuranceSearch.set($event)"
+                          placeholder="Search by name or type..."
+                          (click)="$event.stopPropagation()"
+                          class="w-full pl-9 pr-4 py-2 bg-surface-container-low rounded-lg text-sm outline-none border border-outline-variant/10 focus:border-primary transition-colors font-body"
+                          autofocus />
+                      </div>
+                    </div>
+
+                    <!-- Firm Type Label -->
+                    <div class="px-4 py-2 bg-surface-container-low">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">
+                        {{ bill().visit?.appointment?.patient_case?.car_accident ? 'Auto Insurance' : 'Health Insurance' }} Providers
+                      </span>
+                    </div>
+
+                    <!-- Results -->
+                    <div class="max-h-56 overflow-y-auto">
+                      @if (filteredInsuranceFirms.length === 0) {
+                        <div class="px-4 py-6 text-center text-sm text-on-surface-variant font-label">
+                          No insurance firms found
+                        </div>
+                      }
+                      @for (firm of filteredInsuranceFirms; track firm.id) {
+                        <div
+                          (click)="selectInsurance(firm.id)"
+                          class="flex items-center justify-between px-4 py-3 cursor-pointer transition-colors"
+                          [class]="selectedInsuranceId() === firm.id
+                            ? 'bg-primary/10 border-l-2 border-primary'
+                            : 'hover:bg-surface-container-low'">
+                          <div>
+                            <p class="text-sm font-bold font-headline"
+                              [class]="selectedInsuranceId() === firm.id ? 'text-primary' : 'text-on-surface'">
+                              {{ firm.name }}
+                            </p>
+                            <p class="text-xs text-on-surface-variant font-label capitalize mt-0.5">
+                              {{ firm.firm_type }} insurance
+                            </p>
+                          </div>
+                          @if (selectedInsuranceId() === firm.id) {
+                            <span class="material-symbols-outlined text-primary icon-md">check_circle</span>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                  </div>
+                }
+              </div>
+
+              @if (!selectedInsuranceId()) {
+                <p class="text-xs text-on-surface-variant font-label mt-2 flex items-center gap-1">
+                  <span class="material-symbols-outlined icon-sm text-outline-variant">info</span>
+                  Select a provider to enable insurance coverage input
+                </p>
+              }
+            </div>
+
+            <!-- Billing Inputs -->
+            <div class="grid md:grid-cols-3 gap-6">
+
+              <!-- Insurance Coverage -->
+              <div>
+                <label class="block text-sm font-semibold mb-2 font-label"
+                  [class]="selectedInsuranceId() ? 'text-on-surface-variant' : 'text-on-surface-variant/40'">
+                  Insurance Coverage (%)
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    [disabled]="!selectedInsuranceId()"
+                    class="w-full rounded-lg p-4 font-bold text-lg outline-none border transition-colors"
+                    [class]="selectedInsuranceId()
+                      ? 'bg-surface-container-low/50 border-outline-variant/20 focus:border-primary text-on-surface'
+                      : 'bg-surface-container-high border-outline-variant/10 text-on-surface-variant/40 cursor-not-allowed'"
+                    [ngModel]="billing().insurance"
+                    (ngModelChange)="updateBilling('insurance', $event)" />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold"
+                    [class]="selectedInsuranceId() ? 'text-on-surface-variant' : 'text-on-surface-variant/30'">%</span>
+                </div>
+                @if (!selectedInsuranceId()) {
+                  <p class="text-[10px] text-error font-label mt-1">Select insurance first</p>
+                }
+              </div>
+
+              <!-- Discount -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Discount Amount
+                </label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">$</span>
+                  <input
+                    type="number"
+                    class="w-full bg-surface-container-low/50 rounded-lg p-4 pl-8 font-bold text-lg outline-none border border-outline-variant/20 focus:border-primary transition-colors"
+                    [ngModel]="billing().discount"
+                    (ngModelChange)="updateBilling('discount', $event)" />
+                </div>
+              </div>
+
+              <!-- Tax -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Tax (%)
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    class="w-full bg-surface-container-low/50 rounded-lg p-4 font-bold text-lg outline-none border border-outline-variant/20 focus:border-primary transition-colors"
+                    [ngModel]="billing().tax"
+                    (ngModelChange)="updateBilling('tax', $event)" />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">%</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Due Date & Notes -->
+            <div class="grid md:grid-cols-2 gap-6 mt-6">
+
+              <!-- Due Date -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Due Date
+                </label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant icon-md">calendar_today</span>
+                  <input
+                    type="date"
+                    class="w-full bg-surface-container-low/50 rounded-lg p-4 pl-12 font-bold outline-none border border-outline-variant/20 focus:border-primary transition-colors font-body"
+                    [(ngModel)]="dueDate" />
+                </div>
+              </div>
+
+              <!-- Notes -->
+              <div>
+                <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">
+                  Notes <span class="text-on-surface-variant/50 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  rows="1"
+                  placeholder="Add any billing notes or special instructions..."
+                  class="w-full bg-surface-container-low/50 rounded-lg p-4 font-body text-sm outline-none border border-outline-variant/20 focus:border-primary transition-colors resize-none"
+                  [(ngModel)]="notes">
+                </textarea>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT — Summary (identical structure to create-bill) -->
+        <div class="lg:col-span-4">
+          <div class="bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/15 sticky top-24">
+
+            <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-8">
+              Calculation Summary
+            </h3>
+
+            <div class="space-y-5">
+
+              <!-- Total -->
+              <div class="flex justify-between items-center border-b border-outline-variant/10 pb-4">
+                <span class="text-sm font-body text-on-surface-variant">Total Gross Charge</span>
+                <span class="font-bold font-headline">${{ summary().total }}</span>
+              </div>
+
+              <!-- Insurance -->
+              <div class="flex justify-between items-center border-b border-outline-variant/10 pb-4">
+                <div>
+                  <span class="text-sm font-body text-on-surface-variant">Insurance</span>
+                  @if (selectedInsuranceId()) {
+                    <p class="text-[10px] text-primary font-label">{{ getSelectedInsuranceName() }}</p>
+                  } @else {
+                    <p class="text-[10px] text-on-surface-variant/50 font-label">No provider selected</p>
+                  }
+                </div>
+                <span class="font-bold font-headline"
+                  [class]="selectedInsuranceId() ? 'text-primary' : 'text-on-surface-variant/40'">
+                  -${{ summary().insurance }}
+                </span>
+              </div>
+
+              <!-- Discount -->
+              <div class="flex justify-between items-center border-b border-outline-variant/10 pb-4">
+                <span class="text-sm font-body text-on-surface-variant">Discount</span>
+                <span class="font-bold font-headline text-secondary">-${{ summary().discount }}</span>
+              </div>
+
+              <!-- Tax -->
+              <div class="flex justify-between items-center border-b border-outline-variant/10 pb-4">
+                <span class="text-sm font-body text-on-surface-variant">Tax ({{ billing().tax }}%)</span>
+                <span class="font-bold font-headline">+${{ summary().tax }}</span>
+              </div>
+
+              <!-- Due Date display -->
+              @if (dueDate) {
+                <div class="flex justify-between items-center border-b border-outline-variant/10 pb-4">
+                  <span class="text-sm font-body text-on-surface-variant">Due Date</span>
+                  <span class="text-sm font-bold font-headline">{{ dueDate | date:'MMM d, y' }}</span>
+                </div>
+              }
+
+              <!-- Final -->
+              <div class="pt-2">
+                <span class="text-primary text-xs font-bold uppercase font-label">Patient Responsibility</span>
+                <div class="text-4xl font-extrabold font-headline mt-1">${{ summary().final }}</div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col gap-3 pt-4">
+                <button
+                  (click)="save()"
+                  [disabled]="saving() || selectedProcedures().length === 0"
+                  class="w-full text-white font-bold py-4 rounded-lg shadow-lg font-headline transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
+                  <span class="flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined icon-md">
+                      {{ saving() ? 'hourglass_top' : 'save' }}
+                    </span>
+                    {{ saving() ? 'Saving Changes...' : 'Save Changes' }}
+                  </span>
+                </button>
+
+                <a
+                  [routerLink]="['/bills/invoice', bill().id]"
+                  class="w-full bg-surface-container-high font-bold py-4 rounded-lg font-headline hover:bg-surface-container-highest transition-colors text-center block">
+                  <span class="flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined icon-md">cancel</span>
+                    Discard Changes
+                  </span>
+                </a>
+              </div>
+
+              <!-- Current Status Badge -->
+              <div class="pt-4 border-t border-outline-variant/10">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">
+                  Current Status
+                </p>
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-secondary-container rounded-full text-[10px] font-bold w-fit font-label">
+                  <span class="w-1.5 h-1.5 rounded-full bg-on-secondary-container"></span>
+                  {{ bill().status | uppercase }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </main>
+</div>
