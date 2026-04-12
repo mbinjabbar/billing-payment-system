@@ -31,7 +31,7 @@ class Payment extends Model
     protected static function booted()
     {
         static::creating(function ($payment) {
-            $payment->payment_number = 'PAY-' . now()->format('Ymd') . '-' . strtoupper(uniqid());
+            $payment->payment_number = 'P-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -5));
         });
     }
     public function bill()

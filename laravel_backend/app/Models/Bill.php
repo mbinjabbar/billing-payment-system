@@ -43,7 +43,7 @@ class Bill extends Model
     protected static function booted()
     {
         static::creating(function ($bill) {
-            $bill->bill_number = 'BILL-' . now()->format('Ymd') . '-' . strtoupper(uniqid());
+            $bill->bill_number = 'B-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -5));
         });
     }
 
