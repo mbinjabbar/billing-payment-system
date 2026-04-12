@@ -1,138 +1,271 @@
 <div class="bg-surface text-on-surface min-h-screen font-body">
   <div class="pt-10 px-10 pb-12 space-y-8 w-full">
 
-    <!-- Header -->
-    <section class="flex justify-between items-end">
-      <div>
-        <h2 class="text-4xl font-extrabold tracking-tight font-headline">All
-          Bills</h2>
-        <p class="text-on-surface-variant mt-2 max-w-2xl font-body">
-          Manage all generated bills, payments, and outstanding balances.
-        </p>
-      </div>
+    <!-- Page Header -->
+    <section>
+      <h2 class="text-4xl font-extrabold tracking-tight font-headline">All Bills</h2>
+      <p class="text-on-surface-variant mt-2 font-body">
+        Manage all generated bills, payments, and outstanding balances.
+      </p>
     </section>
 
-    <!-- Table -->
-    <section
-      class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+    <!-- Table Card -->
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
-      <!-- Table Header -->
-      <div class="px-6 py-5 border-b border-outline-variant/10">
-        <h3 class="text-xl font-bold font-headline">Billing Overview</h3>
+      <!-- Table Header: title + inline filters -->
+      <div class="px-6 py-4 border-b border-outline-variant/10">
+        <div class="flex flex-wrap items-center gap-2" [formGroup]="filterForm">
+
+          <!-- Title -->
+          <h3 class="text-lg font-bold font-headline mr-1">Billing Overview</h3>
+
+          <!-- Divider -->
+          <div class="w-px h-5 bg-outline-variant/30 mx-1"></div>
+
+          <!-- Patient Name -->
+          <input
+            type="text"
+            formControlName="patient_name"
+            placeholder="Patient name"
+            class="w-32 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body" />
+
+          <!-- Status -->
+          <select
+            formControlName="status"
+            class="px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body">
+            <option value="">All Statuses</option>
+            <option value="Draft">Draft</option>
+            <option value="Pending">Pending</option>
+            <option value="Partial">Partial</option>
+            <option value="Paid">Paid</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Written Off">Written Off</option>
+          </select>
+
+          <!-- From Date -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+            <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">From</span>
+            <input
+              type="date"
+              formControlName="start_date"
+              class="bg-transparent text-xs outline-none font-body" />
+          </div>
+
+          <!-- To Date -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+            <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">To</span>
+            <input
+              type="date"
+              formControlName="end_date"
+              class="bg-transparent text-xs outline-none font-body" />
+          </div>
+
+          <!-- Min Amount -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+            <span class="text-xs text-on-surface-variant font-bold font-label">$</span>
+            <input
+              type="number"
+              formControlName="min_amount"
+              placeholder="Min"
+              class="w-16 bg-transparent text-xs outline-none font-body" />
+          </div>
+
+          <!-- Max Amount -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+            <span class="text-xs text-on-surface-variant font-bold font-label">$</span>
+            <input
+              type="number"
+              formControlName="max_amount"
+              placeholder="Max"
+              class="w-16 bg-transparent text-xs outline-none font-body" />
+          </div>
+
+          <!-- Apply -->
+          <button
+            (click)="applyFilters()"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
+            Filter
+          </button>
+
+          <!-- Reset -->
+          <button
+            (click)="resetFilters()"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+            Reset
+          </button>
+
+          <!-- Push rest right -->
+          <div class="flex-1"></div>
+
+          <!-- Record count -->
+          @if (totalItems() > 0) {
+            <p class="text-xs text-on-surface-variant font-label">
+              {{ from() }}–{{ to() }} of {{ totalItems() }}
+            </p>
+          }
+
+        </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead>
-            <tr class="bg-surface-container-low">
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit
-                Date</th>
-              <th class="px-5 py-3.5 text-xs font-bold uppercase">Insurance</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due
-                Date</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Action</th>
-            </tr>
-          </thead>
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="flex items-center justify-center py-20">
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+            <p class="text-sm text-on-surface-variant font-label">Loading bills...</p>
+          </div>
+        </div>
+      }
 
-          <tbody class="divide-y divide-outline-variant/10">
-            @for (bill of bills().data; track $index) {
-            <tr class="hover:bg-surface-container-low transition">
+      <!-- Table -->
+      @if (!loading()) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill #</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Visit Date</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Insurance</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Total</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Paid</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Due</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Due Date</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
+              </tr>
+            </thead>
 
-              <!-- Bill Number -->
-              <td class="px-5 py-4">
-                <p class="font-bold">{{ bill.bill_number }}</p>
-                <p class="text-xs text-on-surface-variant">#{{ bill.id }}</p>
-              </td>
+            <tbody class="divide-y divide-outline-variant/10">
 
-              <!-- Patient -->
-              <td class="px-5 py-4">
-                <p class="font-bold">
-                  {{ bill.visit.appointment.patient_case.patient.full_name }}
-                </p>
-              </td>
+              @if (!bills().data?.length) {
+                <tr>
+                  <td colspan="10" class="px-5 py-16 text-center">
+                    <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">receipt_long</span>
+                    <p class="text-sm font-bold text-on-surface-variant">No bills found</p>
+                    <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try adjusting your filters</p>
+                  </td>
+                </tr>
+              }
 
-              <!-- Visit Date -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                {{ bill.visit.visit_date | date }}
-              </td>
+              @for (bill of bills().data; track bill.id) {
+                <tr class="hover:bg-surface-container-low transition">
 
-              <!-- Insurance -->
-              <td class="px-5 py-4">
-                <span
-                  class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
-                  [ngClass]="bill.visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
-                  {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' :
-                  'Standard' }}
-                </span>
-              </td>
+                  <!-- Bill Number -->
+                  <td class="px-5 py-4">
+                    <p class="font-bold">{{ bill.bill_number }}</p>
+                    <p class="text-xs text-on-surface-variant">#{{ bill.id }}</p>
+                  </td>
 
-              <!-- Total -->
-              <td class="px-5 py-4 text-right font-semibold">
-                ${{ bill.bill_amount }}
-              </td>
+                  <!-- Patient -->
+                  <td class="px-5 py-4">
+                    <p class="font-bold">
+                      {{ bill.visit.appointment.patient_case.patient.full_name }}
+                    </p>
+                  </td>
 
-              <!-- Paid -->
-              <td class="px-5 py-4 text-right text-green-600 font-semibold">
-                ${{ bill.paid_amount }}
-              </td>
+                  <!-- Visit Date -->
+                  <td class="px-5 py-4 whitespace-nowrap">
+                    {{ bill.visit.visit_date | date }}
+                  </td>
 
-              <!-- Due -->
-              <td class="px-5 py-4 text-right text-red-600 font-semibold">
-                ${{ bill.outstanding_amount }}
-              </td>
+                  <!-- Insurance -->
+                  <td class="px-5 py-4">
+                    <span
+                      class="px-2.5 py-1 rounded-full text-xs font-bold text-white"
+                      [ngClass]="bill.visit.appointment.patient_case.car_accident ? 'bg-orange-700' : 'bg-cyan-700'">
+                      {{ bill.visit.appointment.patient_case.car_accident ? 'NF2' : 'Standard' }}
+                    </span>
+                  </td>
 
-              <!-- Status -->
-              <td class="px-5 py-4 text-center">
-                <span class="px-2.5 py-1 rounded-full text-xs font-bold"
-                  [class]="getBillStatusClass(bill.status)">
-                  {{ bill.status }}
-                </span>
-              </td>
+                  <!-- Total -->
+                  <td class="px-5 py-4 text-right font-semibold">
+                    ${{ bill.bill_amount }}
+                  </td>
 
-              <!-- Due Date -->
-              <td class="px-5 py-4 text-center">
-                <span [class.text-red-600]="isOverdue(bill.due_date)">
-                  {{ bill.due_date | date }}
-                </span>
-              </td>
+                  <!-- Paid -->
+                  <td class="px-5 py-4 text-right text-green-600 font-semibold">
+                    ${{ bill.paid_amount }}
+                  </td>
 
-              <!-- Actions -->
-              <td class="px-5 py-4 text-right space-x-2">
+                  <!-- Due -->
+                  <td class="px-5 py-4 text-right text-red-600 font-semibold">
+                    ${{ bill.outstanding_amount }}
+                  </td>
 
-                <!-- View -->
-                <button
-                  [routerLink]="['/bills/invoice', bill.id]"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container">
-                  View
-                </button>
-                <button
-                  [routerLink]="['/bills/edit', bill.id]"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container">
-                  Edit
-                </button>
-                <button
-                  [routerLink]="['/bills', bill.id, 'pay']"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container">
-                  Post Payment
-                </button>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+                  <!-- Status -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                      [class]="getBillStatusClass(bill.status)">
+                      {{ bill.status }}
+                    </span>
+                  </td>
+
+                  <!-- Due Date -->
+                  <td class="px-5 py-4 text-center">
+                    <span [class.text-red-600]="isOverdue(bill.due_date)">
+                      {{ bill.due_date | date }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-5 py-4 text-right space-x-2">
+                    <button
+                      [routerLink]="['/bills/invoice', bill.id]"
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
+                      View
+                    </button>
+                    <button
+                      [routerLink]="['/bills/edit', bill.id]"
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                      Edit
+                    </button>
+                    <button
+                      [routerLink]="['/bills', bill.id, 'pay']"
+                      class="px-3 py-1.5 rounded-md text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container transition">
+                      Post Payment
+                    </button>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+            <p class="text-xs text-on-surface-variant font-label">
+              Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
+
+              @for (page of visiblePages(); track $index) {
+                @if (page === '...') {
+                  <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
+                } @else {
+                  <button
+                    (click)="goToPage(+page)"
+                    class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+                    [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
+              <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
+            </div>
+          </div>
+        }
+      }
 
     </section>
   </div>
