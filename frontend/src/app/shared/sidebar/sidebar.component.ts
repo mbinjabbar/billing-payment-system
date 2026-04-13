@@ -11,23 +11,23 @@ interface NavItem {
 
 const BILLER_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard',      route: '/biller' },
-  { label: 'Visits',    icon: 'calendar_today', route: '/biller/visits' },
-  { label: 'Bills',     icon: 'receipt_long',   route: '/bills/bill-list' },
+  { label: 'Visits',    icon: 'calendar_today', route: '/visits' },
+  { label: 'Bills',     icon: 'receipt_long',   route: '/bills' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
 ];
 
 const PAYMENT_POSTER_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard',      route: '/payment-poster' },
-  { label: 'Bills',     icon: 'receipt_long',   route: '/bills/bill-list' },
-  { label: 'Payments',  icon: 'payments',       route: '/payments/payment-list' },
+  { label: 'Bills',     icon: 'receipt_long',   route: '/bills' },
+  { label: 'Payments',  icon: 'payments',       route: '/payments' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
 ];
 
 const ADMIN_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard',      route: '/admin' },
-  { label: 'Visits',    icon: 'calendar_today', route: '/biller/visits' },
-  { label: 'Bills',     icon: 'receipt_long',   route: '/bills/bill-list' },
-  { label: 'Payments',  icon: 'payments',       route: '/payments/payment-list' },
+  { label: 'Visits',    icon: 'calendar_today', route: '/visits' },
+  { label: 'Bills',     icon: 'receipt_long',   route: '/bills' },
+  { label: 'Payments',  icon: 'payments',       route: '/payments' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
   { label: 'Users',     icon: 'group',           route: '/admin/users' },
   { label: 'Settings', icon: 'settings', route: '/admin/settings' },

@@ -1,16 +1,18 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { loginGuard } from './core/guards/login.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'login',
+    canActivate: [loginGuard],
     loadComponent: () =>
-      import('./features/auth/login/login.component').then(m => m.LoginComponent)
+      import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
 
-   // Admin
+  // Admin
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard(['Admin'])],
@@ -36,32 +38,33 @@ export const routes: Routes = [
           import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
       },
       {
-      path: 'settings',
-      loadComponent: () =>
-      import('./features/admin/settings/settings.component').then(m => m.SettingsComponent)
-  },
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/admin/settings/settings.component').then(m => m.SettingsComponent)
+      },
     ]
   },
 
   // Biller
   {
     path: 'biller',
-    canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
+    canActivate: [authGuard, roleGuard(['Biller'])],
     children: [
       {
         path: '',
         loadComponent: () =>
           import('./features/biller/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      },
-      {
-        path: 'visits',
-        loadComponent: () =>
-          import('./features/bills/visit/visit.component').then(m => m.VisitComponent)
       }
     ]
   },
 
   // Bills
+  {
+    path: 'visits',
+    canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
+    loadComponent: () =>
+      import('./features/bills/visit/visit.component').then(m => m.VisitComponent)
+  },
   {
     path: 'bills/create/:visitId',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
@@ -75,7 +78,7 @@ export const routes: Routes = [
       import('./features/bills/edit-bill/edit-bill.component').then(m => m.EditBillComponent)
   },
   {
-    path: 'bills/bill-list',
+    path: 'bills',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller', 'Payment Poster'])],
     loadComponent: () =>
       import('./features/bills/bill-list/bill-list.component').then(m => m.BillListComponent)
@@ -96,12 +99,12 @@ export const routes: Routes = [
   // Payments
   {
     path: 'payment-poster',
-    canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
+    canActivate: [authGuard, roleGuard(['Payment Poster'])],
     loadComponent: () =>
       import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
-    path: 'payments/payment-list',
+    path: 'payments',
     canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
     loadComponent: () =>
       import('./features/payments/payment-list/payment-list.component').then(m => m.PaymentListComponent)
