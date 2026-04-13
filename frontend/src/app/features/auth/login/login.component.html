@@ -1,48 +1,62 @@
-<div class="min-h-screen flex overflow-hidden bg-surface font-body text-on-surface">
+<div
+  class="min-h-screen flex overflow-hidden bg-surface font-body text-on-surface">
 
   <!-- Left Section: Visual & Branding -->
-  <section class="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 text-white overflow-hidden"
+  <section
+    class="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 text-white overflow-hidden"
     style="background-color: #005bc4; background-image: radial-gradient(at 0% 0%, hsla(212,100%,70%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(220,100%,55%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(215,100%,45%,1) 0, transparent 50%), radial-gradient(at 0% 100%, hsla(205,100%,60%,1) 0, transparent 50%), radial-gradient(at 50% 100%, hsla(210,100%,50%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(225,100%,40%,1) 0, transparent 50%);">
 
     <!-- Logo -->
-    <div class="absolute top-10 left-10 text-2xl font-extrabold tracking-tighter font-headline text-white">
+    <div
+      class="absolute top-10 left-10 text-2xl font-extrabold tracking-tighter font-headline text-white">
       MedBilling
     </div>
 
     <!-- Content -->
     <div class="max-w-xl relative z-10">
-      <div class="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-        <span class="material-symbols-outlined text-white text-4xl">account_balance_wallet</span>
+      <div
+        class="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+        <span
+          class="material-symbols-outlined text-white text-4xl">account_balance_wallet</span>
       </div>
-      <h2 class="font-headline text-5xl font-extrabold tracking-tight mb-6 leading-tight">
+      <h2
+        class="font-headline text-5xl font-extrabold tracking-tight mb-6 leading-tight">
         Streamline your practice's financial health.
       </h2>
       <p class="text-xl text-white/80 font-medium leading-relaxed max-w-lg">
-        Advanced medical billing solutions designed to maximize efficiency, reduce overhead, and ensure you get paid faster.
+        Advanced medical billing solutions designed to maximize efficiency,
+        reduce overhead, and ensure you get paid faster.
       </p>
       <div class="mt-12 grid grid-cols-2 gap-8 border-t border-white/10 pt-12">
         <div>
           <div class="text-3xl font-bold text-white mb-1">99.2%</div>
-          <div class="text-sm font-semibold uppercase tracking-widest text-white/60">Claim Accuracy</div>
+          <div
+            class="text-sm font-semibold uppercase tracking-widest text-white/60">Claim
+            Accuracy</div>
         </div>
         <div>
           <div class="text-3xl font-bold text-white mb-1">15k+</div>
-          <div class="text-sm font-semibold uppercase tracking-widest text-white/60">Providers</div>
+          <div
+            class="text-sm font-semibold uppercase tracking-widest text-white/60">Providers</div>
         </div>
       </div>
     </div>
 
     <!-- Decorative blobs -->
-    <div class="absolute top-1/4 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
+    <div
+      class="absolute top-1/4 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+    <div
+      class="absolute bottom-1/4 -left-20 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
   </section>
 
   <!-- Right Section: Login Form -->
   <section class="w-full lg:w-1/2 bg-surface flex flex-col min-h-screen">
 
     <!-- Mobile Header -->
-    <header class="lg:hidden w-full h-20 flex items-center px-8 border-b border-outline-variant/10">
-      <div class="text-2xl font-extrabold text-on-surface tracking-tighter font-headline">MedBilling</div>
+    <header
+      class="lg:hidden w-full h-20 flex items-center px-8 border-b border-outline-variant/10">
+      <div
+        class="text-2xl font-extrabold text-on-surface tracking-tighter font-headline">MedBilling</div>
     </header>
 
     <main class="grow flex items-center justify-center p-8">
@@ -50,25 +64,42 @@
 
         <!-- Heading -->
         <div class="mb-10">
-          <div class="lg:hidden inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-6">
-            <span class="material-symbols-outlined text-primary text-3xl">lock</span>
+          <div
+            class="lg:hidden inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-6">
+            <span
+              class="material-symbols-outlined text-primary text-3xl">lock</span>
           </div>
-          <h1 class="font-headline text-3xl lg:text-4xl font-extrabold text-on-surface tracking-tight mb-3">
+          <h1
+            class="font-headline text-3xl lg:text-4xl font-extrabold text-on-surface tracking-tight mb-3">
             Welcome back
           </h1>
-          <p class="text-on-surface-variant font-medium">Access your secure medical billing dashboard</p>
+          <p class="text-on-surface-variant font-medium">Access your secure
+            medical billing dashboard</p>
         </div>
 
         <!-- Form -->
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6" novalidate>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6"
+          novalidate>
+
+          @if (loginError) {
+          <div
+            class="flex items-center gap-3 p-4 rounded-xl bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+            <span
+              class="material-symbols-outlined icon-md flex-shrink-0">error_outline</span>
+            {{ loginError }}
+          </div>
+          }
 
           <!-- Email Field -->
           <div class="space-y-2">
-            <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1" for="email">
+            <label
+              class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1"
+              for="email">
               Email Address
             </label>
             <div class="relative group">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
                 [ngClass]="{
                   'text-error': email.invalid && email.touched,
                   'text-primary': email.valid && email.touched,
@@ -84,38 +115,44 @@
                   'border-error focus:ring-4 focus:ring-error/10 focus:border-error': email.invalid && email.touched,
                   'border-primary focus:ring-4 focus:ring-primary/10 focus:border-primary': email.valid && email.touched,
                   'border-outline-variant/20 focus:ring-4 focus:ring-primary/10 focus:border-primary': !email.touched
-                }"
-              />
+                }" />
             </div>
             <!-- Email Errors -->
             @if (email.touched && email.invalid) {
-              <div class="ml-1 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-error text-sm">error</span>
-                @if (email.errors?.['required']) {
-                  <p class="text-xs text-error font-medium">Email address is required.</p>
-                }
-                @if (email.errors?.['email']) {
-                  <p class="text-xs text-error font-medium">Please enter a valid email address.</p>
-                }
-              </div>
+            <div class="ml-1 flex items-center gap-1.5">
+              <span
+                class="material-symbols-outlined text-error text-sm">error</span>
+              @if (email.errors?.['required']) {
+              <p class="text-xs text-error font-medium">Email address is
+                required.</p>
+              }
+              @if (email.errors?.['email']) {
+              <p class="text-xs text-error font-medium">Please enter a valid
+                email address.</p>
+              }
+            </div>
             }
             @if (email.touched && email.valid) {
-              <div class="ml-1 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
-                <p class="text-xs text-primary font-medium">Looks good!</p>
-              </div>
+            <div class="ml-1 flex items-center gap-1.5">
+              <span
+                class="material-symbols-outlined text-primary text-sm">check_circle</span>
+              <p class="text-xs text-primary font-medium">Looks good!</p>
+            </div>
             }
           </div>
 
           <!-- Password Field -->
           <div class="space-y-2">
             <div class="flex justify-between items-end ml-1">
-              <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant" for="password">
+              <label
+                class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant"
+                for="password">
                 Password
               </label>
             </div>
             <div class="relative group">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
                 [ngClass]="{
                   'text-error': password.invalid && password.touched,
                   'text-primary': password.valid && password.touched,
@@ -131,8 +168,7 @@
                   'border-error focus:ring-4 focus:ring-error/10 focus:border-error': password.invalid && password.touched,
                   'border-primary focus:ring-4 focus:ring-primary/10 focus:border-primary': password.valid && password.touched,
                   'border-outline-variant/20 focus:ring-4 focus:ring-primary/10 focus:border-primary': !password.touched
-                }"
-              />
+                }" />
               <!-- Toggle Password Visibility -->
               <button type="button" (click)="togglePassword()"
                 class="absolute right-4 top-1/2 -translate-y-1/3 text-outline-variant hover:text-on-surface transition-colors">
@@ -143,21 +179,25 @@
             </div>
             <!-- Password Errors -->
             @if (password.touched && password.invalid) {
-              <div class="ml-1 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-error text-sm">error</span>
-                @if (password.errors?.['required']) {
-                  <p class="text-xs text-error font-medium">Password is required.</p>
-                }
-                @if (password.errors?.['minlength']) {
-                  <p class="text-xs text-error font-medium">Password must be at least 8 characters.</p>
-                }
-              </div>
+            <div class="ml-1 flex items-center gap-1.5">
+              <span
+                class="material-symbols-outlined text-error text-sm">error</span>
+              @if (password.errors?.['required']) {
+              <p class="text-xs text-error font-medium">Password is
+                required.</p>
+              }
+              @if (password.errors?.['minlength']) {
+              <p class="text-xs text-error font-medium">Password must be at
+                least 8 characters.</p>
+              }
+            </div>
             }
             @if (password.touched && password.valid) {
-              <div class="ml-1 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
-                <p class="text-xs text-primary font-medium">Strong password!</p>
-              </div>
+            <div class="ml-1 flex items-center gap-1.5">
+              <span
+                class="material-symbols-outlined text-primary text-sm">check_circle</span>
+              <p class="text-xs text-primary font-medium">Strong password!</p>
+            </div>
             }
           </div>
 
@@ -166,17 +206,23 @@
             <button
               type="submit"
               [disabled]="isLoading"
-              class="w-full text-white font-headline font-bold py-4 rounded-xl shadow-[0_8px_20px_-4px_rgba(0,91,196,0.25)] hover:shadow-[0_12px_24px_-4px_rgba(0,91,196,0.35)] transition-all active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+              class="w-full cursor-pointer text-white font-headline font-bold py-4 rounded-xl shadow-[0_8px_20px_-4px_rgba(0,91,196,0.25)] hover:shadow-[0_12px_24px_-4px_rgba(0,91,196,0.35)] transition-all active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
               style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
               @if (isLoading) {
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                <span>Signing In...</span>
+              <svg class="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10"
+                  stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span>Signing In...</span>
               } @else {
-                <span>Sign In</span>
-                <span class="material-symbols-outlined transition-transform group-hover:translate-x-1" style="font-size: 18px;">arrow_forward</span>
+              <span>Sign In</span>
+              <span
+                class="material-symbols-outlined transition-transform group-hover:translate-x-1"
+                style="font-size: 18px;">arrow_forward</span>
               }
             </button>
           </div>
@@ -184,17 +230,22 @@
         </form>
 
         <!-- Secondary Action -->
-        <div class="mt-10 pt-8 border-t border-outline-variant/10 text-center lg:text-left">
+        <div
+          class="mt-10 pt-8 border-t border-outline-variant/10 text-center lg:text-left">
           <p class="text-sm text-on-surface-variant font-medium">
             New to the system?
-            <a class="text-primary font-bold ml-1 hover:underline" href="#">Contact Administrator</a>
+            <a class="text-primary font-bold ml-1 hover:underline"
+               href="mailto:admin@clinic.com">Contact Administrator</a>
           </p>
         </div>
 
         <!-- Trust Indicator -->
-        <div class="mt-12 lg:mt-20 flex justify-center lg:justify-start items-center gap-3 opacity-40 grayscale">
-          <span class="material-symbols-outlined text-on-surface-variant text-xl">verified_user</span>
-          <span class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant">
+        <div
+          class="mt-12 lg:mt-20 flex justify-center lg:justify-start items-center gap-3 opacity-40 grayscale">
+          <span
+            class="material-symbols-outlined text-on-surface-variant text-xl">verified_user</span>
+          <span
+            class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant">
             Secure AES-256 Encryption
           </span>
         </div>
@@ -203,12 +254,12 @@
     </main>
 
     <!-- Footer -->
-    <footer class="p-8 flex flex-col md:flex-row justify-between items-center gap-4 text-on-surface-variant/50">
+    <footer
+      class="p-8 flex flex-col md:flex-row justify-between items-center gap-4 text-on-surface-variant/50">
       <p class="text-xs font-medium">© 2026 MedBilling Solutions.</p>
-      <div class="flex gap-6">
-        <a class="text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest" href="#">Support</a>
-        <a class="text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest" href="#">Status</a>
-      </div>
+        <a
+          class="text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest"
+          href="#">Support</a>
     </footer>
 
   </section>
