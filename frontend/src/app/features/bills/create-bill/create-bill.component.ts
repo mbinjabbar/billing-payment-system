@@ -52,7 +52,7 @@ export class CreateBillComponent {
   }
 
   loadProcedureCodes() {
-    this.procedureCodesService.getProcedureCodes().subscribe((res) => {
+    this.procedureCodesService.getProcedureCodes(true).subscribe((res) => {
       this.procedures.set(res);
     });
   }

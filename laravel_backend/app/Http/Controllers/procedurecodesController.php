@@ -10,10 +10,16 @@ class procedurecodesController extends Controller
 {
     use ApiResponse;
   
-    public function index()
+    public function index(Request $request)
     {
         try {
-        $procedureCodes = ProcedureMaster::all();
+        $query = ProcedureMaster::query();
+
+        if($request->boolean('active_only')) {
+            $query->where('is_active', true);
+        }
+        
+        $procedureCodes = $query->get();
         return $this->success($procedureCodes, 'Procedure codes retrieved successfully');
         } catch (Exception $e) {
             return $this->error('Unable to fetch procedure codes.');

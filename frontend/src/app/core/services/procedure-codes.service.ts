@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 @Injectable({
@@ -8,8 +8,13 @@ export class ProcedureCodesService {
   private apiUrl = 'http://localhost:8000/api';
   private http   = inject(HttpClient);
 
-  getProcedureCodes() {
-    return this.http.get(`${this.apiUrl}/procedurecodes`);
+  getProcedureCodes(activeOnly: boolean = false) {
+    let params = new HttpParams();
+
+    if(activeOnly) {
+      params = params.set('active_only', true)
+    }
+    return this.http.get(`${this.apiUrl}/procedurecodes`, { params });
   }
 
   getProcedureCodeById(id: number) {
