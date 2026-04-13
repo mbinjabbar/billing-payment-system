@@ -33,9 +33,9 @@ class VisitController extends Controller
             });
 
             $stats = [
-                'total_visits' => (clone $query)->count(),
-                'billed' => (clone $query)->whereHas('bill')->count(),
-                'unbilled'       => (clone $query)->where('status', 'Completed')->doesntHave('bill')->count()
+                'total_visits' => Visit::count(),
+                'billed' => Visit::whereHas('bill')->count(),
+                'unbilled'       => Visit::where('status', 'Completed')->doesntHave('bill')->count()
             ];
 
             $visits = $query->latest('visit_date')->paginate(10);
