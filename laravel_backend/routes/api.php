@@ -23,10 +23,18 @@ Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloa
 Route::post('/payments/export', [paymentController::class, 'export']);
 Route::apiResource('/payments', paymentController::class);
 
-Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
+// Route::apiResource('visits', VisitController::class)
+//     ->only(['index', 'show'])
+//     ->middleware(['firebasejwt','role:admin']);
+Route::group(['middleware' => ['firebasejwt', 'role:admin']], function () {
+    Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
+});
 Route::apiResource('/procedurecodes', procedurecodesController::class);
 Route::apiResource('/insurancefirms', insurancefirmsController::class);
 Route::apiResource('/documents', documentController::class);
 
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::post('/settings', [SettingsController::class, 'update']);
+
+
+
