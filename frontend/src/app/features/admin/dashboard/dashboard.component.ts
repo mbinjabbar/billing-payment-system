@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BillService } from '../../../core/services/bill.service';
 import { PaymentPosterService } from '../../../core/services/payment-poster.service';
-import { VisitService } from '../../../core/services/visit.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,11 +13,9 @@ import { VisitService } from '../../../core/services/visit.service';
 export class DashboardComponent {
   private billService = inject(BillService);
   private paymentService = inject(PaymentPosterService);
-  private visitService = inject(VisitService);
 
   bills = signal<any[]>([]);
   payments = signal<any[]>([]);
-  visitStats = signal<any>({ total_visits: 0, billed: 0, unbilled: 0 });
   recentBills = signal<any[]>([]);
   recentPayments = signal<any[]>([]);
 
@@ -36,7 +33,7 @@ export class DashboardComponent {
   ngOnInit() {
     let loaded = 0;
     const done = () => {
-      if (++loaded === 3) this.loading.set(false);
+      if (++loaded === 2) this.loading.set(false);
     };
 
     // Bills — for billing stats + recent bills table
@@ -54,17 +51,6 @@ export class DashboardComponent {
       next: (res: any) => {
         this.payments.set(res.data ?? []);
         this.recentPayments.set(res.data ?? []);
-        done();
-      },
-      error: () => done(),
-    });
-
-    // Visits — for visit stats from the stats key
-    this.visitService.getVisits(1).subscribe({
-      next: (res: any) => {
-        this.visitStats.set(
-          res.stats ?? { total_visits: 0, billed: 0, unbilled: 0 },
-        );
         done();
       },
       error: () => done(),

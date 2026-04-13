@@ -83,43 +83,7 @@
 
       </div>
 
-      <!-- ── Row 2: Visit Stats ── -->
-      <div class="grid grid-cols-3 gap-6">
-
-        <!-- Total Visits -->
-        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
-          <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-            <span class="material-symbols-outlined text-primary icon-md">calendar_today</span>
-          </div>
-          <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Total Visits</p>
-          <p class="text-3xl font-extrabold text-on-surface font-headline">{{ visitStats().total_visits }}</p>
-        </div>
-
-        <!-- Billed Visits -->
-        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
-          <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-            <span class="material-symbols-outlined text-green-700 icon-md">check_circle</span>
-          </div>
-          <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Billed Visits</p>
-          <p class="text-3xl font-extrabold text-on-surface font-headline">{{ visitStats().billed }}</p>
-        </div>
-
-        <!-- Unbilled Visits -->
-        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 relative">
-          <span class="absolute top-4 right-4 text-[9px] font-extrabold bg-orange-500 text-white px-2 py-0.5 rounded-full font-label tracking-wider">
-            REVIEW
-          </span>
-          <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center mb-4">
-            <span class="material-symbols-outlined text-orange-700 icon-md">event_busy</span>
-          </div>
-          <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest font-label mb-1">Unbilled Visits</p>
-          <p class="text-3xl font-extrabold text-on-surface font-headline">{{ visitStats().unbilled }}</p>
-          <p class="text-xs text-on-surface-variant font-label mt-1">Completed but no bill yet</p>
-        </div>
-
-      </div>
-
-      <!-- ── Row 3: Recent Activity Tables side by side ── -->
+      <!-- ── Row 2: Recent Activity Tables side by side ── -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Recent Bills -->
