@@ -193,7 +193,7 @@ export class CreateBillComponent {
     };
   });
 
-  generateBill() {
+  onSubmit() {
     if (this.selectedProcedures().length === 0) return;
 
     const summary = this.summary();
