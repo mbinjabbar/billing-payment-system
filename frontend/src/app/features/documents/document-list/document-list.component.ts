@@ -106,6 +106,8 @@ export class DocumentListComponent {
         return 'bg-purple-100 text-purple-700';
       case 'Supporting Document':
         return 'bg-gray-100 text-gray-600';
+      case 'Receipt':
+        return 'bg-green-100 text-green-700';
       default:
         return 'bg-gray-100 text-gray-600';
     }
@@ -121,6 +123,8 @@ export class DocumentListComponent {
         return 'image';
       case 'Supporting Document':
         return 'folder';
+      case 'Receipt':
+        return 'receipt';
       default:
         return 'description';
     }
