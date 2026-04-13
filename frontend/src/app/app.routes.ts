@@ -48,7 +48,7 @@ export const routes: Routes = [
   // Biller
   {
     path: 'biller',
-    canActivate: [authGuard, roleGuard(['Biller'])],
+    canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
     children: [
       {
         path: '',
@@ -58,13 +58,15 @@ export const routes: Routes = [
     ]
   },
 
-  // Bills
+  // Visits
   {
     path: 'visits',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
     loadComponent: () =>
       import('./features/bills/visit/visit.component').then(m => m.VisitComponent)
   },
+
+  // Bills — specific routes
   {
     path: 'bills/create/:visitId',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
@@ -78,12 +80,6 @@ export const routes: Routes = [
       import('./features/bills/edit-bill/edit-bill.component').then(m => m.EditBillComponent)
   },
   {
-    path: 'bills',
-    canActivate: [authGuard, roleGuard(['Admin', 'Biller', 'Payment Poster'])],
-    loadComponent: () =>
-      import('./features/bills/bill-list/bill-list.component').then(m => m.BillListComponent)
-  },
-  {
     path: 'bills/invoice/:billId',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller', 'Payment Poster'])],
     loadComponent: () =>
@@ -95,25 +91,35 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/payments/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
   },
+  {
+    // bill list
+    path: 'bills',
+    canActivate: [authGuard, roleGuard(['Admin', 'Biller', 'Payment Poster'])],
+    loadComponent: () =>
+      import('./features/bills/bill-list/bill-list.component').then(m => m.BillListComponent)
+  },
 
   // Payments
-  {
-    path: 'payment-poster',
-    canActivate: [authGuard, roleGuard(['Payment Poster'])],
-    loadComponent: () =>
-      import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent)
-  },
-  {
-    path: 'payments',
-    canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
-    loadComponent: () =>
-      import('./features/payments/payment-list/payment-list.component').then(m => m.PaymentListComponent)
-  },
   {
     path: 'payments/edit/:id',
     canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
     loadComponent: () =>
       import('./features/payments/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
+  },
+  {
+    // payment list
+    path: 'payments',
+    canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
+    loadComponent: () =>
+      import('./features/payments/payment-list/payment-list.component').then(m => m.PaymentListComponent)
+  },
+
+  // Payment Poster
+  {
+    path: 'payment-poster',
+    canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
+    loadComponent: () =>
+      import('./features/payment-poster/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
 
   // Documents
