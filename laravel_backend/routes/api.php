@@ -13,7 +13,7 @@ use App\Http\Controllers\SettingsController;
 
 Route::group(['middleware' => ['firebasejwt']], function () {
 
-Route::apiResource('visits', VisitController::class)->only(['index', 'show'])->middleware('role:Admin|Biller');
+Route::apiResource('visits', VisitController::class)->only(['index', 'show'])->middleware('role:Admin,Biller');
 
 Route::get('/bills/stats', [billController::class, 'stats']);
 Route::post('/bills/export', [billController::class, 'export']);
@@ -23,24 +23,24 @@ Route::get('/bills/invoice/{id}', [documentController::class, 'downloadInvoice']
 Route::get('/bills/nf2/{id}', [documentController::class, 'downloadNF2']);
 
 Route::get('/bills', [billController::class,'index']);
-Route::get('/bills/{id}', [billController::class,'show'])->middleware('role:Admin|Biller|Payment Poster');
+Route::get('/bills/{id}', [billController::class,'show'])->middleware('role:Admin,Biller,Payment Poster');
 
-Route::apiResource('/bills', billController::class)->only(['store','update'])->middleware('role:Admin|Biller');
+Route::apiResource('/bills', billController::class)->only(['store','update'])->middleware('role:Admin,Biller');
 
-Route::middleware(['role:Admin|Payment Poster'])->group(function () {
+Route::middleware(['role:Admin,Payment Poster'])->group(function () {
     Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloadReceipt']);
     Route::post('/payments/export', [paymentController::class, 'export']);
 });
 
-Route::middleware('role:Admin|Payment Poster')->group(function () {
+Route::middleware('role:Admin,Payment Poster')->group(function () {
     Route::apiResource('payments', PaymentController::class)->only([
        'store' ,'index', 'show', 'update'
     ]);
 });
 
 
-Route::get('/procedurecodes', [procedurecodesController::class,'index'])->middleware('role:Admin|Biller');
-Route::get('/insurancefirms', [insurancefirmsController::class,'index'])->middleware('role:Admin|Biller');
+Route::get('/procedurecodes', [procedurecodesController::class,'index'])->middleware('role:Admin,Biller');
+Route::get('/insurancefirms', [insurancefirmsController::class,'index'])->middleware('role:Admin,Biller');
 Route::apiResource('/documents', documentController::class);
 
 Route::middleware(['role:Admin'])->group(function () {

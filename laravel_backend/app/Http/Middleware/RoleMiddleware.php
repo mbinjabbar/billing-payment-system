@@ -8,11 +8,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-public function handle(Request $request, Closure $next, string $role): Response 
+public function handle(Request $request, Closure $next, ...$roles): Response 
 {
     $userRole = $request->attributes->get('user_role');
 
-    if (!$userRole || $userRole !== $role) {
+    if (!$userRole || !in_array($userRole, $roles)) {
         return response()->json([
             'success' => false,
             'message' => "Role " . ($userRole ?? 'Guest') . " is not authorized to access this route"
