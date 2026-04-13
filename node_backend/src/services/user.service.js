@@ -22,6 +22,9 @@ class UserService {
     }
 
     async updateUser(id, data) {
+        if (data.password) {
+            data.password = await hashPassword(data.password);
+        }
         const updatedUser = await userRepository.update(id, data);
         if (!updatedUser) throw new Error("User not found or update failed");
         return updatedUser;
