@@ -183,12 +183,6 @@ class billController extends Controller
                 return $this->error('Only partially paid bills can be written off.', 422);
             }
 
-            // $user = $request->get('auth_user');
-
-            // if($user->role === 'Payment Poster') {
-            //     return $this->error("Payment poster cannot edit billing details", 403);
-            // }
-
             $bill->fill($request->only([
                 'procedure_codes',
                 'charges',
