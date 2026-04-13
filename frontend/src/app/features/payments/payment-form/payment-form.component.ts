@@ -178,7 +178,7 @@ export class PaymentFormComponent {
     if (this.isEdit()) {
       fd.append('_method', 'PUT');
       this.paymentService.updatePayment(this.paymentId, fd).subscribe({
-        next: () => this.router.navigate(['/payments/payment-list']),
+        next: () => this.router.navigate(['/payments']),
         error: (err) => {
           this.error.set(err.error?.message || 'Failed to update payment.');
           this.submitting.set(false);
@@ -187,7 +187,7 @@ export class PaymentFormComponent {
     } else {
       fd.append('received_by', String(this.authService.getUserId()));
       this.paymentService.createPayment(fd).subscribe({
-        next: () => this.router.navigate(['/payments/payment-list']),
+        next: () => this.router.navigate(['/payments']),
         error: (err) => {
           this.error.set(err.error?.message || 'Failed to post payment.');
           this.submitting.set(false);
