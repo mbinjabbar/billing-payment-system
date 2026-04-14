@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { SettingsService } from '../../core/services/settings.service';
 
 @Component({
   selector: 'app-header',
@@ -12,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class HeaderComponent {
   private authService = inject(AuthService);
   private router      = inject(Router);
+  settings = inject(SettingsService);
 
   user = computed(() => this.authService.getUser());
 

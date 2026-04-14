@@ -9,7 +9,7 @@
     <!-- Logo -->
     <div
       class="absolute top-10 left-10 text-2xl font-extrabold tracking-tighter font-headline text-white">
-      MedBilling
+      {{settings.appName()}}
     </div>
 
     <!-- Content -->
@@ -56,7 +56,7 @@
     <header
       class="lg:hidden w-full h-20 flex items-center px-8 border-b border-outline-variant/10">
       <div
-        class="text-2xl font-extrabold text-on-surface tracking-tighter font-headline">MedBilling</div>
+        class="text-2xl font-extrabold text-on-surface tracking-tighter font-headline">{{settings.appName()}}</div>
     </header>
 
     <main class="grow flex items-center justify-center p-8">
@@ -85,7 +85,7 @@
           <div
             class="flex items-center gap-3 p-4 rounded-xl bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
             <span
-              class="material-symbols-outlined icon-md flex-shrink-0">error_outline</span>
+              class="material-symbols-outlined icon-md shrink-0">error_outline</span>
             {{ loginError }}
           </div>
           }

@@ -5,6 +5,7 @@ import { HeaderComponent } from './shared/header/header.component';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
+import { SettingsService } from './core/services/settings.service';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { filter, map, startWith } from 'rxjs';
 })
 export class AppComponent {
   private router = inject(Router);
+  private settingsService = inject(SettingsService);
 
   private url = toSignal(
     this.router.events.pipe(
@@ -28,4 +30,8 @@ export class AppComponent {
     if (!url) return false;
     return !url.includes('/login');
   });
+
+  ngOnInit(){
+    this.settingsService.load();
+  }
 }

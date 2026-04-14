@@ -17,6 +17,7 @@ export class SettingsComponent {
   private procedureService = inject(ProcedureCodesService);
   private insuranceService = inject(InsuranceFirmsService);
   private settingsService  = inject(SettingsService);
+  settings = inject(SettingsService);
 
   activeTab = signal<Tab>('procedures');
 
@@ -202,6 +203,7 @@ export class SettingsComponent {
     this.settingsService.saveSettings(this.settingsForm.value).subscribe({
       next: () => {
         this.success.set('Settings saved successfully.');
+        this.settings.load();
         this.savingConfig.set(false);
       },
       error: () => {

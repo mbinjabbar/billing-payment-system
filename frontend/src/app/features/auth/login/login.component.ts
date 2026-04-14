@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { SettingsService } from '../../../core/services/settings.service';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +12,8 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class LoginComponent {
   private authService = inject(AuthService);
+  settings = inject(SettingsService);
+  
   loginForm: FormGroup;
   showPassword = false;
   isLoading    = false;

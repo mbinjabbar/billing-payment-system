@@ -371,9 +371,6 @@
       [formGroup]="settingsForm">
 
       <h3 class="text-lg font-bold font-headline">Clinic Information</h3>
-      <p class="text-sm text-on-surface-variant font-body -mt-4">
-        This information appears on generated invoices and PDFs.
-      </p>
 
       <!-- Clinic Name -->
       <div>
@@ -414,9 +411,6 @@
 
       <div class="border-t border-outline-variant/10 pt-6">
         <h3 class="text-lg font-bold font-headline mb-4">Billing Defaults</h3>
-        <p class="text-sm text-on-surface-variant font-body -mt-2 mb-4">
-          These values auto-fill when creating a new bill.
-        </p>
 
         <div class="grid grid-cols-2 gap-6">
           <!-- Default Tax Rate -->
@@ -456,7 +450,6 @@
           <input type="text" formControlName="invoice_footer"
             placeholder="e.g. Thank you for your payment."
             class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-sm outline-none focus:border-primary transition" />
-          <p class="text-xs text-on-surface-variant font-label mt-1">Appears at the bottom of generated PDF invoices.</p>
         </div>
       </div>
 
