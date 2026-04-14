@@ -28,10 +28,17 @@ export class AppComponent {
   showShell = computed(() => {
     const url = this.url();
     if (!url) return false;
-    return !url.includes('/login');
+
+    const hideLayoutRoutes = [
+      '/login',
+      '/not-found',
+      '**'
+    ];
+
+    return !hideLayoutRoutes.some(r => url.includes(r));
   });
 
-  ngOnInit(){
+  ngOnInit() {
     this.settingsService.load();
   }
 }

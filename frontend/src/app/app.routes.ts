@@ -129,6 +129,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/documents/document-list/document-list.component').then(m => m.DocumentListComponent)
   },
-
-  { path: '**', redirectTo: 'login', pathMatch: 'full' }
+  // 404 Not Found
+  {
+    path: 'not-found',
+    loadComponent: () =>
+      import('./shared/not-found/not-found.component').then(m=> m.NotFoundComponent)
+  },
+  { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];

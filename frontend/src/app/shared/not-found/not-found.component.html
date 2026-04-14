@@ -1,0 +1,59 @@
+<div class="min-h-screen flex overflow-hidden bg-surface font-body text-on-surface items-center justify-center">
+
+  <section class="w-full lg:w-1/2 flex items-center justify-center p-10">
+
+    <div class="text-center max-w-md space-y-6">
+
+      <!-- App Name -->
+      <div class="text-sm font-bold tracking-widest text-primary uppercase">
+        {{ settings.appName() }}
+      </div>
+
+      <!-- 404 -->
+      <div class="relative mb-2">
+
+        <h1 class="font-headline text-[9rem] font-extrabold leading-none tracking-tighter text-surface-container-highest select-none">
+          404
+        </h1>
+
+      </div>
+
+      <!-- Title -->
+      <h2 class="font-headline text-3xl font-bold tracking-tight">
+        Page not found
+      </h2>
+
+      <!-- Description -->
+      <p class="text-on-surface-variant text-base leading-relaxed">
+        The page you’re looking for doesn’t exist, may have been moved, or is temporarily unavailable.
+      </p>
+
+      <!-- CTA Button -->
+      <div class="pt-4">
+
+        <button
+          (click)="goBack()"
+          class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-white font-bold shadow-md hover:shadow-lg transition-all active:scale-95 group">
+
+          <span>{{ getFallbackText() }}</span>
+
+          <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1">
+            arrow_forward
+          </span>
+
+        </button>
+
+      </div>
+
+      <!-- subtle footer hint -->
+      <div class="pt-6">
+        <p class="text-xs text-on-surface-variant/60 tracking-wide">
+          If you believe this is an error, contact support
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
