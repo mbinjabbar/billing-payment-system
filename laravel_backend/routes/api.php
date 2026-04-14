@@ -9,11 +9,12 @@ use App\Http\Controllers\procedurecodesController;
 use App\Http\Controllers\insurancefirmsController;
 use App\Http\Controllers\SettingsController;
 
-// Download Routes
+// General + Download Routes
 Route::get('/bills/invoice/{id}', [documentController::class, 'downloadInvoice']);
 Route::get('/bills/nf2/{id}',      [documentController::class, 'downloadNF2']);
 Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloadReceipt']);
 Route::get('/documents/cheque/{id}',        [documentController::class, 'downloadCheque']);
+Route::get('/settings',  [SettingsController::class, 'index']);
 
 
 Route::middleware('firebasejwt')->group(function () {
@@ -47,7 +48,6 @@ Route::middleware('firebasejwt')->group(function () {
         Route::delete('/payments/{id}', [paymentController::class, 'destroy']);
         Route::apiResource('/procedurecodes', procedurecodesController::class)->except(['index']);
         Route::apiResource('/insurancefirms', insurancefirmsController::class)->except(['index']);
-        Route::get('/settings',  [SettingsController::class, 'index']);
         Route::post('/settings', [SettingsController::class, 'update']);
     });
 });
