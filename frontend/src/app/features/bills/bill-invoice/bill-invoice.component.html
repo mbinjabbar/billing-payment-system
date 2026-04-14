@@ -224,13 +224,20 @@
             <!-- Paid Amount if any -->
             @if (bill().paid_amount > 0) {
             <div class="mt-6 p-4 bg-secondary-container/30 rounded-lg border border-secondary-container">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1">Amount
+              <p class="text-[10px] font-bold uppercase tracking-widest text-green-600 font-label mb-1">Amount
                 Paid</p>
               <p class="text-xl font-extrabold font-headline text-on-secondary-container">
                 ${{ bill().paid_amount }}
               </p>
             </div>
             }
+            <div class="mt-6 p-4 bg-secondary-container/30 rounded-lg border border-secondary-container">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-error font-label mb-1">Outstanding
+                Amount</p>
+              <p class="text-xl font-extrabold font-headline text-on-secondary-container">
+                ${{ bill().outstanding_amount }}
+              </p>
+            </div>
           </div>
 
           <!-- Totals -->

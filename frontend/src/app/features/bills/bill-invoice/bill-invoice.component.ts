@@ -17,7 +17,6 @@ export class BillInvoiceComponent {
   loading = signal(true);
   error = signal(false);
 
-  // Computed helpers
   patientName = computed(() => {
     const b = this.bill();
     if (!b) return '—';
