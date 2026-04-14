@@ -95,7 +95,7 @@
             <td style="width: 50%;">
                 <span class="label">NAME, ADDRESS, AND PHONE NUMBER OF INSURER'S CLAIMS REPRESENTATIVE *</span>
                 <div class="value bold">{{ $bill->insurance_firm->contact_person ?? 'CLAIMS DEPARTMENT' }}</div>
-                <div class="value">{{ $bill->insurance_firm->phone ?? 'N/A' }} / {{ $bill->insurance_firm->email ?? 'N/A' }}</div>
+                <div style="text-transform:lowercase" class="value">{{ $bill->insurance_firm->phone ?? 'N/A' }} / {{ $bill->insurance_firm->email ?? 'N/A' }}</div>
             </td>
         </tr>
     </table>
