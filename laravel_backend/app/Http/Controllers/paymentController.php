@@ -133,6 +133,10 @@ class paymentController extends Controller
             Storage::put($invoicePath, $invoicePdf->output());
             Storage::put($receiptPath, $receiptPdf->output());
 
+            $document = Document::where('payment_id', $payment->id)
+                ->where('document_type', 'Receipt')
+                ->first();
+
             Document::create([
                 'bill_id'       => $bill->id,
                 'document_type' => 'Invoice',
@@ -145,7 +149,9 @@ class paymentController extends Controller
                 'version'       => 1,
             ]);
 
-            Document::create([
+
+                if ($document) {
+                $document->update([
                 'bill_id'       => $bill->id,
                 'payment_id'    => $payment->id,
                 'document_type' => 'Receipt',
@@ -157,6 +163,20 @@ class paymentController extends Controller
                 'uploaded_by'   => $data['received_by'],
                 'version'       => 1,
             ]);
+                } else {
+                    Document::create([
+                        'bill_id'       => $bill->id,
+                        'payment_id'    => $payment->id,
+                        'document_type' => 'Receipt',
+                        'file_name'     => $receiptFileName,
+                        'file_type'     => 'application/pdf',
+                        'file_path'     => $receiptPath,
+                        'file_size'     => Storage::size($receiptPath),
+                        'upload_date'   => now(),
+                        'uploaded_by'   => $data['received_by'],
+                        'version'       => 1,
+                    ]);
+                }
 
             if ($request->hasFile('cheque_file')) {
                 Document::create([
@@ -252,6 +272,42 @@ class paymentController extends Controller
                 $bill->status = 'Partial';
             }
             $bill->save();
+
+            $invoicePdf      = Pdf::loadView('Invoice_pdf', compact('bill'));
+            $invoiceFileName = 'Invoice_' . $bill->bill_number . '.pdf';
+            $invoicePath     = 'bills/' . $invoiceFileName; 
+            $receiptPdf      = Pdf::loadView('Receipt_pdf', compact('payment'));
+            $receiptFileName = 'Receipt_' . $payment->payment_number . '.pdf';
+            $receiptPath     = 'bills/' . $receiptFileName;
+
+            Storage::put($invoicePath, $invoicePdf->output()); 
+            Storage::put($receiptPath, $receiptPdf->output());
+
+               Document::create([
+                'bill_id'       => $bill->id,
+                'document_type' => 'Invoice',
+                'file_name'     => $invoiceFileName,
+                'file_type'     => 'application/pdf',
+                'file_path'     => $invoicePath,
+                'file_size'     => Storage::size($invoicePath),
+                'upload_date'   => now(),
+                'uploaded_by'   => $payment['received_by'],
+                'version'       => 1,
+            ]);
+            
+            Document::create([
+                'bill_id'       => $bill->id,
+                'payment_id'    => $payment->id,
+                'document_type' => 'Receipt',
+                'file_name'     => $receiptFileName,
+                'file_type'     => 'application/pdf',
+                'file_path'     => $receiptPath,
+                'file_size'     => Storage::size($receiptPath),
+                'upload_date'   => now(),
+                'uploaded_by'   => $payment['received_by'],
+                'version'       => 1,
+            ]);
+
             if ($request->hasFile('cheque_file')) {
                 Document::create([
                     'bill_id'       => $bill->id,
