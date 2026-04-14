@@ -1,0 +1,42 @@
+<div class="min-h-screen flex overflow-hidden bg-surface font-body text-on-surface items-center justify-center">
+
+  <!-- Right section -->
+  <section class="w-full lg:w-1/2 flex items-center justify-center p-10">
+
+    <div class="text-center max-w-md space-y-6">
+
+      <!-- App name -->
+      <div class="text-sm font-bold tracking-widest text-primary uppercase">
+        {{ settings.appName() }}
+      </div>
+
+      <!-- 403 -->
+      <h1 class="font-headline text-[7rem] font-extrabold leading-none tracking-tighter text-surface-container-highest select-none">
+        403
+      </h1>
+
+      <h2 class="font-headline text-3xl font-bold">
+        Forbidden Access
+      </h2>
+
+      <p class="text-on-surface-variant text-base leading-relaxed">
+        You are not authorized to access this page.
+      </p>
+
+      <!-- CTA -->
+      <button
+        (click)="goBack()"
+        class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-white font-bold shadow-md hover:shadow-lg transition-all active:scale-95 group">
+
+        <span>{{ getRedirectText() }}</span>
+
+        <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">
+          arrow_forward
+        </span>
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

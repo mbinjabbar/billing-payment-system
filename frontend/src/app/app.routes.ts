@@ -135,5 +135,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./shared/not-found/not-found.component').then(m=> m.NotFoundComponent)
   },
+    // 403 Forbidden
+  {
+    path: 'forbidden',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/forbidden/forbidden.component').then(m=> m.ForbiddenComponent)
+  },
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];

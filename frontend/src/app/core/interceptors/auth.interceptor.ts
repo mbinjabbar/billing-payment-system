@@ -22,9 +22,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/login']);
       }
 
-      //if (error.status === 403) {
-        //router.navigate(['/forbidden']);
-      //}
+      if (error.status === 403) {
+        router.navigate(['/forbidden']);
+      }
 
       if (error.status === 0) {
         console.error('No connection to server');
