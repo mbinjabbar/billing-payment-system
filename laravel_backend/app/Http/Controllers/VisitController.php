@@ -34,7 +34,7 @@ class VisitController extends Controller
 
             $stats = [
                 'total_visits' => Visit::count(),
-                'billed' => Visit::whereHas('bill')->count(),
+                'billed' => Visit::whereHas('bill', fn($q) => $q->whereNotIn('status', ['Draft']))->count(),
                 'unbilled'       => Visit::where('status', 'Completed')->doesntHave('bill')->count()
             ];
 
