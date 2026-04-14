@@ -72,13 +72,11 @@ export class BillInvoiceComponent {
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case 'paid':
-        return 'bg-secondary-container text-on-secondary-container';
+        return 'bg-green-200 text-green-800';
       case 'pending':
-        return 'bg-error-container/20 text-error';
+        return 'bg-orange-200 text-orange-800';
       case 'draft':
-        return 'bg-primary-container text-on-primary-container';
-      case 'submitted':
-        return 'bg-tertiary-container text-on-tertiary-container';
+        return 'bg-purple-200 text-purple-800';
       default:
         return 'bg-surface-container-high text-on-surface-variant';
     }
