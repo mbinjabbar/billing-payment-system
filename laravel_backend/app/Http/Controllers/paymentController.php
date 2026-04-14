@@ -126,7 +126,24 @@ class paymentController extends Controller
             $receiptFileName = 'Receipt_' . $payment->payment_number . '.pdf';
             $receiptPath     = 'bills/' . $receiptFileName;
 
+            $invoicePdf      = Pdf::loadView('Invoice_pdf', compact('bill'));
+            $invoiceFileName = 'Invoice_' . $bill->bill_number . '.pdf';
+            $invoicePath     = 'bills/' . $invoiceFileName;
+
+            Storage::put($invoicePath, $invoicePdf->output());
             Storage::put($receiptPath, $receiptPdf->output());
+
+            Document::create([
+                'bill_id'       => $bill->id,
+                'document_type' => 'Invoice',
+                'file_name'     => $invoiceFileName,
+                'file_type'     => 'application/pdf',
+                'file_path'     => $invoicePath,
+                'file_size'     => Storage::size($invoicePath),
+                'upload_date'   => now(),
+                'uploaded_by'   => $data['received_by'],
+                'version'       => 1,
+            ]);
 
             Document::create([
                 'bill_id'       => $bill->id,
