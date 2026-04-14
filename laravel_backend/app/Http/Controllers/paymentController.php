@@ -137,7 +137,7 @@ class paymentController extends Controller
                 'file_path'     => $receiptPath,
                 'file_size'     => Storage::size($receiptPath),
                 'upload_date'   => now(),
-                'uploaded_by'   => $data['received_by'] ?? 1,
+                'uploaded_by'   => $data['received_by'],
                 'version'       => 1,
             ]);
 
@@ -151,7 +151,7 @@ class paymentController extends Controller
                     'file_path'     => $filePath,
                     'file_size'     => $file->getSize(),
                     'upload_date'   => now(),
-                    'uploaded_by'   => $request->created_by ?? 1,
+                    'uploaded_by'   => $data['received_by'],
                     'version'       => 1
                 ]);
             }
@@ -245,7 +245,7 @@ class paymentController extends Controller
                     'file_path'     => $filePath,
                     'file_size'     => $fileSize,
                     'upload_date'   => now(),
-                    'uploaded_by'   => $request->created_by ?? 1,
+                    'uploaded_by'   => $data['received_by'],
                     'version'       => 1
                 ]);
             }
