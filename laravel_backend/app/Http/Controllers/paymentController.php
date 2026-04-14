@@ -100,64 +100,76 @@ class paymentController extends Controller
             $bill->status             = $bill->outstanding_amount <= 0 ? 'Paid' : 'Partial';
             $bill->save();
 
-            // Load relationships needed for PDFs
-            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
-            $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
+$settings = Setting::all()->pluck('value', 'key')->toArray();
 
-            $settings = Setting::all()->pluck('value', 'key')->toArray();
+// Reload bill WITH payments so invoice shows updated payment history
+$bill->load(
+    'visit.appointment.patientCase.patient',
+    'insurance_firm',
+    'payments'  // ← critical — loads the new payment we just created
+);
 
-            // ── Regenerate Invoice PDF (overwrite existing file) ──────────────
-            $invoiceFileName = 'Invoice_' . $bill->bill_number . '.pdf';
-            $invoicePath     = 'bills/' . $invoiceFileName;
-            Storage::put($invoicePath, Pdf::loadView('Invoice_pdf', compact('bill', 'settings'))->output());
+// Load payment relationships for receipt
+$payment->load([
+    'bill.visit.appointment.patientCase.patient',
+    'receiver'
+]);
 
-            // Update existing Invoice document record — increment version
-            $invoiceDoc = Document::where('bill_id', $bill->id)
-                ->where('document_type', 'Invoice')
-                ->first();
+// ── Regenerate Invoice PDF with settings + updated payments ───────────
+$invoiceFileName = 'Invoice_' . $bill->bill_number . '.pdf';
+$invoicePath     = 'bills/' . $invoiceFileName;
+Storage::put($invoicePath,
+    Pdf::loadView('Invoice_pdf', compact('bill', 'settings'))->output()
+);
 
-            if ($invoiceDoc) {
-                $invoiceDoc->update([
-                    'file_size'   => Storage::size($invoicePath),
-                    'upload_date' => now(),
-                    'version'     => $invoiceDoc->version + 1,
-                ]);
-            }
+// UPDATE existing invoice document — increment version, don't create new
+$invoiceDoc = Document::where('bill_id', $bill->id)
+    ->where('document_type', 'Invoice')
+    ->first();
+if ($invoiceDoc) {
+    $invoiceDoc->update([
+        'file_size'   => Storage::size($invoicePath),
+        'upload_date' => now(),
+        'version'     => $invoiceDoc->version + 1,
+    ]);
+}
 
-            // ── Generate Receipt PDF (new file per payment) ───────────────────
-            $receiptFileName = 'Receipt_' . $payment->payment_number . '.pdf';
-            $receiptPath     = 'bills/' . $receiptFileName;
-            Storage::put($receiptPath, Pdf::loadView('Receipt_pdf', compact('payment', 'settings'))->output());
+// ── Generate Receipt PDF ──────────────────────────────────────────────
+$receiptFileName = 'Receipt_' . $payment->payment_number . '.pdf';
+$receiptPath     = 'bills/' . $receiptFileName;
+Storage::put($receiptPath,
+    Pdf::loadView('Receipt_pdf', compact('payment', 'settings'))->output()
+);
 
-            // Always create a new Receipt document (one per payment)
-            Document::create([
-                'bill_id'       => $bill->id,
-                'payment_id'    => $payment->id,
-                'document_type' => 'Receipt',
-                'file_name'     => $receiptFileName,
-                'file_type'     => 'application/pdf',
-                'file_path'     => $receiptPath,
-                'file_size'     => Storage::size($receiptPath),
-                'upload_date'   => now(),
-                'uploaded_by'   => $data['received_by'],
-                'version'       => 1,
-            ]);
+// CREATE new receipt document (one per payment)
+Document::create([
+    'bill_id'       => $bill->id,
+    'payment_id'    => $payment->id,
+    'document_type' => 'Receipt',
+    'file_name'     => $receiptFileName,
+    'file_type'     => 'application/pdf',
+    'file_path'     => $receiptPath,
+    'file_size'     => Storage::size($receiptPath),
+    'upload_date'   => now(),
+    'uploaded_by'   => $data['received_by'],
+    'version'       => 1,
+]);
 
-            // ── Save Cheque Image document if uploaded ────────────────────────
-            if ($request->hasFile('cheque_file')) {
-                Document::create([
-                    'bill_id'       => $bill->id,
-                    'payment_id'    => $payment->id,
-                    'document_type' => 'Cheque Image',
-                    'file_name'     => $name,
-                    'file_type'     => $type,
-                    'file_path'     => $filePath,
-                    'file_size'     => $request->file('cheque_file')->getSize(),
-                    'upload_date'   => now(),
-                    'uploaded_by'   => $data['received_by'],
-                    'version'       => 1,
-                ]);
-            }
+// ── Cheque Image ──────────────────────────────────────────────────────
+if ($request->hasFile('cheque_file')) {
+    Document::create([
+        'bill_id'       => $bill->id,
+        'payment_id'    => $payment->id,
+        'document_type' => 'Cheque Image',
+        'file_name'     => $name,
+        'file_type'     => $type,
+        'file_path'     => $filePath,
+        'file_size'     => $file->getSize(),
+        'upload_date'   => now(),
+        'uploaded_by'   => $data['received_by'],
+        'version'       => 1,
+    ]);
+}
 
             return $this->success($payment, 'Payment created and bill updated successfully.');
         } catch (Exception $e) {
