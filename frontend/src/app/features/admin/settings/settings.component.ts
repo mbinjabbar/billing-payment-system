@@ -62,7 +62,6 @@ export class SettingsComponent {
     default_tax_rate: new FormControl('0'),
     default_due_days: new FormControl('30'),
     invoice_footer:   new FormControl(''),
-    max_file_size_mb: new FormControl('5'),
   });
 
   savingConfig = signal(false);

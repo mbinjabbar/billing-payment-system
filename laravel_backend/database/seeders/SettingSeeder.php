@@ -17,7 +17,6 @@ class SettingSeeder extends Seeder
             ['key' => 'default_tax_rate', 'value' => '0',                        'created_at' => now(), 'updated_at' => now()],
             ['key' => 'default_due_days', 'value' => '30',                       'created_at' => now(), 'updated_at' => now()],
             ['key' => 'invoice_footer',   'value' => 'Thank you for your payment.', 'created_at' => now(), 'updated_at' => now()],
-            ['key' => 'max_file_size_mb', 'value' => '5',                        'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }
