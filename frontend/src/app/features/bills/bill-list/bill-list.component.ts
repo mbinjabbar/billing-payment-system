@@ -16,11 +16,12 @@ export class BillListComponent implements OnInit {
   private billService = inject(BillService);
   private authService = inject(AuthService);
 
-  bills       = signal<any>({});
-  loading     = signal(false);
-  currentPage = signal(1);
-  role = computed(() => this.authService.getRole());
-  exporting = signal(false);
+  bills           = signal<any>({});
+  loading         = signal(false);
+  currentPage     = signal(1);
+  role            = computed(() => this.authService.getRole());
+  exporting       = signal(false);
+  confirmDeleteId = signal<number | null>(null);
 
   filterForm = new FormGroup({
     patient_name: new FormControl(''),
@@ -31,11 +32,9 @@ export class BillListComponent implements OnInit {
     max_amount:   new FormControl(''),
   });
 
-  ngOnInit() {
-    this.fetchBills();
-  }
+  ngOnInit() { this.fetchBills(); }
 
-  // ── Fetch ────────────────────────────────────────────────────────────────
+  // ── Fetch ─────────────────────────────────────────────────────────────────
   fetchBills(page: number = 1) {
     this.loading.set(true);
     const filters = { ...this.cleanFilters(this.filterForm.value), page };
@@ -46,10 +45,7 @@ export class BillListComponent implements OnInit {
         this.currentPage.set(res?.meta?.current_page ?? 1);
         this.loading.set(false);
       },
-      error: (err: any) => {
-        console.error('Error fetching bills:', err);
-        this.loading.set(false);
-      }
+      error: () => this.loading.set(false)
     });
   }
 
@@ -60,7 +56,60 @@ export class BillListComponent implements OnInit {
     this.fetchBills(1);
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // ── Delete (Admin only) ───────────────────────────────────────────────────
+  confirmDelete(id: number) { this.confirmDeleteId.set(id); }
+  cancelDelete()             { this.confirmDeleteId.set(null); }
+
+  executeDelete() {
+    const id = this.confirmDeleteId();
+    if (!id) return;
+    this.billService.deleteBill(id).subscribe({
+      next: () => {
+        this.confirmDeleteId.set(null);
+        this.fetchBills(this.currentPage());
+      },
+      error: () => this.confirmDeleteId.set(null)
+    });
+  }
+
+  // ── Status override ───────────────────────────────────────────────────────
+  overrideStatus(billId: number, event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const status = select.value;
+    if (!status) return;
+
+    this.billService.updateBillStatus(billId, status).subscribe({
+      next: () => {
+        select.value = '';
+        this.fetchBills(this.currentPage());
+      },
+      error: () => { select.value = ''; }
+    });
+  }
+
+  // ── Export ────────────────────────────────────────────────────────────────
+  exportBills() {
+    this.exporting.set(true);
+    const filters = this.cleanFilters(this.filterForm.value);
+
+    this.billService.exportBills(filters).subscribe({
+      next: (res: any) => {
+        const blob = new Blob([res], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        const url  = window.URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = 'bills.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.exporting.set(false);
+      },
+      error: () => this.exporting.set(false),
+    });
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
   private cleanFilters(filters: any): any {
     const cleaned: any = {};
     Object.keys(filters).forEach(key => {
@@ -70,7 +119,7 @@ export class BillListComponent implements OnInit {
     return cleaned;
   }
 
-  // ── Pagination ───────────────────────────────────────────────────────────
+  // ── Pagination ────────────────────────────────────────────────────────────
   totalItems = computed(() => this.bills()?.meta?.total    ?? 0);
   totalPages = computed(() => this.bills()?.meta?.last_page ?? 1);
   from       = computed(() => this.bills()?.meta?.from      ?? 0);
@@ -100,7 +149,7 @@ export class BillListComponent implements OnInit {
     return pages;
   }
 
-  // ── Status / UI ──────────────────────────────────────────────────────────
+  // ── UI helpers ────────────────────────────────────────────────────────────
   getBillStatusClass(status: string): string {
     switch (status) {
       case 'Paid':        return 'bg-green-100 text-green-700';
@@ -117,43 +166,4 @@ export class BillListComponent implements OnInit {
     if (!date) return false;
     return new Date(date) < new Date();
   }
-
-  exportBills() {
-  this.exporting.set(true);
-  const filters = this.cleanFilters(this.filterForm.value);
- 
-  this.billService.exportBills(filters).subscribe({
-    next: (res: any) => {
-      const blob = new Blob([res], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href     = url;
-      a.download = 'bills.xlsx';
-      a.click();
-      window.URL.revokeObjectURL(url);
-      this.exporting.set(false);
-    },
-    error: () => this.exporting.set(false),
-  });
-}
-
-overrideStatus(billId: number, event: Event) {
-  const select = event.target as HTMLSelectElement;
-  const status = select.value;
-  if (!status) return;
-
-  this.billService.updateBillStatus(billId, status).subscribe({
-    next: () => {
-      select.value = '';
-       console.log('Status override called:', billId, status);
-      this.fetchBills(this.currentPage());
-    },
-    error: (err) => {
-      select.value = '';
-      console.error(err.error?.message || 'Failed to update status');
-    }
-  });
-}
 }

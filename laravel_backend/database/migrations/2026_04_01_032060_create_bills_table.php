@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('visit_id')->unique()->constrained('visits')->cascadeOnDelete();
+            $table->foreignId('visit_id')->index()->constrained('visits')->cascadeOnDelete();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('insurance_firm_id')->nullable()->constrained('insurance_firms');
             $table->string('bill_number')->unique();

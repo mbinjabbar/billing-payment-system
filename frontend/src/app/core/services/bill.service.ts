@@ -30,13 +30,17 @@ export class BillService {
     return this.http.put(`${this.apiUrl}/bills/${id}`, payload);
   }
 
+  deleteBill(id: number) {
+    return this.http.delete(`${this.apiUrl}/bills/${id}`);
+  }
+
   exportBills(filters: any = {}) {
     return this.http.post(`${this.apiUrl}/bills/export`, filters, {
       responseType: 'blob'
     });
   }
-  
+
   updateBillStatus(id: number, status: string) {
-  return this.http.patch(`${this.apiUrl}/bills/${id}/status`, { status });
-}
+    return this.http.patch(`${this.apiUrl}/bills/${id}/status`, { status });
+  }
 }
