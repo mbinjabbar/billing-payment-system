@@ -252,11 +252,14 @@
                   Edit
                 </span>
                 }
+                @if(role() === 'Admin'){
                 <button
                   (click)="confirmDelete(payment.id)"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition">
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition"
+                  >
                   Delete
                 </button>
+                }
               </td>
 
             </tr>

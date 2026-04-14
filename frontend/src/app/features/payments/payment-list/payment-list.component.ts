@@ -3,6 +3,7 @@ import { PaymentPosterService } from '../../../core/services/payment-poster.serv
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-payment-list',
@@ -12,12 +13,14 @@ import { RouterLink } from '@angular/router';
 })
 export class PaymentListComponent {
   private paymentService = inject(PaymentPosterService);
+  private authService = inject(AuthService);
 
   payments    = signal<any>({});
   loading     = signal(false);
   exporting   = signal(false);
   currentPage = signal(1);
   confirmDeleteId = signal<number | null>(null);
+  role = signal<any>(this.authService.getRole());
 
   filterForm = new FormGroup({
     bill_id:        new FormControl(''),
@@ -33,10 +36,12 @@ export class PaymentListComponent {
   from       = computed(() => this.payments()?.meta?.from      ?? 0);
   to         = computed(() => this.payments()?.meta?.to        ?? 0);
   list       = computed(() => this.payments()?.data            ?? []);
-
+  
   ngOnInit() {
     this.fetchPayments();
   }
+
+  
 
   // ── Fetch ────────────────────────────────────────────────────────────────
   fetchPayments(page: number = 1) {
