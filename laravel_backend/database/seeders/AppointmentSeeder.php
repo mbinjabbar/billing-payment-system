@@ -14,7 +14,7 @@ class AppointmentSeeder extends Seeder
         $faker = Factory::create();
         $caseIds = PatientCase::pluck('id')->toArray();
 
-        for ($i = 1; $i <= 25; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             Appointment::create([
                 'patient_case_id' => $faker->randomElement($caseIds),
                 'appointment_type'   => $faker->randomElement(['Initial', 'Follow-up', 'Consultation', 'Procedure', 'Telehealth', 'Emergency', 'Routine Checkup']),

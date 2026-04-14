@@ -12,7 +12,7 @@ class PatientCaseSeeder extends Seeder
     {
         $faker = Factory::create();
 
-        for ($i = 1; $i <= 25; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             PatientCase::create([
                 'patient_id'    => $i,
                 'case_number'   => 'CASE-' . now()->year . '-' . $faker->unique()->numberBetween(100, 999),
