@@ -205,7 +205,7 @@
               <!-- Billing Status -->
               <td class="px-5 py-4 text-center whitespace-nowrap">
                 <span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-wide"
-                  [class]="getBillingStatusClass(visit.bill !== null)">
+                  [class]="getBillingStatusClass(visit.bill)">
                   {{ getBillingLabel(visit.bill) }}
                 </span>
               </td>
