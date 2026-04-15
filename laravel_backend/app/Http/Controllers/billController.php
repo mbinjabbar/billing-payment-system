@@ -5,56 +5,35 @@ namespace App\Http\Controllers;
 use App\Exports\BillsExport;
 use Illuminate\Http\Request;
 use App\Models\Bill;
-use App\Models\Document;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Models\Setting;
+use App\Services\BillService;
+use App\Services\SettingService;
+use Illuminate\Validation\ValidationException;
 
 class billController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(private BillService $billService, private SettingService $settingService) {}
+
     public function index(Request $request)
     {
         try {
-            $query = Bill::with('visit.appointment.patientCase.patient', 'insurance_firm');
+            $filters = $request->only([
+                'status',
+                'start_date',
+                'end_date',
+                'min_amount',
+                'max_amount',
+                'patient_name'
+            ]);
 
-            $query->when($request->status, function ($q) use ($request) {
-                return $q->where('status', $request->status);
-            });
-
-            $query->when($request->start_date && $request->end_date, function ($q) use ($request) {
-                return $q->whereBetween('bill_date', [$request->start_date, $request->end_date]);
-            });
-
-            $query->when($request->min_amount && $request->max_amount, function ($q) use ($request) {
-                return $q->whereBetween('bill_amount', [$request->min_amount, $request->max_amount]);
-            });
-
-            $query->when($request->patient_name, function ($q) use ($request) {
-                return $q->whereHas('visit.appointment.patientCase.patient', function ($sub) use ($request) {
-                    return $sub->where('first_name', 'like', '%' . $request->patient_name . '%')
-                        ->orWhere('middle_name', 'like', '%' . $request->patient_name . '%')
-                        ->orWhere('last_name',   'like', '%' . $request->patient_name . '%');
-                });
-            });
-
-            $stats = [
-                'total_bill_amount' => (clone $query)->sum('bill_amount'),
-                'total_paid_amount' => (clone $query)->sum('paid_amount'),
-                'total_outstanding' => (clone $query)->sum('outstanding_amount'),
-                'total_bills'       => (clone $query)->count(),
-                'pending_count'     => (clone $query)->where('status', 'Pending')->count(),
-                'partial_count'     => (clone $query)->where('status', 'Partial')->count(),
-                'paid_count'        => (clone $query)->where('status', 'Paid')->count(),
-            ];
-
-            $bills = $query->latest('bill_date')->paginate(10);
+            $bills = $this->billService->getFilteredBills($filters);
+            $stats = $this->billService->getBillStats($filters);
 
             return $this->success($bills, 'Bills retrieved successfully', 200, $stats);
         } catch (Exception $e) {
@@ -64,29 +43,26 @@ class billController extends Controller
 
     public function store(Request $request)
     {
+        // Validation checks before opening transaction
+        $exists = Bill::where('visit_id', $request->visit_id)
+            ->whereNotIn('status', ['Draft'])
+            ->exists();
+
+        if ($exists) {
+            return $this->error('A bill has already been generated for this visit.', 422);
+        }
+
         DB::beginTransaction();
         try {
-            $data             = $request->all();
-            $charges          = $data['charges'];
-            $discount         = $data['discount_amount'];
-            $tax              = $data['tax_amount'];
-            $insurancePercent = $data['insurance_coverage'];
-            $insuranceAmount  = ($charges * $insurancePercent) / 100;
-            $billAmount       = ($charges - $insuranceAmount - $discount) + $tax;
+            $data = $request->all();
+            $billAmount = $this->billService->calculateBillAmount(
+                $data['charges'],
+                $data['insurance_coverage'],
+                $data['discount_amount'],
+                $data['tax_amount']
+            );
 
-            // Block if a non-draft bill already exists for this visit
-            $exists = Bill::where('visit_id', $request->visit_id)
-                ->whereNotIn('status', ['Draft'])
-                ->exists();
-
-            if ($exists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'A bill has already been generated for this visit.'
-                ], 422);
-            }
-
-            // Delete any existing draft for this visit before creating new one
+            // Delete any existing draft for this visit
             Bill::where('visit_id', $request->visit_id)
                 ->where('status', 'Draft')
                 ->delete();
@@ -97,25 +73,25 @@ class billController extends Controller
                 'insurance_firm_id' => $data['insurance_firm_id'],
                 'created_by'        => $data['created_by'],
                 'procedure_codes'   => $data['procedure_codes'],
-                'charges'           => $charges,
-                'insurance_coverage'=> $insurancePercent,
-                'discount_amount'   => $discount,
-                'tax_amount'        => $tax,
+                'charges'           => $data['charges'],
+                'insurance_coverage' => $data['insurance_coverage'],
+                'discount_amount'   => $data['discount_amount'],
+                'tax_amount'        => $data['tax_amount'],
                 'bill_amount'       => $billAmount,
-                'outstanding_amount'=> $billAmount,
+                'outstanding_amount' => $billAmount,
                 'paid_amount'       => $data['paid_amount'],
                 'status'            => $data['status'],
                 'due_date'          => $data['due_date'],
                 'notes'             => $data['notes'],
             ]);
 
-            // Draft — skip PDF generation, return immediately
+            // Draft — no PDF generation needed
             if ($data['status'] === 'Draft') {
                 DB::commit();
                 return $this->success($bill, 'Bill saved as draft successfully.');
             }
 
-            // Pending — load relationships and generate PDFs
+            // Load relationships needed for PDF generation
             $bill->load(
                 'visit.appointment.patientCase.patient',
                 'visit.appointment.patientCase.nf2Detail',
@@ -123,49 +99,12 @@ class billController extends Controller
                 'payments'
             );
 
-            $isCarAccident = $bill->visit->appointment->patientCase->car_accident;
+            $settings = $this->settingService->getSettings();
 
-            $filesToGenerate = [
-                ['view' => 'Invoice_pdf', 'prefix' => 'Invoice_', 'type' => 'Invoice']
-            ];
-
-            if ($isCarAccident) {
-                $filesToGenerate[] = ['view' => 'NF2_pdf', 'prefix' => 'NF2_', 'type' => 'NF2 Form'];
-            }
-
-            $settings = Setting::all()->pluck('value', 'key')->toArray();
-
-            foreach ($filesToGenerate as $file) {
-                $pdf      = PDF::loadView($file['view'], compact('bill', 'settings'));
-                $fileName = $file['prefix'] . $bill->bill_number . '.pdf';
-                $path     = 'bills/' . $fileName;
-
-                Storage::put($path, $pdf->output());
-                $fileSize = Storage::size($path);
-
-                if ($fileSize > (5 * 1024 * 1024)) {
-                    throw new Exception("File $fileName exceeds 5MB limit.");
-                }
-
-                Document::create([
-                    'bill_id'       => $bill->id,
-                    'document_type' => $file['type'],
-                    'file_name'     => $fileName,
-                    'file_type'     => Storage::mimeType($path),
-                    'file_path'     => $path,
-                    'file_size'     => $fileSize,
-                    'upload_date'   => now(),
-                    'uploaded_by'   => $data['created_by'],
-                    'version'       => 1,
-                ]);
-
-                $bill->update(['generated_document_path' => $path]);
-            }
-
+            $this->billService->generateBillDocuments($bill, $settings);
             DB::commit();
-            $msg = $isCarAccident ? 'Standard and NF2 Bills generated.' : 'Standard Bill generated.';
-            return $this->success($bill, $msg);
 
+            return $this->success($bill, "Bill created successfully");
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error: ' . $e->getMessage());
@@ -188,87 +127,24 @@ class billController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        try {
-            $bill = Bill::findOrFail($id);
+{
+    try {
+        $bill = Bill::findOrFail($id);
 
-            // Block edit if payments already posted (unless it's a draft being submitted)
-            if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
-                return $this->error('Cannot edit a bill that has payments posted against it.', 403);
-            }
-
-            $bill->fill($request->only([
-                'procedure_codes',
-                'charges',
-                'insurance_coverage',
-                'discount_amount',
-                'tax_amount',
-                'notes',
-                'due_date',
-            ]));
-
-            $insuranceAmount          = ($bill->charges * $bill->insurance_coverage) / 100;
-            $bill->bill_amount        = ($bill->charges - $insuranceAmount - $bill->discount_amount) + $bill->tax_amount;
-            $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
-
-            // If was Draft and now being submitted, set to Pending
-            if ($bill->status === 'Draft') {
-                $bill->status = 'Pending';
-            } elseif ($bill->outstanding_amount <= 0) {
-                $bill->status = 'Paid';
-            } elseif ($bill->outstanding_amount > 0 && $bill->paid_amount > 0) {
-                $bill->status = 'Partial';
-            }
-
-            $bill->save();
-
-            $bill->load(
-                'visit.appointment.patientCase.patient',
-                'insurance_firm',
-                'payments'
-            );
-
-            $settings = Setting::all()->pluck('value', 'key')->toArray();
-            $pdf      = Pdf::loadView('Invoice_pdf', compact('bill', 'settings'));
-            $fileName = 'Invoice_' . $bill->bill_number . '.pdf';
-            $path     = 'bills/' . $fileName;
-
-            Storage::put($path, $pdf->output());
-            $fileSize = Storage::size($path);
-
-            $document = Document::where('bill_id', $bill->id)
-                ->where('document_type', 'Invoice')
-                ->first();
-
-            if ($document) {
-                $document->update([
-                    'file_name'   => $fileName,
-                    'file_type'   => Storage::mimeType($path),
-                    'file_path'   => $path,
-                    'file_size'   => $fileSize,
-                    'upload_date' => now(),
-                    'uploaded_by' => $bill->created_by,
-                    'version'     => $document->version + 1,
-                ]);
-            } else {
-                Document::create([
-                    'bill_id'       => $bill->id,
-                    'document_type' => 'Invoice',
-                    'file_name'     => $fileName,
-                    'file_type'     => Storage::mimeType($path),
-                    'file_path'     => $path,
-                    'file_size'     => $fileSize,
-                    'upload_date'   => now(),
-                    'uploaded_by'   => $bill->created_by,
-                    'version'       => 1,
-                ]);
-            }
-
-            return $this->success($bill, 'Bill updated and recalculated successfully.');
-        } catch (Exception $e) {
-            return $this->error('Failed to update bill.');
+        if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
+            return $this->error('Cannot edit a bill that has payments posted against it.', 403);
         }
+
+        $bill = $this->billService->updateBill($bill, $request->all());
+
+        $settings = $this->settingService->getSettings();
+        $this->billService->generateInvoice($bill, $settings);
+
+        return $this->success($bill, 'Bill updated and recalculated successfully.');
+    } catch (Exception $e) {
+        return $this->error('Failed to update bill.');
     }
+}
 
     public function destroy($id)
     {
@@ -296,26 +172,17 @@ class billController extends Controller
     public function updateStatus(Request $request, $id)
     {
         try {
-            $bill = Bill::findOrFail($id);
-
             $request->validate([
                 'status' => 'required|in:Cancelled,Written Off'
             ]);
 
-            if ($request->status === 'Cancelled' && $bill->paid_amount > 0) {
-                return $this->error('Cannot cancel a bill with payments posted. Use Write Off instead.', 422);
-            }
-
-            if ($request->status === 'Written Off' && $bill->status !== 'Partial') {
-                return $this->error('Only partially paid bills can be written off.', 422);
-            }
-
-            $bill->status = $request->status;
-            $bill->save();
+            $bill = $this->billService->updateBillStatus($id, $request->status);
 
             return $this->success($bill, 'Bill status updated successfully.');
+        } catch (ValidationException $e) {
+            return $this->error($e->getMessage(), 422);
         } catch (Exception $e) {
-            return $this->error('Failed to update bill status.');
+            return $this->error($e->getMessage(), 422);
         }
     }
 }
