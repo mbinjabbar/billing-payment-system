@@ -15,28 +15,34 @@ class filevalidationmiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!$request->hasFile('cheque_file')) {
+            return $next($request);
+        }
+
         $allowedMimes = [
-            'application/pdf',                                        
-            'image/jpeg',                                              
-            'image/png',                                                
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ];
-        $maxSizeKB = 5120; // 5MB in KB
-        
-         if (!$request->hasFile('cheque_file')) {
-            return response()->json(['error' => 'No file uploaded'], 400);
-        }
- 
+        $maxSizeKB = 5120; // 5MB in Kb
+
         $file = $request->file('cheque_file');
+
         if (!in_array($file->getMimeType(), $allowedMimes)) {
-            return response()->json(['error' => 'Invalid file type. Allowed types: PDF, JPG, PNG, DOCX'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid file type. Allowed: PDF, JPG, PNG, DOCX'
+            ], 422);
         }
+
         if ($file->getSize() > $maxSizeKB * 1024) {
-            return response()->json(['error' => 'File size exceeds the maximum limit of 5MB'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'File size exceeds the maximum limit of 5MB'
+            ], 422);
         }
 
         return $next($request);
     }
 }
-
-
