@@ -24,6 +24,10 @@ class documentController extends Controller
         }
         // Admin gets everything
 
+        if($request->filled('type')){
+            $query->where('document_type', $request->type );
+        }
+
         $documents = $query->latest()->paginate(10);
         return $this->success($documents, 'Documents retrieved successfully.');
     }

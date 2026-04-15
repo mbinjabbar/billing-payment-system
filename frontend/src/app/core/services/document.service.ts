@@ -11,11 +11,7 @@ export class DocumentService {
   getDocuments(params: any = {}) {
     const stringParams: any = {};
     Object.keys(params).forEach((key) => {
-      if (
-        params[key] !== null &&
-        params[key] !== undefined &&
-        params[key] !== ''
-      ) {
+      {
         stringParams[key] = String(params[key]);
       }
     });
