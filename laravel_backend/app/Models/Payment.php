@@ -33,6 +33,10 @@ class Payment extends Model
         static::creating(function ($payment) {
             $payment->payment_number = 'P-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -5));
         });
+
+        static::deleting(function ($payment) {
+            $payment->documents()->delete();
+        });
     }
     public function bill()
     {
