@@ -3,9 +3,5 @@ export const notFound = (req, res) => {
 }
 
 export const errorHandler = (err, req, res, next) => {
-    console.log("Global Error:", err.stack);
-    res.api.error(
-        err.message || "Internal server error",
-        err.status || 500,
-    );
+    res.api.error(err.message || "Internal server error",err.status || 500, err.errors || null);
 };
