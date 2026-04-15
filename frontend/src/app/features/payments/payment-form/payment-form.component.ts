@@ -63,7 +63,7 @@ export class PaymentFormComponent {
   isEdit = computed(() => this.paymentId > 0);
 
   // ── Conditional field visibility ─────────────────────────────────────────
-  showChequeFields = computed(() => this.paymentMode() === 'Check');
+  showChequeFields = computed(() => this.paymentMode() === 'Cheque');
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit() {
