@@ -40,6 +40,7 @@ Route::middleware('firebasejwt')->group(function () {
     Route::middleware('role:Admin,Payment Poster')->group(function () {
         Route::apiResource('/payments', paymentController::class)->except(['destroy']);
         Route::post('/payments/export',             [paymentController::class, 'export']);
+        Route::patch('payments/{id}/refund', [paymentController::class, 'refund']);
     });
 
     // Admin only

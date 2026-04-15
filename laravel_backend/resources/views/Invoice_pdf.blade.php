@@ -179,6 +179,7 @@
                             <th style="padding: 4px 6px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #64748b; text-align: left; border-bottom: 1px solid #e2e8f0;">Date</th>
                             <th style="padding: 4px 6px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #64748b; text-align: left; border-bottom: 1px solid #e2e8f0;">Mode</th>
                             <th style="padding: 4px 6px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #64748b; text-align: right; border-bottom: 1px solid #e2e8f0;">Amount</th>
+                            <th style="padding: 4px 6px; font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #64748b; text-align: right; border-bottom: 1px solid #e2e8f0;">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -188,6 +189,7 @@
                             <td style="padding: 4px 6px; font-size: 9px;">{{ \Carbon\Carbon::parse($payment->payment_date)->format('M d, Y') }}</td>
                             <td style="padding: 4px 6px; font-size: 9px;">{{ $payment->payment_mode }}</td>
                             <td style="padding: 4px 6px; font-size: 9px; text-align: right; font-weight: bold; color: #16a34a;">${{ number_format($payment->amount_paid, 2) }}</td>
+                            <td style="padding: 4px 6px; font-size: 9px;">{{ $payment->payment_status }}</td>
                         </tr>
                         @endforeach
                     </tbody>

@@ -11,8 +11,7 @@
     </section>
 
     <!-- Table Card -->
-    <section
-      class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
       <!-- Table Header: title + inline filters + export -->
       <div class="px-6 py-4 border-b border-outline-variant/10">
@@ -25,15 +24,11 @@
           <div class="w-px h-5 bg-outline-variant/30 mx-1"></div>
 
           <!-- Bill ID -->
-          <input
-            type="number"
-            formControlName="bill_id"
-            placeholder="Bill ID"
+          <input type="number" formControlName="bill_id" placeholder="Bill ID"
             class="w-20 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body" />
 
           <!-- Payment Mode -->
-          <select
-            formControlName="payment_mode"
+          <select formControlName="payment_mode"
             class="px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body">
             <option value>All Modes</option>
             <option value="Cash">Cash</option>
@@ -46,8 +41,7 @@
           </select>
 
           <!-- Status -->
-          <select
-            formControlName="payment_status"
+          <select formControlName="payment_status"
             class="px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body">
             <option value>All Statuses</option>
             <option value="Completed">Completed</option>
@@ -60,35 +54,25 @@
           <!-- From Date -->
           <div
             class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
-            <span
-              class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">From</span>
-            <input
-              type="date"
-              formControlName="from_date"
-              class="bg-transparent text-xs outline-none font-body" />
+            <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">From</span>
+            <input type="date" formControlName="from_date" class="bg-transparent text-xs outline-none font-body" />
           </div>
 
           <!-- To Date -->
           <div
             class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
-            <span
-              class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">To</span>
-            <input
-              type="date"
-              formControlName="to_date"
-              class="bg-transparent text-xs outline-none font-body" />
+            <span class="text-xs text-on-surface-variant font-bold font-label whitespace-nowrap">To</span>
+            <input type="date" formControlName="to_date" class="bg-transparent text-xs outline-none font-body" />
           </div>
 
           <!-- Apply -->
-          <button
-            (click)="applyFilters()"
+          <button (click)="applyFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
             Filter
           </button>
 
           <!-- Reset -->
-          <button
-            (click)="resetFilters()"
+          <button (click)="resetFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
             Reset
           </button>
@@ -107,9 +91,7 @@
           <div class="w-px h-5 bg-outline-variant/30"></div>
 
           <!-- Export -->
-          <button
-            (click)="exportPayments()"
-            [disabled]="exporting()"
+          <button (click)="exportPayments()" [disabled]="exporting()"
             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-50 transition font-headline">
             <span class="material-symbols-outlined icon-sm">
               {{ exporting() ? 'hourglass_top' : 'download' }}
@@ -124,8 +106,7 @@
       @if (loading()) {
       <div class="flex items-center justify-center py-20">
         <div class="flex flex-col items-center gap-4">
-          <div
-            class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+          <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
           <p class="text-sm text-on-surface-variant font-label">Loading
             payments...</p>
         </div>
@@ -141,17 +122,12 @@
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Payment #</th>
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Bill</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Amount</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Mode</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Amount</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Mode</th>
               <th class="px-5 py-3.5 text-xs font-bold uppercase">Reference</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Date</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
-              <th
-                class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Date</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Status</th>
+              <th class="px-5 py-3.5 text-xs font-bold uppercase text-right">Actions</th>
             </tr>
           </thead>
 
@@ -160,12 +136,10 @@
             @if (list().length === 0) {
             <tr>
               <td colspan="9" class="px-5 py-16 text-center">
-                <span
-                  class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">payments</span>
+                <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">payments</span>
                 <p class="text-sm font-bold text-on-surface-variant">No payments
                   found</p>
-                <p
-                  class="text-xs text-on-surface-variant/60 mt-1 font-label">Try
+                <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try
                   adjusting your filters</p>
               </td>
             </tr>
@@ -191,8 +165,7 @@
 
               <!-- Bill -->
               <td class="px-5 py-4">
-                <button
-                  [routerLink]="['/bills/invoice', payment.bill_id]"
+                <button [routerLink]="['/bills/invoice', payment.bill_id]"
                   class="text-xs font-bold text-primary hover:underline">
                   Bill #{{ payment.bill_id }}
                 </button>
@@ -247,16 +220,19 @@
                   Edit
                 </button>
                 } @else {
-                <span
-                  class="px-3 py-1.5 rounded-md text-xs font-bold text-on-surface-variant/40 cursor-not-allowed">
+                <span class="px-3 py-1.5 rounded-md text-xs font-bold text-on-surface-variant/40 cursor-not-allowed">
                   Edit
                 </span>
                 }
+                @if (payment.payment_status === 'Completed') {
+                <button (click)="onRefundPayment(payment.id)"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-orange-50 text-orange-700 hover:bg-orange-100 transition">
+                  Refund
+                </button>
+                }
                 @if(role() === 'Admin'){
-                <button
-                  (click)="confirmDelete(payment.id)"
-                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition"
-                  >
+                <button (click)="confirmDelete(payment.id)"
+                  class="px-3 py-1.5 rounded-md text-xs font-bold bg-error/10 text-error hover:bg-error/20 transition">
                   Delete
                 </button>
                 }
@@ -270,8 +246,7 @@
 
       <!-- Pagination -->
       @if (totalPages() > 1) {
-      <div
-        class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+      <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
         <p class="text-xs text-on-surface-variant font-label">
           Page <span class="font-bold text-on-surface">{{ currentPage()
             }}</span> of {{ totalPages() }}
@@ -279,28 +254,23 @@
         <div class="flex items-center gap-1">
           <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
             class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
-          <button (click)="goToPage(currentPage() - 1)"
-            [disabled]="currentPage() === 1"
+          <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
             class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
 
           @for (page of visiblePages(); track $index) {
           @if (page === '...') {
           <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
           } @else {
-          <button
-            (click)="goToPage(+page)"
-            class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+          <button (click)="goToPage(+page)" class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
             [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
             {{ page }}
           </button>
           }
           }
 
-          <button (click)="goToPage(currentPage() + 1)"
-            [disabled]="currentPage() === totalPages()"
+          <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
             class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
-          <button (click)="goToPage(totalPages())"
-            [disabled]="currentPage() === totalPages()"
+          <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
             class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
         </div>
       </div>
@@ -313,15 +283,12 @@
 
 <!-- Delete Confirm Modal -->
 @if (confirmDeleteId()) {
-<div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
   <div
     class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
     <div class="flex flex-col items-center text-center gap-4">
-      <div
-        class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center">
-        <span
-          class="material-symbols-outlined text-error icon-xl">delete_forever</span>
+      <div class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-error icon-xl">delete_forever</span>
       </div>
       <div>
         <h3 class="text-lg font-bold font-headline">Delete Payment?</h3>
@@ -331,13 +298,11 @@
         </p>
       </div>
       <div class="flex gap-3 w-full mt-2">
-        <button
-          (click)="cancelDelete()"
+        <button (click)="cancelDelete()"
           class="flex-1 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
           Cancel
         </button>
-        <button
-          (click)="executeDelete()"
+        <button (click)="executeDelete()"
           class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-error text-white hover:bg-error/90 transition font-headline">
           Delete
         </button>

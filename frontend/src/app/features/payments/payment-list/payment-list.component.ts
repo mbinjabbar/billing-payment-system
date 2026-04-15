@@ -15,33 +15,33 @@ export class PaymentListComponent {
   private paymentService = inject(PaymentPosterService);
   private authService = inject(AuthService);
 
-  payments    = signal<any>({});
-  loading     = signal(false);
-  exporting   = signal(false);
+  payments = signal<any>({});
+  loading = signal(false);
+  exporting = signal(false);
   currentPage = signal(1);
   confirmDeleteId = signal<number | null>(null);
   role = signal<any>(this.authService.getRole());
 
   filterForm = new FormGroup({
-    bill_id:        new FormControl(''),
-    payment_mode:   new FormControl(''),
+    bill_id: new FormControl(''),
+    payment_mode: new FormControl(''),
     payment_status: new FormControl(''),
-    from_date:      new FormControl(''),
-    to_date:        new FormControl(''),
+    from_date: new FormControl(''),
+    to_date: new FormControl(''),
   });
 
   // ── Computed pagination ──────────────────────────────────────────────────
-  totalItems = computed(() => this.payments()?.meta?.total    ?? 0);
+  totalItems = computed(() => this.payments()?.meta?.total ?? 0);
   totalPages = computed(() => this.payments()?.meta?.last_page ?? 1);
-  from       = computed(() => this.payments()?.meta?.from      ?? 0);
-  to         = computed(() => this.payments()?.meta?.to        ?? 0);
-  list       = computed(() => this.payments()?.data            ?? []);
-  
+  from = computed(() => this.payments()?.meta?.from ?? 0);
+  to = computed(() => this.payments()?.meta?.to ?? 0);
+  list = computed(() => this.payments()?.data ?? []);
+
   ngOnInit() {
     this.fetchPayments();
   }
 
-  
+
 
   // ── Fetch ────────────────────────────────────────────────────────────────
   fetchPayments(page: number = 1) {
@@ -72,7 +72,7 @@ export class PaymentListComponent {
   }
 
   visiblePages(): (number | string)[] {
-    const total   = this.totalPages();
+    const total = this.totalPages();
     const current = this.currentPage();
     const pages: (number | string)[] = [];
 
@@ -92,7 +92,7 @@ export class PaymentListComponent {
 
   // ── Delete ───────────────────────────────────────────────────────────────
   confirmDelete(id: number) { this.confirmDeleteId.set(id); }
-  cancelDelete()            { this.confirmDeleteId.set(null); }
+  cancelDelete() { this.confirmDeleteId.set(null); }
 
   executeDelete() {
     const id = this.confirmDeleteId();
@@ -117,8 +117,8 @@ export class PaymentListComponent {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
         const url = window.URL.createObjectURL(blob);
-        const a   = document.createElement('a');
-        a.href     = url;
+        const a = document.createElement('a');
+        a.href = url;
         a.download = 'payments.xlsx';
         a.click();
         window.URL.revokeObjectURL(url);
@@ -140,24 +140,35 @@ export class PaymentListComponent {
 
   getPaymentModeClass(mode: string): string {
     switch (mode) {
-      case 'Cash':           return 'bg-green-100 text-green-700';
-      case 'Check':          return 'bg-blue-100 text-blue-700';
-      case 'Bank Transfer':  return 'bg-indigo-100 text-indigo-700';
-      case 'Credit Card':    return 'bg-purple-100 text-purple-700';
-      case 'Debit Card':     return 'bg-violet-100 text-violet-700';
-      case 'Insurance':      return 'bg-cyan-100 text-cyan-700';
+      case 'Cash': return 'bg-green-100 text-green-700';
+      case 'Check': return 'bg-blue-100 text-blue-700';
+      case 'Bank Transfer': return 'bg-indigo-100 text-indigo-700';
+      case 'Credit Card': return 'bg-purple-100 text-purple-700';
+      case 'Debit Card': return 'bg-violet-100 text-violet-700';
+      case 'Insurance': return 'bg-cyan-100 text-cyan-700';
       case 'Online Payment': return 'bg-orange-100 text-orange-700';
-      default:               return 'bg-gray-100 text-gray-700';
+      default: return 'bg-gray-100 text-gray-700';
     }
   }
 
   getPaymentStatusClass(status: string): string {
     switch (status) {
       case 'Completed': return 'bg-green-100 text-green-700';
-      case 'Pending':   return 'bg-orange-100 text-orange-700';
-      case 'Failed':    return 'bg-red-100 text-red-700';
-      case 'Refunded':  return 'bg-gray-200 text-gray-600';
-      default:          return 'bg-gray-100 text-gray-700';
+      case 'Pending': return 'bg-orange-100 text-orange-700';
+      case 'Failed': return 'bg-red-100 text-red-700';
+      case 'Refunded': return 'bg-gray-200 text-gray-600';
+      default: return 'bg-gray-100 text-gray-700';
     }
+  }
+
+  onRefundPayment(id: number) {
+    this.paymentService.refundPayment(id).subscribe({
+      next: () => {
+        this.fetchPayments(this.currentPage());
+      },
+      error: (err) => {
+        console.error(err.error?.message || 'Failed to refund payment.');
+      }
+    });
   }
 }
