@@ -18,13 +18,13 @@
         <div class="flex flex-wrap items-center gap-2" [formGroup]="filterForm">
 
           <!-- Title -->
-          <h3 class="text-lg font-bold font-headline mr-1">Payment Records</h3>
+          <h3 class="text-lg font-bold font-headline mr-1">Filter</h3>
 
           <!-- Divider -->
           <div class="w-px h-5 bg-outline-variant/30 mx-1"></div>
 
           <!-- Bill ID -->
-          <input type="number" formControlName="bill_id" placeholder="Bill ID"
+          <input (keyup.enter)="applyFilters()" key type="number" formControlName="bill_id" placeholder="Bill ID"
             class="w-20 px-2.5 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 text-xs outline-none focus:border-primary transition font-body" />
 
           <!-- Payment Mode -->
@@ -68,7 +68,7 @@
           <!-- Apply -->
           <button (click)="applyFilters()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
-            Filter
+            Apply
           </button>
 
           <!-- Reset -->
