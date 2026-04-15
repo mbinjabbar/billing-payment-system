@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { PaymentPosterService } from '../../../core/services/payment-poster.service';
 import { BillService } from '../../../core/services/bill.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-payment-form',
@@ -43,9 +44,14 @@ export class PaymentFormComponent {
 
   // ── Computed ─────────────────────────────────────────────────────────────
   outstanding = computed(() => Number(this.bill()?.outstanding_amount ?? 0));
+  
+  private amountPaidValue = toSignal(
+    this.paymentForm.get('amount_paid')!.valueChanges,
+    { initialValue: ''}
+  )
 
   payingNow = computed(() => {
-    const val = Number(this.paymentForm.get('amount_paid')?.value ?? 0);
+    const val = Number(this.amountPaidValue());
     return isNaN(val) ? 0 : val;
   });
 
@@ -57,7 +63,7 @@ export class PaymentFormComponent {
   isEdit = computed(() => this.paymentId > 0);
 
   // ── Conditional field visibility ─────────────────────────────────────────
-  showCheckFields = computed(() => this.paymentMode() === 'Check');
+  showChequeFields = computed(() => this.paymentMode() === 'Check');
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit() {
