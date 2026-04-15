@@ -45,6 +45,11 @@ class Bill extends Model
         static::creating(function ($bill) {
             $bill->bill_number = 'B-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -5));
         });
+
+        static::deleting(function ($bill) {
+            $bill->payments()->delete();
+            $bill->documents()->delete();
+        });
     }
 
     public function creator()
