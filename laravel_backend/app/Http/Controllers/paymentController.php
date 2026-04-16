@@ -55,23 +55,6 @@ class paymentController extends Controller
                 $request->file('cheque_file')
             );
 
-            if($request->payment_status === 'Completed') {
-            $settings = $this->settingService->getSettings();
-
-            $bill->load(
-                'visit.appointment.patientCase.patient',
-                'insurance_firm',
-                'payments'
-            );
-
-            $payment->load([
-                'bill.visit.appointment.patientCase.patient',
-                'receiver'
-            ]);
-
-            $this->documentService->generateInvoice($bill, $settings);
-            $this->documentService->generateReceipt($payment, $settings);
-            }
 
             if ($cheque) {
                 $this->documentService->storeChequeDocument(
@@ -80,6 +63,24 @@ class paymentController extends Controller
                     $cheque,
                     $data['received_by']
                 );
+            }
+
+            if ($request->payment_status === 'Completed') {
+                $settings = $this->settingService->getSettings();
+
+                $bill->load(
+                    'visit.appointment.patientCase.patient',
+                    'insurance_firm',
+                    'payments'
+                );
+
+                $payment->load([
+                    'bill.visit.appointment.patientCase.patient',
+                    'receiver'
+                ]);
+
+                $this->documentService->generateInvoice($bill, $settings);
+                $this->documentService->generateReceipt($payment, $settings);
             }
 
             return $this->success($payment, 'Payment created successfully');
@@ -148,30 +149,23 @@ class paymentController extends Controller
                 $bill->outstanding_amount  = $bill->bill_amount - $bill->paid_amount;
                 $this->billService->resolveBillStatus($bill);
                 $bill->save();
+
+                $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
+                $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
+
+                $settings = $this->settingService->getSettings();
+                $this->documentService->generateInvoice($bill, $settings);
+                $this->documentService->generateReceipt($payment, $settings, true);
             }
-
-            // Load relationships for PDFs
-            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
-            $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
-
-            $settings = $this->settingService->getSettings();
-            $this->documentService->generateInvoice($bill, $settings);
-            $this->documentService->generateReceipt($payment, $settings, true);
 
             // Cheque Image — create new if file replaced
             if ($request->hasFile('cheque_file')) {
-                Document::create([
-                    'bill_id'       => $bill->id,
-                    'payment_id'    => $payment->id,
-                    'document_type' => 'Cheque Image',
-                    'file_name'     => $name,
-                    'file_type'     => $type,
-                    'file_path'     => $filePath,
-                    'file_size'     => $fileSize,
-                    'upload_date'   => now(),
-                    'uploaded_by'   => $payment->received_by,
-                    'version'       => 1,
-                ]);
+                $this->documentService->storeChequeDocument(
+                    $bill,
+                    $payment,
+                    ['name' => $name, 'type' => $type, 'path' => $filePath, 'size' => $fileSize],
+                    $payment->received_by
+                );
             }
 
             return $this->success($payment, 'Payment and bill updated successfully.');
