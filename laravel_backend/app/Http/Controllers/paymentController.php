@@ -55,29 +55,29 @@ class paymentController extends Controller
                 $request->file('cheque_file')
             );
 
-            if ($payment->payment_status === 'Completed') {
-                $bill->load(
-                    'visit.appointment.patientCase.patient',
-                    'insurance_firm',
-                    'payments'
+            $settings = $this->settingService->getSettings();
+
+            $bill->load(
+                'visit.appointment.patientCase.patient',
+                'insurance_firm',
+                'payments'
+            );
+
+            $payment->load([
+                'bill.visit.appointment.patientCase.patient',
+                'receiver'
+            ]);
+
+            $this->documentService->generateInvoice($bill, $settings);
+            $this->documentService->generateReceipt($payment, $settings);
+
+            if ($cheque) {
+                $this->documentService->storeChequeDocument(
+                    $bill,
+                    $payment,
+                    $cheque,
+                    $data['received_by']
                 );
-                $payment->load([
-                    'bill.visit.appointment.patientCase.patient',
-                    'receiver'
-                ]);
-
-                $settings = $this->settingService->getSettings();
-                $this->documentService->generateInvoice($bill, $settings);
-                $this->documentService->generateReceipt($payment, $settings);
-
-                if ($cheque) {
-                    $this->documentService->storeChequeDocument(
-                        $bill,
-                        $payment,
-                        $cheque,
-                        $data['received_by']
-                    );
-                }
             }
 
             return $this->success($payment, 'Payment created successfully');
@@ -110,6 +110,7 @@ class paymentController extends Controller
             $oldAmountPaid = $payment->amount_paid;
             $newAmountPaid = $request->amount_paid;
 
+            // Overpayment guard
             if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
                 return $this->error('Amount paid cannot exceed outstanding amount.', 400);
             }
@@ -126,6 +127,7 @@ class paymentController extends Controller
                 $payment->cheque_file_path = $filePath;
             }
 
+            // Update payment fields
             $payment->fill($request->only([
                 'amount_paid',
                 'payment_mode',
@@ -138,31 +140,39 @@ class paymentController extends Controller
             ]));
             $payment->save();
 
-            // Only update bill and documents if becoming Completed
+            // Only update bill if payment is becoming Completed
             if ($request->payment_status === 'Completed') {
                 $bill->paid_amount        += $newAmountPaid;
                 $bill->outstanding_amount  = $bill->bill_amount - $bill->paid_amount;
                 $this->billService->resolveBillStatus($bill);
                 $bill->save();
-
-                $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
-                $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
-
-                $settings = $this->settingService->getSettings();
-                $this->documentService->generateInvoice($bill, $settings);
-                $this->documentService->generateReceipt($payment, $settings, true);
-
-                if ($request->hasFile('cheque_file')) {
-                    $this->documentService->storeChequeDocument(
-                        $bill,
-                        $payment,
-                        ['name' => $name, 'type' => $type, 'path' => $filePath, 'size' => $fileSize],
-                        $payment->received_by
-                    );
-                }
             }
 
-            return $this->success($payment, 'Payment updated successfully.');
+            // Load relationships for PDFs
+            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
+            $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
+
+            $settings = $this->settingService->getSettings();
+            $this->documentService->generateInvoice($bill, $settings);
+            $this->documentService->generateReceipt($payment, $settings, true);
+
+            // Cheque Image — create new if file replaced
+            if ($request->hasFile('cheque_file')) {
+                Document::create([
+                    'bill_id'       => $bill->id,
+                    'payment_id'    => $payment->id,
+                    'document_type' => 'Cheque Image',
+                    'file_name'     => $name,
+                    'file_type'     => $type,
+                    'file_path'     => $filePath,
+                    'file_size'     => $fileSize,
+                    'upload_date'   => now(),
+                    'uploaded_by'   => $payment->received_by,
+                    'version'       => 1,
+                ]);
+            }
+
+            return $this->success($payment, 'Payment and bill updated successfully.');
         } catch (Exception $e) {
             Log::error('UPDATE PAYMENT FAILED', ['error' => $e->getMessage(), 'line' => $e->getLine()]);
             return $this->error($e->getMessage());
@@ -182,22 +192,18 @@ class paymentController extends Controller
     {
         try {
             $payment = Payment::findOrFail($id);
-            $bill    = Bill::findOrFail($payment->bill_id);
 
-            // Reverse the payment amount
-            $this->paymentService->reversePaymentImpact($bill, $payment);
+            if ($payment->payment_status === 'Completed') {
+                return $this->error('Cannot delete a Completed payment. Use Refund instead.', 422);
+            }
 
-            // Soft delete the payment
+            if ($payment->payment_status === 'Refunded') {
+                return $this->error('Cannot delete a Refunded payment.', 422);
+            }
+
             $payment->delete();
 
-            // ── Regenerate Invoice PDF to reflect removed payment ─────────────
-            $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
-            $settings = $this->settingService->getSettings();
-
-            $this->documentService->generateInvoice($bill, $settings);
-
-
-            return $this->success(null, 'Payment deleted and bill updated successfully.');
+            return $this->success(null, 'Payment deleted successfully.');
         } catch (Exception $e) {
             Log::error('DELETE PAYMENT FAILED', ['error' => $e->getMessage()]);
             return $this->error('An error occurred while deleting the payment.');

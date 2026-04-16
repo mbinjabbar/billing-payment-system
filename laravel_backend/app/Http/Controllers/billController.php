@@ -20,8 +20,8 @@ class billController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private BillService $billService, 
-        private SettingService $settingService, 
+        private BillService $billService,
+        private SettingService $settingService,
         private DocumentService $documentService
     ) {}
 
@@ -132,31 +132,36 @@ class billController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    try {
-        $bill = Bill::findOrFail($id);
+    {
+        try {
+            $bill = Bill::findOrFail($id);
 
-        if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
-            return $this->error('Cannot edit a bill that has payments posted against it.', 403);
+            if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
+                return $this->error('Cannot edit a bill that has payments posted against it.', 403);
+            }
+
+            $bill = $this->billService->updateBill($bill, $request->all());
+
+            $settings = $this->settingService->getSettings();
+            $this->documentService->generateInvoice($bill, $settings);
+
+            return $this->success($bill, 'Bill updated and recalculated successfully.');
+        } catch (Exception $e) {
+            return $this->error('Failed to update bill.');
         }
-
-        $bill = $this->billService->updateBill($bill, $request->all());
-
-        $settings = $this->settingService->getSettings();
-        $this->documentService->generateInvoice($bill, $settings);
-
-        return $this->success($bill, 'Bill updated and recalculated successfully.');
-    } catch (Exception $e) {
-        return $this->error('Failed to update bill.');
     }
-}
 
     public function destroy($id)
     {
         try {
             $bill = Bill::findOrFail($id);
+
+            if (in_array($bill->status, ['Partial', 'Paid', 'Written Off'])) {
+                return $this->error('Cannot delete a bill with payments posted against it.', 422);
+            }
+
             $bill->delete();
-            return $this->success(null, 'Bill has been soft-deleted successfully.');
+            return $this->success(null, 'Bill deleted successfully.');
         } catch (Exception $e) {
             return $this->error('Failed to delete the bill.');
         }

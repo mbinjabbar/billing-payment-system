@@ -237,10 +237,17 @@
 
                   <!-- Delete — Admin only -->
                   @if (role() === 'Admin') {
+                  @if (bill.status !== 'Paid' && bill.status !== 'Partial' && bill.status !== 'Written Off') {
                   <button (click)="confirmDelete(bill.id)" title="Delete Bill"
                     class="w-8 h-8 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition">
                     <span class="material-symbols-outlined icon-sm">delete</span>
                   </button>
+                  } @else {
+                  <button disabled [title]="'Cannot delete — bill is ' + bill.status"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                  }
                   }
 
                 </div>
