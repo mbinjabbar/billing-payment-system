@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Visit;
+use App\Services\VisitService;
 use Exception;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
@@ -11,34 +12,15 @@ class VisitController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(private VisitService $visitService) {}
+
     public function index(Request $request)
     {
         try {
-            $query = Visit::with(['appointment.patientCase.patient', 'bill']);
 
-            $query->when($request->status, function ($q) use ($request) {
-                return $q->where('status', $request->status);
-            });
-
-            $query->when($request->visit_date, function ($q) use ($request) {
-                return $q->whereDate('visit_date', $request->visit_date);
-            });
-
-            $query->when($request->patient_name, function ($q) use ($request) {
-                return $q->whereHas('appointment.patientCase.patient', function ($sub) use ($request) {
-                    $sub->where('first_name', 'like', '%' . $request->patient_name . '%')
-                        ->orWhere('middle_name', 'like', '%' . $request->patient_name . '%')
-                        ->orWhere('last_name', 'like', '%' . $request->patient_name . '%');
-                });
-            });
-
-            $stats = [
-                'total_visits' => Visit::count(),
-                'billed' => Visit::whereHas('bill', fn($q) => $q->whereNotIn('status', ['Draft']))->count(),
-                'unbilled'       => Visit::where('status', 'Completed')->doesntHave('bill')->count()
-            ];
-
-            $visits = $query->latest('visit_date')->paginate(10);
+            $filters = $request->only(['status', 'visit_date', 'patient_name']);
+            $visits = $this->visitService->getFilteredVisits($filters);
+            $stats = $this->visitService->getVisitsStats();
 
             return $this->success($visits, 'Visits list fetched successfully.', 200, $stats);
         } catch (Exception $e) {
