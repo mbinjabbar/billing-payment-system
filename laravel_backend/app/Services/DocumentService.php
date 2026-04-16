@@ -116,7 +116,8 @@ class DocumentService
         $pdf = Pdf::loadView('Receipt_pdf', compact('payment', 'settings'));
         Storage::put($path, $pdf->output());
 
-        $fileSize = Storage::size($path);
+        $fullPath = Storage::path($path);
+        $fileSize = filesize($fullPath);
 
         $document = Document::where('payment_id', $payment->id)
             ->where('document_type', 'Receipt')

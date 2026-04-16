@@ -89,7 +89,9 @@ class PaymentService
             'cheque_file_path' => $cheque['path'] ?? null,
         ]));
 
-        $this->updateBillAfterPayment($bill, $data['amount_paid']);
+        if ($payment->payment_status === 'Completed') {
+            $this->updateBillAfterPayment($bill, $data['amount_paid']);
+        }
 
         return [$payment, $bill, $cheque];
     }

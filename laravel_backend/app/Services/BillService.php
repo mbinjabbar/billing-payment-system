@@ -78,7 +78,7 @@ class BillService
     }
 
     // ── Bill Status ───────────────────────────────────────────────────────
-    private function resolveBillStatus(Bill $bill)
+    public function resolveBillStatus(Bill $bill)
     {
         if ($bill->paid_amount <= 0) {
             $bill->status = 'Pending';
