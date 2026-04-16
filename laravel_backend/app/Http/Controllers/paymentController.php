@@ -35,7 +35,8 @@ class paymentController extends Controller
                 'payment_mode',
                 'payment_status',
                 'from_date',
-                'to_date'
+                'to_date',
+                'limit'
             ]);
 
             $payments = $this->paymentService->getFilteredPayments($filters);

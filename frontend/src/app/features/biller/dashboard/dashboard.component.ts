@@ -23,7 +23,7 @@ export class DashboardComponent {
   });
 
   ngOnInit() {
-    this.billService.getBills({}).subscribe((res: any) => {
+    this.billService.getBills({ limit: 5 }).subscribe((res: any) => {
       this.bills.set(res);
       if (res.stats) this.stats.set(res.stats);
     });

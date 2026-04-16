@@ -45,7 +45,14 @@ class BillService
     // ── Filtered Bills + Stats ────────────────────────────────────────────
     public function getFilteredBills(array $filters)
     {
-        return $this->buildBillQuery($filters)->latest('bill_date')->paginate(10);
+        $query = $this->buildBillQuery($filters);
+        $limit = $filters['limit'] ?? null;
+
+        if ($limit) {
+            return $query->latest('bill_date')->limit($limit)->get();
+        }
+
+        return $query->latest('bill_date')->paginate(10);
     }
 
     public function getBillStats(array $filters): array

@@ -34,7 +34,8 @@ class billController extends Controller
                 'end_date',
                 'min_amount',
                 'max_amount',
-                'patient_name'
+                'patient_name',
+                'limit'
             ]);
 
             $bills = $this->billService->getFilteredBills($filters);

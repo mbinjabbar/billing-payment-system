@@ -49,32 +49,31 @@ class PaymentService
     }
     public function getFilteredPayments(array $filters)
     {
-        return Payment::with('bill.visit.appointment.patientCase.patient')
+        $query = Payment::with('bill.visit.appointment.patientCase.patient')
             ->when(
                 $filters['bill_id'] ?? null,
-                fn($q, $billId) =>
-                $q->where('bill_id', $billId)
+                fn($q, $billId) => $q->where('bill_id', $billId)
             )
             ->when(
                 $filters['payment_mode'] ?? null,
-                fn($q, $mode) =>
-                $q->where('payment_mode', $mode)
+                fn($q, $mode) => $q->where('payment_mode', $mode)
             )
             ->when(
                 $filters['payment_status'] ?? null,
-                fn($q, $status) =>
-                $q->where('payment_status', $status)
+                fn($q, $status) => $q->where('payment_status', $status)
             )
             ->when(
                 !empty($filters['from_date']) && !empty($filters['to_date']),
-                fn($q) =>
-                $q->whereBetween('payment_date', [
+                fn($q) => $q->whereBetween('payment_date', [
                     $filters['from_date'],
                     $filters['to_date']
                 ])
             )
-            ->latest()
-            ->paginate(10);
+            ->latest();
+
+        return isset($filters['limit'])
+            ? $query->limit($filters['limit'])->get()
+            : $query->paginate(10);
     }
 
     public function createPayment(array $data, $file = null)

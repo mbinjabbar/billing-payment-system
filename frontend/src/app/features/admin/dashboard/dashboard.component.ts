@@ -37,7 +37,7 @@ export class DashboardComponent {
     };
 
     // Bills — for billing stats + recent bills table
-    this.billService.getBills({}).subscribe({
+    this.billService.getBills({ limit: 5 }).subscribe({
       next: (res: any) => {
         this.recentBills.set((res.data ?? []).slice(0, 5));
         if (res.stats) this.stats.set(res.stats);
@@ -47,7 +47,7 @@ export class DashboardComponent {
     });
 
     // Payments — for payment stats + recent payments table
-    this.paymentService.getPayments({ per_page: 5 }).subscribe({
+    this.paymentService.getPayments({ limit: 5 }).subscribe({
       next: (res: any) => {
         this.payments.set(res.data ?? []);
         this.recentPayments.set(res.data ?? []);
@@ -58,19 +58,19 @@ export class DashboardComponent {
   }
 
   // ── Bill stats ────────────────────────────────────────────────────────────
-totalBilled      = computed(() => Number(this.stats().total_bill_amount));
-totalCollected   = computed(() => Number(this.stats().total_paid_amount));
-totalOutstanding = computed(() => Number(this.stats().total_outstanding));
-pendingBillsCount = computed(() => this.stats().pending_count);
-partialBillsCount = computed(() => this.stats().partial_count);
-paidBillsCount    = computed(() => this.stats().paid_count);
+  totalBilled = computed(() => Number(this.stats().total_bill_amount));
+  totalCollected = computed(() => Number(this.stats().total_paid_amount));
+  totalOutstanding = computed(() => Number(this.stats().total_outstanding));
+  pendingBillsCount = computed(() => this.stats().pending_count);
+  partialBillsCount = computed(() => this.stats().partial_count);
+  paidBillsCount = computed(() => this.stats().paid_count);
 
-collectionProgress = computed(() => {
-  const total = this.totalBilled();
-  if (!total) return 0;
-  const pct = (this.totalCollected() / total) * 100;
-  return pct > 100 ? 100 : pct;
-});
+  collectionProgress = computed(() => {
+    const total = this.totalBilled();
+    if (!total) return 0;
+    const pct = (this.totalCollected() / total) * 100;
+    return pct > 100 ? 100 : pct;
+  });
 
   // ── Payment stats ────────────────────────────────────────────────────────
   totalPaymentsCount = computed(() => this.payments().length);

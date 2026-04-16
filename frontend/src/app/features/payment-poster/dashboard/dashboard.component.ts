@@ -28,7 +28,7 @@ export class DashboardComponent {
     const done = () => { if (++loaded === 2) this.loading.set(false); };
 
     // Recent payments for the table only
-    this.paymentService.getPayments({ per_page: 5 }).subscribe({
+    this.paymentService.getPayments({ limit: 5 }).subscribe({
       next: (res: any) => { this.payments.set(res.data ?? []); done(); },
       error: () => done(),
     });
