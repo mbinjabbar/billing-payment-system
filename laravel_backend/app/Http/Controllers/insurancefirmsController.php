@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\InsuranceFirm;
 use Illuminate\Http\Request;
 use Exception;
@@ -9,21 +10,28 @@ use App\Traits\ApiResponse;
 class insurancefirmsController extends Controller
 {
     use ApiResponse;
-   
-    public function index()
+
+    public function index(Request $request)
     {
         try {
-            $insuranceFirms = InsuranceFirm::all();
+            $query = InsuranceFirm::query();
+
+            if ($request->boolean('active_only')) {
+                $query->where('is_active', true);
+            }
+
+            $insuranceFirms = $query->get();
+
             return $this->success($insuranceFirms, 'Insurance firms retrieved successfully');
         } catch (Exception $e) {
             return $this->error('Unable to fetch insurance firms.');
         }
     }
 
-    
+
     public function store(Request $request)
     {
-        
+
         try {
             $data = $request->validate([
                 'name' => 'required|unique:insurance_firms,name',
@@ -43,7 +51,7 @@ class insurancefirmsController extends Controller
         }
     }
 
-   
+
     public function show($id)
     {
         try {
@@ -54,8 +62,8 @@ class insurancefirmsController extends Controller
         }
     }
 
-    
-    public function update(Request $request,$id)
+
+    public function update(Request $request, $id)
     {
         try {
             $data = $request->validate([
@@ -77,7 +85,7 @@ class insurancefirmsController extends Controller
         }
     }
 
-   
+
     public function destroy($id)
     {
         try {

@@ -62,7 +62,7 @@ export class CreateBillComponent {
   }
 
   loadInsuranceFirms() {
-    this.insuranceFirmsService.getInsuranceFirms().subscribe((res) => {
+    this.insuranceFirmsService.getInsuranceFirms(true).subscribe((res) => {
       this.insuranceFirms.set(res);
     });
   }

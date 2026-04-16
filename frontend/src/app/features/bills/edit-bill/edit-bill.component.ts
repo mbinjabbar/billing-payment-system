@@ -43,11 +43,11 @@ export class EditBillComponent {
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('billId'));
 
-    this.procedureCodesService.getProcedureCodes().subscribe((res: any) => {
+    this.procedureCodesService.getProcedureCodes(true).subscribe((res: any) => {
       this.procedures.set(res);
     });
 
-    this.insuranceFirmsService.getInsuranceFirms().subscribe((res: any) => {
+    this.insuranceFirmsService.getInsuranceFirms(true).subscribe((res: any) => {
       this.insuranceFirms.set(res);
     });
 

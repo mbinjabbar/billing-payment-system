@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 @Injectable({
@@ -6,10 +6,15 @@ import { inject, Injectable } from '@angular/core';
 })
 export class InsuranceFirmsService {
   private apiUrl = 'http://localhost:8000/api';
-  private http   = inject(HttpClient);
+  private http = inject(HttpClient);
 
-  getInsuranceFirms() {
-    return this.http.get(`${this.apiUrl}/insurancefirms`);
+  getInsuranceFirms(activeOnly: boolean = false) {
+    let params = new HttpParams();
+
+    if (activeOnly) {
+      params = params.set('active_only', true)
+    }
+    return this.http.get(`${this.apiUrl}/insurancefirms`, { params });
   }
 
   getInsuranceFirmById(id: number) {
