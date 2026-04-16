@@ -11,6 +11,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\BillService;
+use App\Services\DocumentService;
 use App\Services\SettingService;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +19,11 @@ class billController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(private BillService $billService, private SettingService $settingService) {}
+    public function __construct(
+        private BillService $billService, 
+        private SettingService $settingService, 
+        private DocumentService $documentService
+    ) {}
 
     public function index(Request $request)
     {
@@ -101,7 +106,7 @@ class billController extends Controller
 
             $settings = $this->settingService->getSettings();
 
-            $this->billService->generateBillDocuments($bill, $settings);
+            $this->documentService->generateBillDocuments($bill, $settings);
             DB::commit();
 
             return $this->success($bill, "Bill created successfully");
@@ -138,7 +143,7 @@ class billController extends Controller
         $bill = $this->billService->updateBill($bill, $request->all());
 
         $settings = $this->settingService->getSettings();
-        $this->billService->generateInvoice($bill, $settings);
+        $this->documentService->generateInvoice($bill, $settings);
 
         return $this->success($bill, 'Bill updated and recalculated successfully.');
     } catch (Exception $e) {

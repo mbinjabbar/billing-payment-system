@@ -1,0 +1,166 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Bill;
+use App\Models\Document;
+use App\Models\Payment;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+
+class DocumentService
+{
+    private function generateAndStoreDocument(
+        Bill $bill,
+        string $view,
+        string $prefix,
+        string $type,
+        array $settings,
+        bool $isUpdate = false
+    ) {
+        $fileName = $prefix . $bill->bill_number . '.pdf';
+        $path = 'bills/' . $fileName;
+
+        $pdf = Pdf::loadView($view, compact('bill', 'settings'));
+        Storage::put($path, $pdf->output());
+
+        $fullPath = Storage::path($path);
+        $fileSize = filesize($fullPath);
+        $mimeType = mime_content_type($fullPath);
+
+        if ($fileSize > (5 * 1024 * 1024)) {
+            throw new \Exception("File $fileName exceeds 5MB limit.");
+        }
+
+        if ($isUpdate) {
+            $document = Document::where('bill_id', $bill->id)
+                ->where('document_type', $type)
+                ->first();
+
+            if ($document) {
+                $document->update([
+                    'file_name'   => $fileName,
+                    'file_type'   => $mimeType,
+                    'file_path'   => $path,
+                    'file_size'   => $fileSize,
+                    'upload_date' => now(),
+                    'uploaded_by' => $bill->created_by,
+                    'version'     => $document->version + 1,
+                ]);
+            } else {
+                $this->createDocument($bill, $type, $fileName, $mimeType, $path, $fileSize);
+            }
+        } else {
+            $this->createDocument($bill, $type, $fileName, $mimeType, $path, $fileSize);
+        }
+        $bill->update(['generated_document_path' => $path]);
+    }
+
+    private function createDocument($bill, $type, $fileName, $mimeType, $path, $fileSize)
+    {
+        Document::create([
+            'bill_id'       => $bill->id,
+            'document_type' => $type,
+            'file_name'     => $fileName,
+            'file_type'     => $mimeType,
+            'file_path'     => $path,
+            'file_size'     => $fileSize,
+            'upload_date'   => now(),
+            'uploaded_by'   => $bill->created_by,
+            'version'       => 1,
+        ]);
+    }
+
+    // Used on bill update/payment/status change — updates existing Invoice document
+    public function generateInvoice(Bill $bill, array $settings)
+    {
+        $this->generateAndStoreDocument(
+            $bill,
+            'Invoice_pdf',
+            'Invoice_',
+            'Invoice',
+            $settings,
+            true
+        );
+    }
+
+    // ── PDF Generation ────────────────────────────────────────────────────
+    // Used on bill creation — generates Invoice + NF2 (if car accident)
+    public function generateBillDocuments(Bill $bill, array $settings)
+    {
+        $filesToGenerate = [
+            ['view' => 'Invoice_pdf', 'prefix' => 'Invoice_', 'type' => 'Invoice']
+        ];
+
+        if ($bill->visit->appointment->patientCase->car_accident) {
+            $filesToGenerate[] = ['view' => 'NF2_pdf', 'prefix' => 'NF2_', 'type' => 'NF2 Form'];
+        }
+
+        foreach ($filesToGenerate as $file) {
+            $this->generateAndStoreDocument(
+                $bill,
+                $file['view'],
+                $file['prefix'],
+                $file['type'],
+                $settings
+            );
+        }
+    }
+
+    public function generateReceipt($payment, array $settings, $isUpdate = false, bool $isRefund = false)
+    {
+        $suffix = $isRefund ? '_refund' : '';
+        $fileName = 'Receipt_' . $payment->payment_number . $suffix . '.pdf';
+        $path     = 'bills/' . $fileName;
+
+        $pdf = Pdf::loadView('Receipt_pdf', compact('payment', 'settings'));
+        Storage::put($path, $pdf->output());
+
+        $fileSize = Storage::size($path);
+
+        $document = Document::where('payment_id', $payment->id)
+            ->where('document_type', 'Receipt')
+            ->first();
+
+        if ($isUpdate && $document) {
+            $document->update([
+                'file_size'   => $fileSize,
+                'upload_date' => now(),
+                'version'     => $document->version + 1,
+            ]);
+        } else {
+            Document::create([
+                'bill_id'       => $payment->bill_id,
+                'payment_id'    => $payment->id,
+                'document_type' => 'Receipt',
+                'file_name'     => $fileName,
+                'file_type'     => 'application/pdf',
+                'file_path'     => $path,
+                'file_size'     => $fileSize,
+                'upload_date'   => now(),
+                'uploaded_by'   => $payment->received_by,
+                'version'       => 1,
+            ]);
+        }
+    }
+
+    public function storeChequeDocument(
+        Bill $bill,
+        Payment $payment,
+        array $cheque,
+        int $uploadedBy
+    ) {
+        Document::create([
+            'bill_id'       => $bill->id,
+            'payment_id'    => $payment->id,
+            'document_type' => 'Cheque Image',
+            'file_name'     => $cheque['name'],
+            'file_type'     => $cheque['type'],
+            'file_path'     => $cheque['path'],
+            'file_size'     => $cheque['size'],
+            'upload_date'   => now(),
+            'uploaded_by'   => $uploadedBy,
+            'version'       => 1,
+        ]);
+    }
+}

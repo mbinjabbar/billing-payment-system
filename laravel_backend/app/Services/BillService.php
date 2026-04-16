@@ -3,16 +3,13 @@
 namespace App\Services;
 
 use App\Models\Bill;
-use App\Models\Document;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
 
 class BillService
 {
-    public function __construct(private SettingService $settingService) {}
+    public function __construct(private SettingService $settingService, private DocumentService $documentService) {}
 
     // ── Query Builder (private — shared internally) ───────────────────────
-    private function buildBillQuery(array $filters): \Illuminate\Database\Eloquent\Builder
+    private function buildBillQuery(array $filters)
     {
         $query = Bill::with('visit.appointment.patientCase.patient', 'insurance_firm');
 
@@ -67,7 +64,7 @@ class BillService
     }
 
     // ── Bill Amount Calculation ───────────────────────────────────────────
-    public function calculateBillAmount(float $charges, float $insurancePercent, float $discount, float $tax): float
+    public function calculateBillAmount(float $charges, float $insurancePercent, float $discount, float $tax)
     {
         $insuranceAmount = ($charges * $insurancePercent) / 100;
         return ($charges - $insuranceAmount - $discount) + $tax;
@@ -81,7 +78,7 @@ class BillService
     }
 
     // ── Bill Status ───────────────────────────────────────────────────────
-    private function resolveBillStatus(Bill $bill): void
+    private function resolveBillStatus(Bill $bill)
     {
         if ($bill->paid_amount <= 0) {
             $bill->status = 'Pending';
@@ -92,95 +89,8 @@ class BillService
         }
     }
 
-    // ── PDF Generation ────────────────────────────────────────────────────
-    // Used on bill creation — generates Invoice + NF2 (if car accident)
-    public function generateBillDocuments(Bill $bill, array $settings): void
-    {
-        $filesToGenerate = [
-            ['view' => 'Invoice_pdf', 'prefix' => 'Invoice_', 'type' => 'Invoice']
-        ];
-
-        // Append NF2 — do NOT replace the array
-        if ($bill->visit->appointment->patientCase->car_accident) {
-            $filesToGenerate[] = ['view' => 'NF2_pdf', 'prefix' => 'NF2_', 'type' => 'NF2 Form'];
-        }
-
-        foreach ($filesToGenerate as $file) {
-            $pdf      = Pdf::loadView($file['view'], compact('bill', 'settings'));
-            $fileName = $file['prefix'] . $bill->bill_number . '.pdf';
-            $path     = 'bills/' . $fileName;
-
-            Storage::put($path, $pdf->output());
-
-            $fullPath = Storage::path($path);
-            $fileSize = filesize($fullPath);
-            $mimeType = mime_content_type($fullPath);
-
-            if ($fileSize > (5 * 1024 * 1024)) {
-                throw new \Exception("File $fileName exceeds 5MB limit.");
-            }
-
-            Document::create([
-                'bill_id'       => $bill->id,
-                'document_type' => $file['type'],
-                'file_name'     => $fileName,
-                'file_type'     => $mimeType,
-                'file_path'     => $path,
-                'file_size'     => $fileSize,
-                'upload_date'   => now(),
-                'uploaded_by'   => $bill->created_by,
-                'version'       => 1,
-            ]);
-
-            $bill->update(['generated_document_path' => $path]);
-        }
-    }
-
-    // Used on bill update/payment/status change — updates existing Invoice document
-    public function generateInvoice(Bill $bill, array $settings): void
-    {
-        $fileName = 'Invoice_' . $bill->bill_number . '.pdf';
-        $path     = 'bills/' . $fileName;
-
-        Storage::put($path, Pdf::loadView('Invoice_pdf', compact('bill', 'settings'))->output());
-        
-        $fullPath = Storage::path($path);
-        $fileSize = filesize($fullPath);
-        $mimeType = mime_content_type($fullPath);
-
-        $document = Document::where('bill_id', $bill->id)
-            ->where('document_type', 'Invoice')
-            ->first();
-
-        if ($document) {
-            $document->update([
-                'file_name'   => $fileName,
-                'file_type'   => $mimeType,
-                'file_path'   => $path,
-                'file_size'   => $fileSize,
-                'upload_date' => now(),
-                'uploaded_by' => $bill->created_by,
-                'version'     => $document->version + 1,
-            ]);
-        } else {
-            Document::create([
-                'bill_id'       => $bill->id,
-                'document_type' => 'Invoice',
-                'file_name'     => $fileName,
-                'file_type'     => $mimeType,
-                'file_path'     => $path,
-                'file_size'     => $fileSize,
-                'upload_date'   => now(),
-                'uploaded_by'   => $bill->created_by,
-                'version'       => 1,
-            ]);
-        }
-
-        $bill->update(['generated_document_path' => $path]);
-    }
-
     // ── Update Bill ───────────────────────────────────────────────────────
-    public function updateBill(Bill $bill, array $data): Bill
+    public function updateBill(Bill $bill, array $data)
     {
         $bill->fill([
             'procedure_codes'    => $data['procedure_codes'],
@@ -213,7 +123,7 @@ class BillService
     }
 
     // ── Update Bill Status (Cancelled / Written Off) ──────────────────────
-    public function updateBillStatus(int $id, string $status): Bill
+    public function updateBillStatus(int $id, string $status)
     {
         $bill = Bill::findOrFail($id);
 
@@ -235,7 +145,7 @@ class BillService
         );
 
         $settings = $this->settingService->getSettings();
-        $this->generateInvoice($bill, $settings);
+        $this->documentService->generateInvoice($bill, $settings);
 
         return $bill;
     }
