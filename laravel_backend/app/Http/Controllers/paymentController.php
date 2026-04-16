@@ -55,6 +55,7 @@ class paymentController extends Controller
                 $request->file('cheque_file')
             );
 
+            if($request->payment_status === 'Completed') {
             $settings = $this->settingService->getSettings();
 
             $bill->load(
@@ -70,6 +71,7 @@ class paymentController extends Controller
 
             $this->documentService->generateInvoice($bill, $settings);
             $this->documentService->generateReceipt($payment, $settings);
+            }
 
             if ($cheque) {
                 $this->documentService->storeChequeDocument(
