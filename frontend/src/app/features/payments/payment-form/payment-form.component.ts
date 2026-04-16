@@ -23,6 +23,7 @@ export class PaymentFormComponent {
   // ── State ────────────────────────────────────────────────────────────────
   bill         = signal<any>(null);
   selectedFile = signal<File | null>(null);
+  existingCheque = signal<any>(null);
   submitting   = signal(false);
   error        = signal('');
   billId       = 0;
@@ -112,6 +113,9 @@ export class PaymentFormComponent {
         this.paymentForm.patchValue(data);
         // Set paymentMode signal when editing so conditional fields render
         this.paymentMode.set(data.payment_mode ?? '');
+        if (data.cheque_file_path) {
+        this.existingCheque.set(data.cheque_file_path);
+      }
       },
       error: () => this.error.set('Failed to load payment details.'),
     });
