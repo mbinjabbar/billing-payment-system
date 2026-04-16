@@ -59,7 +59,7 @@ class DocumentService
         // Cheque files are in public storage, everything else in local storage
         $basePath = $document->document_type === 'Cheque Image'
             ? storage_path('app/public/' . $document->file_path)
-            : storage_path('app/' . $document->file_path);
+            : storage_path('app/private/' . $document->file_path);
 
         if (!file_exists($basePath)) {
             throw new \Exception('File not found on disk.');
