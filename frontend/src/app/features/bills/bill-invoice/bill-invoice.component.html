@@ -44,7 +44,7 @@
   <!-- Download Invoice -->
    @if(bill().status !== 'Draft'){
   <button (click)="downloadInvoice(bill().id)"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary cursor-pointer">
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary">
     <span class="material-symbols-outlined icon-sm">download</span>
     Download Invoice
   </button>
@@ -53,7 +53,7 @@
   <!-- Download NF2 — only for car accident bills -->
   @if (isCarAccident()) {
     <button (click)="downloadNF2(bill().id)"
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm font-headline active:scale-97 transition-all border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100 cursor-pointer">
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm font-headline active:scale-97 transition-all border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100">
       <span class="material-symbols-outlined icon-sm">description</span>
       Download NF2
     </button>

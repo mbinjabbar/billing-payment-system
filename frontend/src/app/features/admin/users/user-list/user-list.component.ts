@@ -30,6 +30,7 @@ export class UserListComponent {
     this.userService.getUsers().subscribe({
       next: (res: any) => {
         this.users.set(res.data ?? res);
+        console.log(res.data)
         this.loading.set(false);
       },
       error: () => {

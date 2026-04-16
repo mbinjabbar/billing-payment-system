@@ -221,7 +221,7 @@
 
                   <!-- Post Payment — Payment Poster/Admin only, disabled if Paid/Cancelled/Written Off -->
                   @if (role() === 'Payment Poster' || role() === 'Admin') {
-                  @if (bill.status !== 'Cancelled' && bill.status !== 'Written Off' && bill.status !== 'Paid') {
+                  @if (bill.status === 'Pending' || bill.status === 'Partial') {
                   <button [routerLink]="['/bills', bill.id, 'pay']" title="Post Payment"
                     class="w-8 h-8 flex items-center justify-center rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition">
                     <span class="material-symbols-outlined icon-sm">payments</span>
