@@ -1,11 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InsuranceFirmsService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = `${environment.laravelApiUrl}/insurancefirms`;
   private http = inject(HttpClient);
 
   getInsuranceFirms(activeOnly: boolean = false) {
@@ -14,22 +15,22 @@ export class InsuranceFirmsService {
     if (activeOnly) {
       params = params.set('active_only', true)
     }
-    return this.http.get(`${this.apiUrl}/insurancefirms`, { params });
+    return this.http.get(this.apiUrl, { params });
   }
 
   getInsuranceFirmById(id: number) {
-    return this.http.get(`${this.apiUrl}/insurancefirms/${id}`);
+    return this.http.get(`${this.apiUrl}/${id}`);
   }
 
   createInsuranceFirm(payload: any) {
-    return this.http.post(`${this.apiUrl}/insurancefirms`, payload);
+    return this.http.post(this.apiUrl, payload);
   }
 
   updateInsuranceFirm(id: number, payload: any) {
-    return this.http.put(`${this.apiUrl}/insurancefirms/${id}`, payload);
+    return this.http.put(`${this.apiUrl}/${id}`, payload);
   }
 
   deleteInsuranceFirm(id: number) {
-    return this.http.delete(`${this.apiUrl}/insurancefirms/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 export interface AuthUser {
   id: number;
@@ -14,7 +15,7 @@ export interface AuthUser {
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.nodeApiUrl}/auth`;
   private http = inject(HttpClient);
   private router = inject(Router);
 

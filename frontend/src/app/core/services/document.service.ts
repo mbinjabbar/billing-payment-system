@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DocumentService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.laravelApiUrl;
   private http = inject(HttpClient);
 
   getDocuments(params: any = {}) {

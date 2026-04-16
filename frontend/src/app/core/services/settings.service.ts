@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = `${environment.laravelApiUrl}/settings`;
   private http = inject(HttpClient);
   private settings = signal<any>(null);
   private title = inject(Title);
@@ -12,11 +13,11 @@ export class SettingsService {
   appName = computed(() => this.settings()?.clinic_name)
 
   getSettings() {
-    return this.http.get(`${this.apiUrl}/settings`);
+    return this.http.get(this.apiUrl);
   }
 
   saveSettings(payload: any) {
-    return this.http.post(`${this.apiUrl}/settings`, payload);
+    return this.http.post(this.apiUrl, payload);
   }
 
   load() {

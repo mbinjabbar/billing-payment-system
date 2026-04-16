@@ -1,11 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProcedureCodesService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = `${environment.laravelApiUrl}/procedurecodes`;
   private http   = inject(HttpClient);
 
   getProcedureCodes(activeOnly: boolean = false) {
@@ -14,22 +15,22 @@ export class ProcedureCodesService {
     if(activeOnly) {
       params = params.set('active_only', true)
     }
-    return this.http.get(`${this.apiUrl}/procedurecodes`, { params });
+    return this.http.get(this.apiUrl, { params });
   }
 
   getProcedureCodeById(id: number) {
-    return this.http.get(`${this.apiUrl}/procedurecodes/${id}`);
+    return this.http.get(`${this.apiUrl}/${id}`);
   }
 
   createProcedureCode(payload: any) {
-    return this.http.post(`${this.apiUrl}/procedurecodes`, payload);
+    return this.http.post(this.apiUrl, payload);
   }
 
   updateProcedureCode(id: number, payload: any) {
-    return this.http.put(`${this.apiUrl}/procedurecodes/${id}`, payload);
+    return this.http.put(`${this.apiUrl}/${id}`, payload);
   }
 
   deleteProcedureCode(id: number) {
-    return this.http.delete(`${this.apiUrl}/procedurecodes/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
