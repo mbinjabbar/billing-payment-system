@@ -140,7 +140,7 @@ class PaymentService
         $bill->save();
     }
 
-    public function refundPayment(Payment $payment, float $refundAmount)
+    public function refundPayment(Payment $payment, ?float $refundAmount = null)
     {
         $bill = $payment->bill;
 
