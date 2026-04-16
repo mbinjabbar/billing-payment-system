@@ -8,13 +8,13 @@ use Exception;
 use App\Models\Bill;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Log;
-use App\Models\Document;
 use App\Exports\PaymentsExport;
 use App\Services\BillService;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\DocumentService;
 use App\Services\PaymentService;
 use App\Services\SettingService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class paymentController extends Controller
@@ -49,6 +49,7 @@ class paymentController extends Controller
 
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
             $data = $request->all();
 
@@ -85,8 +86,10 @@ class paymentController extends Controller
                 $this->documentService->generateReceipt($payment, $settings);
             }
 
+            DB::commit();
             return $this->success($payment, 'Payment created successfully');
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('STORE PAYMENT FAILED', ['error' => $e->getMessage()]);
             return $this->error($e->getMessage());
         }
@@ -104,11 +107,13 @@ class paymentController extends Controller
 
         public function update(Request $request, $id)
     {
+        DB::beginTransaction();
         try {
             $payment = Payment::findOrFail($id);
  
             // Only Pending or Failed payments can be edited
             if (!in_array($payment->payment_status, ['Pending', 'Failed'])) {
+                DB::rollBack();
                 return $this->error('Only Pending or Failed payments can be edited.', 422);
             }
  
@@ -118,6 +123,7 @@ class paymentController extends Controller
  
             // Overpayment guard
             if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
+                DB::rollBack();
                 return $this->error('Amount paid cannot exceed outstanding amount.', 400);
             }
  
@@ -179,9 +185,11 @@ class paymentController extends Controller
                     $payment->received_by
                 );
             }
- 
+
+            DB::commit();
             return $this->success($payment, 'Payment updated successfully.');
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error('UPDATE PAYMENT FAILED', ['error' => $e->getMessage(), 'line' => $e->getLine()]);
             return $this->error($e->getMessage());
         }
@@ -198,21 +206,26 @@ class paymentController extends Controller
 
     public function destroy($id)
     {
+        DB::beginTransaction();
         try {
             $payment = Payment::findOrFail($id);
 
             if ($payment->payment_status === 'Completed') {
+                DB::rollBack();
                 return $this->error('Cannot delete a Completed payment. Use Refund instead.', 422);
             }
 
             if ($payment->payment_status === 'Refunded') {
+                DB::rollBack();
                 return $this->error('Cannot delete a Refunded payment.', 422);
             }
 
             $payment->delete();
 
+            DB::commit();
             return $this->success(null, 'Payment deleted successfully.');
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error('DELETE PAYMENT FAILED', ['error' => $e->getMessage()]);
             return $this->error('An error occurred while deleting the payment.');
         }
@@ -221,6 +234,7 @@ class paymentController extends Controller
     // refund method
     public function refund(Request $request, $id)
     {
+        DB::beginTransaction();
         try {
             $payment = Payment::findOrFail($id);
 
@@ -250,8 +264,10 @@ class paymentController extends Controller
 
             $this->documentService->generateInvoice($bill, $settings);
 
+            DB::commit();
             return $this->success($payment, 'Payment refunded and bill updated successfully.');
         } catch (Exception $e) {
+            DB::rollBack();
             return $this->error($e->getMessage());
         }
     }

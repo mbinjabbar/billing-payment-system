@@ -13,7 +13,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Services\BillService;
 use App\Services\DocumentService;
 use App\Services\SettingService;
-use Illuminate\Validation\ValidationException;
 
 class billController extends Controller
 {
@@ -134,10 +133,12 @@ class billController extends Controller
 
     public function update(Request $request, $id)
     {
+        DB::beginTransaction();
         try {
             $bill = Bill::findOrFail($id);
 
             if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
+                DB::rollBack();
                 return $this->error('Cannot edit a bill that has payments posted against it.', 403);
             }
 
@@ -145,25 +146,32 @@ class billController extends Controller
 
             $settings = $this->settingService->getSettings();
             $this->documentService->generateInvoice($bill, $settings);
+            DB::commit();
 
             return $this->success($bill, 'Bill updated and recalculated successfully.');
         } catch (Exception $e) {
+            DB::rollBack();
             return $this->error('Failed to update bill.');
         }
     }
 
     public function destroy($id)
     {
+        DB::beginTransaction();
         try {
             $bill = Bill::findOrFail($id);
 
             if (in_array($bill->status, ['Partial', 'Paid', 'Written Off'])) {
+                DB::rollBack();
                 return $this->error('Cannot delete a bill with payments posted against it.', 422);
             }
 
             $bill->delete();
+
+            DB::commit();
             return $this->success(null, 'Bill deleted successfully.');
         } catch (Exception $e) {
+            DB::rollBack();
             return $this->error('Failed to delete the bill.');
         }
     }
@@ -182,6 +190,7 @@ class billController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        DB::beginTransaction();
         try {
             $request->validate([
                 'status' => 'required|in:Cancelled,Written Off'
@@ -189,10 +198,10 @@ class billController extends Controller
 
             $bill = $this->billService->updateBillStatus($id, $request->status);
 
+            DB::commit();
             return $this->success($bill, 'Bill status updated successfully.');
-        } catch (ValidationException $e) {
-            return $this->error($e->getMessage(), 422);
-        } catch (Exception $e) {
+        }  catch (Exception $e) {
+            DB::rollBack();
             return $this->error($e->getMessage(), 422);
         }
     }
