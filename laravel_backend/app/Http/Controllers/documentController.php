@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
+use App\Services\DocumentService;
 use App\Traits\ApiResponse;
 use Exception;
 use Illuminate\Http\Request;
@@ -10,29 +11,20 @@ use Illuminate\Http\Request;
 class documentController extends Controller
 {
     use ApiResponse;
+    public function __construct(private DocumentService $documentService){}
+
     public function index(Request $request)
     {
-        $query = Document::with('bill.visit.appointment.patientCase.patient', 'payment');
-
-        // Filter by role
-        $role = $request->query('role');
-
-        if ($role === 'Biller') {
-            $query->whereIn('document_type', ['Invoice', 'NF2 Form']);
-        } elseif ($role === 'Payment Poster') {
-            $query->whereIn('document_type', ['Invoice', 'Cheque Image', 'Receipt']);
+        try {
+            $filters   = $request->only(['role', 'type']);
+            $documents = $this->documentService->getFilteredDocuments($filters);
+            return $this->success($documents, 'Documents retrieved successfully.');
+        } catch (Exception $e) {
+            return $this->error('Failed to fetch documents.');
         }
-        // Admin gets everything
-
-        if($request->filled('type')){
-            $query->where('document_type', $request->type );
-        }
-
-        $documents = $query->latest()->paginate(10);
-        return $this->success($documents, 'Documents retrieved successfully.');
     }
 
- 
+
     public function downloadInvoice($id)
     {
         try {

@@ -10,6 +10,27 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentService
 {
+    public function getFilteredDocuments(array $filters): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $query = Document::with('bill.visit.appointment.patientCase.patient', 'payment');
+
+        // Role-based document type filtering
+        $role = $filters['role'] ?? null;
+        if ($role === 'Biller') {
+            $query->whereIn('document_type', ['Invoice', 'NF2 Form']);
+        } elseif ($role === 'Payment Poster') {
+            $query->whereIn('document_type', ['Invoice', 'Cheque Image', 'Receipt']);
+        }
+        // Admin gets everything — no filter applied
+
+        // Type filter
+        if (!empty($filters['type'])) {
+            $query->where('document_type', $filters['type']);
+        }
+
+        return $query->latest()->paginate(10);
+    }
+    
     private function generateAndStoreDocument(
         Bill $bill,
         string $view,
