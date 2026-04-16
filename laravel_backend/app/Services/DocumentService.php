@@ -30,7 +30,44 @@ class DocumentService
 
         return $query->latest()->paginate(10);
     }
-    
+
+    public function getDocument(string $type, int $id)
+    {
+        $query = Document::where('document_type', $type)->latest();
+
+        // Receipt is linked to payment, everything else to bill
+        if ($type === 'Receipt') {
+            $query->where('payment_id', $id);
+        } else {
+            $query->where('bill_id', $id);
+        }
+
+        return $query->firstOrFail();
+    }
+
+    public function getChequeDocument(int $id)
+    {
+        $document = Document::findOrFail($id);
+        if ($document->document_type !== 'Cheque Image') {
+            throw new \Exception('Not a cheque document.');
+        }
+        return $document;
+    }
+
+    public function resolveFilePath(Document $document): string
+    {
+        // Cheque files are in public storage, everything else in local storage
+        $basePath = $document->document_type === 'Cheque Image'
+            ? storage_path('app/public/' . $document->file_path)
+            : storage_path('app/' . $document->file_path);
+
+        if (!file_exists($basePath)) {
+            throw new \Exception('File not found on disk.');
+        }
+
+        return $basePath;
+    }
+
     private function generateAndStoreDocument(
         Bill $bill,
         string $view,
