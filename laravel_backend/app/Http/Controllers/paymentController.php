@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Services\DocumentService;
 use App\Services\PaymentService;
 use App\Services\SettingService;
+use Illuminate\Support\Facades\Storage;
 
 class paymentController extends Controller
 {
@@ -100,27 +101,31 @@ class paymentController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+        public function update(Request $request, $id)
     {
         try {
             $payment = Payment::findOrFail($id);
-
+ 
+            // Only Pending or Failed payments can be edited
             if (!in_array($payment->payment_status, ['Pending', 'Failed'])) {
                 return $this->error('Only Pending or Failed payments can be edited.', 422);
             }
-
+ 
             $bill          = Bill::findOrFail($request->bill_id ?? $payment->bill_id);
             $oldAmountPaid = $payment->amount_paid;
             $newAmountPaid = $request->amount_paid;
-
+ 
             // Overpayment guard
             if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
                 return $this->error('Amount paid cannot exceed outstanding amount.', 400);
             }
-
-            // Handle cheque file upload
-            $filePath = $payment->cheque_file_path;
+ 
+            // ── Step 1: Save old cheque path BEFORE anything overwrites it ────
+            $oldChequePath = $payment->cheque_file_path;
+            $filePath      = $payment->cheque_file_path;
             $name = $type = $fileSize = null;
+ 
+            // ── Step 2: Store new cheque file on disk if uploaded ─────────────
             if ($request->hasFile('cheque_file')) {
                 $file     = $request->file('cheque_file');
                 $name     = $file->getClientOriginalName();
@@ -129,8 +134,8 @@ class paymentController extends Controller
                 $filePath = $file->store('cheque_files', 'public');
                 $payment->cheque_file_path = $filePath;
             }
-
-            // Update payment fields
+ 
+            // ── Step 3: Update payment fields and save to DB ──────────────────
             $payment->fill($request->only([
                 'amount_paid',
                 'payment_mode',
@@ -142,24 +147,30 @@ class paymentController extends Controller
                 'notes',
             ]));
             $payment->save();
-
-            // Only update bill if payment is becoming Completed
+ 
+            // ── Step 4: Update bill + regenerate PDFs only if Completed ───────
             if ($request->payment_status === 'Completed') {
                 $bill->paid_amount        += $newAmountPaid;
                 $bill->outstanding_amount  = $bill->bill_amount - $bill->paid_amount;
                 $this->billService->resolveBillStatus($bill);
                 $bill->save();
-
+ 
                 $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
                 $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
-
+ 
                 $settings = $this->settingService->getSettings();
                 $this->documentService->generateInvoice($bill, $settings);
                 $this->documentService->generateReceipt($payment, $settings, true);
             }
-
-            // Cheque Image — create new if file replaced
+ 
+            // ── Step 5: Handle cheque document AFTER payment saved ────────────
             if ($request->hasFile('cheque_file')) {
+                // Delete old file from disk using saved old path
+                if ($oldChequePath) {
+                    Storage::disk('public')->delete($oldChequePath);
+                }
+ 
+                // storeChequeDocument soft deletes old record internally and creates new
                 $this->documentService->storeChequeDocument(
                     $bill,
                     $payment,
@@ -167,8 +178,8 @@ class paymentController extends Controller
                     $payment->received_by
                 );
             }
-
-            return $this->success($payment, 'Payment and bill updated successfully.');
+ 
+            return $this->success($payment, 'Payment updated successfully.');
         } catch (Exception $e) {
             Log::error('UPDATE PAYMENT FAILED', ['error' => $e->getMessage(), 'line' => $e->getLine()]);
             return $this->error($e->getMessage());

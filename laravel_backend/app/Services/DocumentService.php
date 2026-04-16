@@ -209,6 +209,11 @@ class DocumentService
         array $cheque,
         int $uploadedBy
     ) {
+
+        Document::where('payment_id', $payment->id)
+            ->where('document_type', 'Cheque Image')
+            ->delete();
+            
         Document::create([
             'bill_id'       => $bill->id,
             'payment_id'    => $payment->id,
