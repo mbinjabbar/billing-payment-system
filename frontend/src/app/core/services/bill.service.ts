@@ -10,13 +10,9 @@ export class BillService {
   private http   = inject(HttpClient);
 
   getBills(filters: any = {}) {
-    const params: any = {};
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== null && filters[key] !== '' && filters[key] !== undefined) {
-        params[key] = String(filters[key]);
-      }
+    return this.http.get(this.apiUrl, {
+      params: filters
     });
-    return this.http.get(this.apiUrl, { params });
   }
 
   getBillById(id: number) {
