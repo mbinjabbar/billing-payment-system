@@ -40,16 +40,18 @@ class PaymentsExport implements FromCollection, WithHeadings
             ]);
         }
 
-        return $query->get([
-            'id',
-            'bill_id',
-            'amount_paid',
-            'payment_mode',
-            'payment_status',
-            'payment_date',
-            'transaction_reference',
-            'notes'
-        ]);
+        return $query->latest('payment_date')->get()->map(function ($payment) {
+            return [
+                'id' => $payment->id,
+                'bill_id' => $payment->bill_id,
+                'amount_paid' => $payment->amount_paid,
+                'payment_mode' => $payment->payment_mode,
+                'payment_status' => $payment->payment_status,
+                'payment_date' => $payment->payment_date,
+                'transaction_reference' => $payment->transaction_reference,
+                'notes' => $payment->notes
+            ];
+        });
     }
 
     public function headings(): array
