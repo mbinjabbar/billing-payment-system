@@ -6,7 +6,6 @@ use App\Exports\BillsExport;
 use Illuminate\Http\Request;
 use App\Models\Bill;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -112,7 +111,6 @@ class billController extends Controller
             return $this->success($bill, "Bill created successfully");
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Error: ' . $e->getMessage());
             return $this->error('Failed to generate bill: ' . $e->getMessage());
         }
     }

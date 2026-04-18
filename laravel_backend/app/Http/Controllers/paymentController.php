@@ -7,7 +7,6 @@ use App\Models\Payment;
 use Exception;
 use App\Models\Bill;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Log;
 use App\Exports\PaymentsExport;
 use App\Services\BillService;
 use Maatwebsite\Excel\Facades\Excel;
@@ -42,7 +41,6 @@ class paymentController extends Controller
             $payments = $this->paymentService->getFilteredPayments($filters);
             return $this->success($payments, 'Payments retrieved successfully');
         } catch (Exception $e) {
-            Log::error('PAYMENT LIST ERROR', ['message' => $e->getMessage()]);
             return $this->error('An error occurred while fetching payments');
         }
     }
@@ -90,7 +88,6 @@ class paymentController extends Controller
             return $this->success($payment, 'Payment created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('STORE PAYMENT FAILED', ['error' => $e->getMessage()]);
             return $this->error($e->getMessage());
         }
     }
@@ -190,7 +187,6 @@ class paymentController extends Controller
             return $this->success($payment, 'Payment updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('UPDATE PAYMENT FAILED', ['error' => $e->getMessage(), 'line' => $e->getLine()]);
             return $this->error($e->getMessage());
         }
     }
@@ -226,7 +222,6 @@ class paymentController extends Controller
             return $this->success(null, 'Payment deleted successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('DELETE PAYMENT FAILED', ['error' => $e->getMessage()]);
             return $this->error('An error occurred while deleting the payment.');
         }
     }

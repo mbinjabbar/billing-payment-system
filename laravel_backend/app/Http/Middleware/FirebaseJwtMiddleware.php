@@ -16,10 +16,7 @@ class FirebaseJwtMiddleware
     {
         $token = $request->bearerToken();
         
-        Log::info($token); 
-
         if (!$token) {
-            Log::error("No token provided"); 
             return response()->json(['error' => 'Token not provided'], 401);
         }
 
@@ -31,14 +28,11 @@ class FirebaseJwtMiddleware
     if (!$role) {
         return response()->json(['error' => 'Role not found in token'], 403);
     }
-     Log::info($role);
-
     // Pass it to the request attributes so your Controllers can see it
     $request->attributes->add([
         'user_data' => $decoded,
         'user_role' => $role
     ]);
-    Log::info($role);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 401);
         }
