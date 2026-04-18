@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   laravelApiUrl: 'http://localhost:8000/api',
   nodeApiUrl: 'http://localhost:3000/api',
 };
