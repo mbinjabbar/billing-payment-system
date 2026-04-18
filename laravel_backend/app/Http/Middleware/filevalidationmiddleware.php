@@ -2,21 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Traits\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class filevalidationmiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
+    use ApiResponse;
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->hasFile('cheque_file')) {
-            return $next($request);
+            return $this->error('No file uploaded', 422);
         }
 
         $allowedMimes = [
@@ -25,22 +22,16 @@ class filevalidationmiddleware
             'image/png',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ];
-        $maxSizeKB = 5120; // 5MB in Kb
+        $maxSizeKB = 5120;
 
         $file = $request->file('cheque_file');
 
         if (!in_array($file->getMimeType(), $allowedMimes)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid file type. Allowed: PDF, JPG, PNG, DOCX'
-            ], 422);
+            return $this->error('Invalid file type. Allowed: PDF, JPG, PNG, DOCX', 422);
         }
 
         if ($file->getSize() > $maxSizeKB * 1024) {
-            return response()->json([
-                'success' => false,
-                'message' => 'File size exceeds the maximum limit of 5MB'
-            ], 422);
+            return $this->error('File size exceeds the maximum limit of 5MB', 422);
         }
 
         return $next($request);

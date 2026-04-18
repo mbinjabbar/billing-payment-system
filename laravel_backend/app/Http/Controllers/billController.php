@@ -111,7 +111,7 @@ class billController extends Controller
             return $this->success($bill, "Bill created successfully");
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->error('Failed to generate bill: ' . $e->getMessage());
+            return $this->error('Failed to generate bill: ');
         }
     }
 
@@ -182,7 +182,7 @@ class billController extends Controller
                 'bills.xlsx'
             );
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error("Failed to export bills: " . $e->getMessage());
         }
     }
 
@@ -200,7 +200,7 @@ class billController extends Controller
             return $this->success($bill, 'Bill status updated successfully.');
         }  catch (Exception $e) {
             DB::rollBack();
-            return $this->error($e->getMessage(), 422);
+            return $this->error("Failed to update bill status: " . $e->getMessage(), 422);
         }
     }
 }

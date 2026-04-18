@@ -88,7 +88,7 @@ class paymentController extends Controller
             return $this->success($payment, 'Payment created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->error($e->getMessage());
+            return $this->error('Failed to create payment.');
         }
     }
 
@@ -187,7 +187,7 @@ class paymentController extends Controller
             return $this->success($payment, 'Payment updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->error($e->getMessage());
+            return $this->error('Failed to update payment.');
         }
     }
 
@@ -196,7 +196,7 @@ class paymentController extends Controller
         try {
             return Excel::download(new PaymentsExport($request->all()), 'payments.xlsx');
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error('Failed to export payments.');
         }
     }
 
@@ -263,7 +263,7 @@ class paymentController extends Controller
             return $this->success($payment, 'Payment refunded and bill updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->error($e->getMessage());
+            return $this->error('Failed to refund payment.');
         }
     }
 }

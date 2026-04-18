@@ -43,7 +43,7 @@ class procedurecodesController extends Controller
                 $procedureCode = ProcedureMaster::create($data);
                 return $this->success($procedureCode, 'Procedure code created successfully', 201);
             } catch (Exception $e) {
-                return $this->error($e->getMessage());
+                return $this->error('Failed to create procedure code.');
             }
     }
 
@@ -72,7 +72,7 @@ class procedurecodesController extends Controller
             $procedureCode->update($data);
             return $this->success($procedureCode, 'Procedure code updated successfully');
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error('Failed to update procedure code.');
         }
     }
 

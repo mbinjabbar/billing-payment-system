@@ -30,7 +30,7 @@ class documentController extends Controller
             $filePath = $this->documentService->resolveFilePath($document);
             return response()->download($filePath);
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error('Failed to download invoice.');
         }
     }
 
@@ -41,7 +41,7 @@ class documentController extends Controller
             $filePath = $this->documentService->resolveFilePath($document);
             return response()->download($filePath);
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error('Failed to download NF2 form.');
         }
     }
 
@@ -52,7 +52,7 @@ class documentController extends Controller
             $filePath = $this->documentService->resolveFilePath($document);
             return response()->download($filePath);
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error('Failed to download receipt.');
         }
     }
 
@@ -63,7 +63,7 @@ class documentController extends Controller
             $filePath = $this->documentService->resolveFilePath($document);
             return response()->download($filePath);
         } catch (Exception $e) {
-            return $this->error($e->getMessage());
+            return $this->error('Failed to download cheque.');
         }
     }
 }

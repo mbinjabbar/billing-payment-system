@@ -1,40 +1,40 @@
-<?php 
+<?php
 
 namespace App\Http\Middleware;
 
+use App\Traits\ApiResponse;
 use Closure;
 use Exception; // Added this
 use Illuminate\Http\Request;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Log;
 
 class FirebaseJwtMiddleware
 {
+    use ApiResponse;
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->bearerToken();
-        
+
         if (!$token) {
-            return response()->json(['error' => 'Token not provided'], 401);
+            return $this->error('Token not provided', 401);
         }
 
         try {
             $key = new Key(env('JWT_SECRET'), 'HS256');
             $decoded = JWT::decode($token, $key);
-        
-    $role = $decoded->role ?? null; 
-    if (!$role) {
-        return response()->json(['error' => 'Role not found in token'], 403);
-    }
-    // Pass it to the request attributes so your Controllers can see it
-    $request->attributes->add([
-        'user_data' => $decoded,
-        'user_role' => $role
-    ]);
+
+            $role = $decoded->role ?? null;
+            if (!$role) {
+                return $this->error('Role not found in token', 403);
+            }
+            $request->attributes->add([
+                'user_data' => $decoded,
+                'user_role' => $role
+            ]);
         } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 401);
+            return $this->error('Invalid token', 401);
         }
 
         return $next($request);
