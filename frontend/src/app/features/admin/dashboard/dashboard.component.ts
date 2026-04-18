@@ -39,7 +39,7 @@ export class DashboardComponent {
     // Bills — for billing stats + recent bills table
     this.billService.getBills({ limit: 5 }).subscribe({
       next: (res: any) => {
-        this.recentBills.set((res.data ?? []).slice(0, 5));
+        this.recentBills.set((res.data ?? []));
         if (res.stats) this.stats.set(res.stats);
         done();
       },
