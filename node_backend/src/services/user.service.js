@@ -1,5 +1,6 @@
 import userRepository from '../repositories/user.repository.js';
 import { hashPassword } from '../utils/helpers.js';
+import { NotFoundError, ConflictError } from '../errors/errors.js';
 
 class UserService {
     async getAllUsers() {
@@ -8,16 +9,15 @@ class UserService {
 
     async getUserById(id) {
         const user = await userRepository.findById(id);
-        if (!user) throw new Error("User not found");
+        if (!user) throw new NotFoundError('User not found');
         return user;
     }
 
     async createUser(data) {
         const existing = await userRepository.findByEmail(data.email);
-        if (existing) throw new Error("Email already registered");
+        if (existing) throw new ConflictError('Email already registered');
 
         const hashedPassword = await hashPassword(data.password);
-
         return await userRepository.create({ ...data, password: hashedPassword });
     }
 
@@ -26,13 +26,13 @@ class UserService {
             data.password = await hashPassword(data.password);
         }
         const updatedUser = await userRepository.update(id, data);
-        if (!updatedUser) throw new Error("User not found or update failed");
+        if (!updatedUser) throw new NotFoundError('User not found');
         return updatedUser;
     }
 
     async deleteUser(id) {
         const result = await userRepository.delete(id);
-        if (!result) throw new Error("User not found");
+        if (!result) throw new NotFoundError('User not found');
         return result;
     }
 }
