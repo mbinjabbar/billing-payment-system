@@ -9,16 +9,17 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-          $middleware->alias([
-           'firebasejwt' => \App\Http\Middleware\FirebaseJwtMiddleware::class,
-           'role' => \App\Http\Middleware\RoleMiddleware::class,
-           'filevalidation' => \App\Http\Middleware\filevalidationmiddleware::class,
+        $middleware->alias([
+            'firebasejwt' => \App\Http\Middleware\FirebaseJwtMiddleware::class,
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'filevalidation' => \App\Http\Middleware\filevalidationmiddleware::class,
+            'validate'      => \App\Http\Middleware\ValidateRequest::class,
         ]);
     })
 
@@ -30,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 500);
         });
 
-    $exceptions->render(function (ModelNotFoundException $e) {
+        $exceptions->render(function (ModelNotFoundException $e) {
             $model = class_basename($e->getModel());
             return response()->json([
                 'success' => false,
@@ -38,14 +39,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 404);
         });
 
-    $exceptions->render(function (NotFoundHttpException $e) {
+        $exceptions->render(function (NotFoundHttpException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Route not found'
             ], 404);
         });
-
-
     })->create();
-
-    
