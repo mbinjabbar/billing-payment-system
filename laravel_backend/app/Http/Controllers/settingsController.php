@@ -19,12 +19,14 @@ class SettingsController extends Controller
     {
         try {
             $settings = $this->settingService->getSettings();
+
             return $this->success($settings, 'Settings retrieved successfully.');
         } catch (Exception $e) {
             return $this->error('Failed to retrieve settings.');
         }
     }
 
+    // Update or create settings (key-value based)
     public function update(Request $request)
     {
         try {
@@ -38,6 +40,7 @@ class SettingsController extends Controller
                 'invoice_footer'   => 'nullable|string|max:500',
             ]);
 
+            // store each setting as key-value pair
             foreach ($request->all() as $key => $value) {
                 Setting::updateOrCreate(
                     ['key' => $key],
@@ -47,7 +50,10 @@ class SettingsController extends Controller
 
             return $this->success(null, 'Settings saved successfully.');
         } catch (ValidationException $e) {
-            return $this->error(collect($e->errors())->flatten()->join(', '), 422);
+            return $this->error(
+                collect($e->errors())->flatten()->join(', '),
+                422
+            );
         }
     }
 }

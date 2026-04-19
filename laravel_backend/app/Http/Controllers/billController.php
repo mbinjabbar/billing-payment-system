@@ -23,6 +23,7 @@ class billController extends Controller
         private DocumentService $documentService
     ) {}
 
+    // Get all bills with filters + stats
     public function index(Request $request)
     {
         try {
@@ -45,9 +46,10 @@ class billController extends Controller
         }
     }
 
+    // Create a new bill (or save as draft)
     public function store(Request $request)
     {
-        // Validation checks before opening transaction
+        // prevent duplicate bill for same visit (except draft)
         $exists = Bill::where('visit_id', $request->visit_id)
             ->whereNotIn('status', ['Draft'])
             ->exists();
@@ -59,6 +61,8 @@ class billController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->all();
+
+            // calculate final bill amount using service
             $billAmount = $this->billService->calculateBillAmount(
                 $data['charges'],
                 $data['insurance_coverage'],
@@ -66,36 +70,36 @@ class billController extends Controller
                 $data['tax_amount']
             );
 
-            // Delete any existing draft for this visit
+            // remove old draft if exists for same visit
             Bill::where('visit_id', $request->visit_id)
                 ->where('status', 'Draft')
                 ->delete();
 
             $bill = Bill::create([
-                'visit_id'          => $data['visit_id'],
-                'bill_date'         => now(),
-                'insurance_firm_id' => $data['insurance_firm_id'],
-                'created_by'        => $data['created_by'],
-                'procedure_codes'   => $data['procedure_codes'],
-                'charges'           => $data['charges'],
+                'visit_id'           => $data['visit_id'],
+                'bill_date'          => now(),
+                'insurance_firm_id'  => $data['insurance_firm_id'],
+                'created_by'         => $data['created_by'],
+                'procedure_codes'    => $data['procedure_codes'],
+                'charges'            => $data['charges'],
                 'insurance_coverage' => $data['insurance_coverage'],
-                'discount_amount'   => $data['discount_amount'],
-                'tax_amount'        => $data['tax_amount'],
-                'bill_amount'       => $billAmount,
+                'discount_amount'    => $data['discount_amount'],
+                'tax_amount'         => $data['tax_amount'],
+                'bill_amount'        => $billAmount,
                 'outstanding_amount' => $billAmount,
-                'paid_amount'       => $data['paid_amount'],
-                'status'            => $data['status'],
-                'due_date'          => $data['due_date'],
-                'notes'             => $data['notes'],
+                'paid_amount'        => $data['paid_amount'],
+                'status'             => $data['status'],
+                'due_date'           => $data['due_date'],
+                'notes'              => $data['notes'],
             ]);
 
-            // Draft — no PDF generation needed
+            // if draft, stop here (no documents needed)
             if ($data['status'] === 'Draft') {
                 DB::commit();
                 return $this->success($bill, 'Bill saved as draft successfully.');
             }
 
-            // Load relationships needed for PDF generation
+            // load relations needed for invoice/PDF generation
             $bill->load(
                 'visit.appointment.patientCase.patient',
                 'visit.appointment.patientCase.nf2Detail',
@@ -105,7 +109,9 @@ class billController extends Controller
 
             $settings = $this->settingService->getSettings();
 
+            // generate invoice documents (PDF)
             $this->documentService->generateBillDocuments($bill, $settings);
+
             DB::commit();
 
             return $this->success($bill, "Bill created successfully");
@@ -114,7 +120,6 @@ class billController extends Controller
             return $this->error('Failed to generate bill: ');
         }
     }
-
     public function show($id)
     {
         try {
@@ -124,18 +129,21 @@ class billController extends Controller
                 'creator',
                 'payments'
             ])->findOrFail($id);
+
             return $this->success($bill, 'Bill detail fetched successfully.');
         } catch (Exception $e) {
             return $this->error('Bill data not found.');
         }
     }
 
+    // Update bill (only allowed if no payments exist)
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
         try {
             $bill = Bill::findOrFail($id);
 
+            // block edit if payments already exist
             if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
                 DB::rollBack();
                 return $this->error('Cannot edit a bill that has payments posted against it.', 403);
@@ -144,7 +152,10 @@ class billController extends Controller
             $bill = $this->billService->updateBill($bill, $request->all());
 
             $settings = $this->settingService->getSettings();
+
+            // regenerate invoice after update
             $this->documentService->generateInvoice($bill, $settings);
+
             DB::commit();
 
             return $this->success($bill, 'Bill updated and recalculated successfully.');
@@ -154,12 +165,14 @@ class billController extends Controller
         }
     }
 
+    // Delete bill (only if no payment impact)
     public function destroy($id)
     {
         DB::beginTransaction();
         try {
             $bill = Bill::findOrFail($id);
 
+            // prevent deletion if financial activity exists
             if (in_array($bill->status, ['Partial', 'Paid', 'Written Off'])) {
                 DB::rollBack();
                 return $this->error('Cannot delete a bill with payments posted against it.', 422);
@@ -175,6 +188,7 @@ class billController extends Controller
         }
     }
 
+    // Export bills to Excel
     public function export(Request $request)
     {
         try {
@@ -187,6 +201,7 @@ class billController extends Controller
         }
     }
 
+    // Change bill status (Cancelled / Written Off only)
     public function updateStatus(Request $request, $id)
     {
         DB::beginTransaction();
@@ -199,7 +214,7 @@ class billController extends Controller
 
             DB::commit();
             return $this->success($bill, 'Bill status updated successfully.');
-        }  catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return $this->error("Failed to update bill status: " . $e->getMessage(), 422);
         }

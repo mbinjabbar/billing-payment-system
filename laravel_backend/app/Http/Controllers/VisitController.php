@@ -14,13 +14,14 @@ class VisitController extends Controller
 
     public function __construct(private VisitService $visitService) {}
 
+    // Get visits list with filters + stats
     public function index(Request $request)
     {
         try {
-
             $filters = $request->only(['status', 'visit_date', 'patient_name']);
+
             $visits = $this->visitService->getFilteredVisits($filters);
-            $stats = $this->visitService->getVisitsStats();
+            $stats  = $this->visitService->getVisitsStats();
 
             return $this->success($visits, 'Visits list fetched successfully.', 200, $stats);
         } catch (Exception $e) {
@@ -31,7 +32,11 @@ class VisitController extends Controller
     public function show($id)
     {
         try {
-            $visit = Visit::with(['appointment.patientCase.patient', 'bill'])->findOrFail($id);
+            $visit = Visit::with([
+                'appointment.patientCase.patient',
+                'bill'
+            ])->findOrFail($id);
+
             return $this->success($visit, 'Visit detail fetched successfully.');
         } catch (Exception $e) {
             return $this->error('Visit data not found.');

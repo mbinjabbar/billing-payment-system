@@ -10,20 +10,24 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentService
 {
-    public function getFilteredDocuments(array $filters): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    // Get documents with role-based filtering
+    public function getFilteredDocuments(array $filters)
     {
-        $query = Document::with('bill.visit.appointment.patientCase.patient', 'payment');
+        $query = Document::with(
+            'bill.visit.appointment.patientCase.patient',
+            'payment'
+        );
 
-        // Role-based document type filtering
+        // restrict document visibility based on user role
         $role = $filters['role'] ?? null;
+
         if ($role === 'Biller') {
             $query->whereIn('document_type', ['Invoice', 'NF2 Form']);
         } elseif ($role === 'Payment Poster') {
             $query->whereIn('document_type', ['Invoice', 'Cheque Image', 'Receipt']);
         }
-        // Admin gets everything — no filter applied
 
-        // Type filter
+        // filter by document type if provided
         if (!empty($filters['type'])) {
             $query->where('document_type', $filters['type']);
         }
@@ -31,11 +35,11 @@ class DocumentService
         return $query->latest()->paginate(10);
     }
 
+    // Get latest document by type (Invoice / NF2 / Receipt)
     public function getDocument(string $type, int $id)
     {
         $query = Document::where('document_type', $type)->latest();
 
-        // Receipt is linked to payment, everything else to bill
         if ($type === 'Receipt') {
             $query->where('payment_id', $id);
         } else {
@@ -45,18 +49,21 @@ class DocumentService
         return $query->firstOrFail();
     }
 
+    // Get cheque document and validate type
     public function getChequeDocument(int $id)
     {
         $document = Document::findOrFail($id);
+
         if ($document->document_type !== 'Cheque Image') {
             throw new \Exception('Not a cheque document.');
         }
+
         return $document;
     }
 
+    // Resolve physical file path (public vs private storage)
     public function resolveFilePath(Document $document): string
     {
-        // Cheque files are in public storage, everything else in local storage
         $basePath = $document->document_type === 'Cheque Image'
             ? storage_path('app/public/' . $document->file_path)
             : storage_path('app/private/' . $document->file_path);
@@ -68,6 +75,7 @@ class DocumentService
         return $basePath;
     }
 
+    // reusable PDF generator + DB storage logic
     private function generateAndStoreDocument(
         Bill $bill,
         string $view,
@@ -79,6 +87,7 @@ class DocumentService
         $fileName = $prefix . $bill->bill_number . '.pdf';
         $path = 'bills/' . $fileName;
 
+        // generate PDF from view
         $pdf = Pdf::loadView($view, compact('bill', 'settings'));
         Storage::put($path, $pdf->output());
 
@@ -86,10 +95,12 @@ class DocumentService
         $fileSize = filesize($fullPath);
         $mimeType = mime_content_type($fullPath);
 
+        // size limit (5MB)
         if ($fileSize > (5 * 1024 * 1024)) {
             throw new \Exception("File $fileName exceeds 5MB limit.");
         }
 
+        // update existing document or create new one
         if ($isUpdate) {
             $document = Document::where('bill_id', $bill->id)
                 ->where('document_type', $type)
@@ -111,9 +122,12 @@ class DocumentService
         } else {
             $this->createDocument($bill, $type, $fileName, $mimeType, $path, $fileSize);
         }
+
+        // store latest generated path on bill
         $bill->update(['generated_document_path' => $path]);
     }
 
+    // Create document record in DB
     private function createDocument($bill, $type, $fileName, $mimeType, $path, $fileSize)
     {
         Document::create([
@@ -129,7 +143,7 @@ class DocumentService
         ]);
     }
 
-    // Used on bill update/payment/status change — updates existing Invoice document
+    // Generate or update invoice PDF
     public function generateInvoice(Bill $bill, array $settings)
     {
         $this->generateAndStoreDocument(
@@ -142,8 +156,7 @@ class DocumentService
         );
     }
 
-    // ── PDF Generation ────────────────────────────────────────────────────
-    // Used on bill creation — generates Invoice + NF2 (if car accident)
+    // Generate invoice + NF2 (if car accident case)
     public function generateBillDocuments(Bill $bill, array $settings)
     {
         $filesToGenerate = [
@@ -151,7 +164,11 @@ class DocumentService
         ];
 
         if ($bill->visit->appointment->patientCase->car_accident) {
-            $filesToGenerate[] = ['view' => 'NF2_pdf', 'prefix' => 'NF2_', 'type' => 'NF2 Form'];
+            $filesToGenerate[] = [
+                'view' => 'NF2_pdf',
+                'prefix' => 'NF2_',
+                'type' => 'NF2 Form'
+            ];
         }
 
         foreach ($filesToGenerate as $file) {
@@ -165,11 +182,12 @@ class DocumentService
         }
     }
 
+    // Generate receipt (supports refund + update modes)
     public function generateReceipt($payment, array $settings, $isUpdate = false, bool $isRefund = false)
     {
         $suffix = $isRefund ? '_refund' : '';
         $fileName = 'Receipt_' . $payment->payment_number . $suffix . '.pdf';
-        $path     = 'bills/' . $fileName;
+        $path = 'bills/' . $fileName;
 
         $pdf = Pdf::loadView('Receipt_pdf', compact('payment', 'settings'));
         Storage::put($path, $pdf->output());
@@ -181,6 +199,7 @@ class DocumentService
             ->where('document_type', 'Receipt')
             ->first();
 
+        // update existing receipt or create new one
         if ($isUpdate && $document) {
             $document->update([
                 'file_size'   => $fileSize,
@@ -203,17 +222,18 @@ class DocumentService
         }
     }
 
+    // Store cheque file as document (replaces old one)
     public function storeChequeDocument(
         Bill $bill,
         Payment $payment,
         array $cheque,
         int $uploadedBy
     ) {
-
+        // remove previous cheque document
         Document::where('payment_id', $payment->id)
             ->where('document_type', 'Cheque Image')
             ->delete();
-            
+
         Document::create([
             'bill_id'       => $bill->id,
             'payment_id'    => $payment->id,

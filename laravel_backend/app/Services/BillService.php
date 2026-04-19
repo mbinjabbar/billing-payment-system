@@ -6,28 +6,45 @@ use App\Models\Bill;
 
 class BillService
 {
-    public function __construct(private SettingService $settingService, private DocumentService $documentService) {}
+    public function __construct(
+        private SettingService $settingService,
+        private DocumentService $documentService
+    ) {}
 
-    // ── Query Builder (private — shared internally) ───────────────────────
+    // Base query builder for bills (shared by filters + stats)
     private function buildBillQuery(array $filters)
     {
-        $query = Bill::with('visit.appointment.patientCase.patient', 'insurance_firm', 'creator');
+        $query = Bill::with(
+            'visit.appointment.patientCase.patient',
+            'insurance_firm',
+            'creator'
+        );
 
+        // filter by status
         $query->when(
             $filters['status'] ?? null,
             fn($q) => $q->where('status', $filters['status'])
         );
 
+        // filter by date range
         $query->when(
             !empty($filters['start_date']) && !empty($filters['end_date']),
-            fn($q) => $q->whereBetween('bill_date', [$filters['start_date'], $filters['end_date']])
+            fn($q) => $q->whereBetween('bill_date', [
+                $filters['start_date'],
+                $filters['end_date']
+            ])
         );
 
+        // filter by amount range
         $query->when(
             !empty($filters['min_amount']) && !empty($filters['max_amount']),
-            fn($q) => $q->whereBetween('bill_amount', [$filters['min_amount'], $filters['max_amount']])
+            fn($q) => $q->whereBetween('bill_amount', [
+                $filters['min_amount'],
+                $filters['max_amount']
+            ])
         );
 
+        // search by patient name
         $query->when(
             $filters['patient_name'] ?? null,
             fn($q) => $q->whereHas(
@@ -35,14 +52,14 @@ class BillService
                 fn($sub) => $sub
                     ->where('first_name', 'like', '%' . $filters['patient_name'] . '%')
                     ->orWhere('middle_name', 'like', '%' . $filters['patient_name'] . '%')
-                    ->orWhere('last_name',   'like', '%' . $filters['patient_name'] . '%')
+                    ->orWhere('last_name', 'like', '%' . $filters['patient_name'] . '%')
             )
         );
 
         return $query;
     }
 
-    // ── Filtered Bills + Stats ────────────────────────────────────────────
+    // Get filtered bills (with optional limit or pagination)
     public function getFilteredBills(array $filters)
     {
         $query = $this->buildBillQuery($filters);
@@ -55,6 +72,7 @@ class BillService
         return $query->latest('bill_date')->paginate(10);
     }
 
+    // Dashboard stats for bills
     public function getBillStats(array $filters): array
     {
         $query = $this->buildBillQuery($filters);
@@ -70,21 +88,30 @@ class BillService
         ];
     }
 
-    // ── Bill Amount Calculation ───────────────────────────────────────────
-    public function calculateBillAmount(float $charges, float $insurancePercent, float $discount, float $tax)
-    {
+    // Calculate final bill amount
+    public function calculateBillAmount(
+        float $charges,
+        float $insurancePercent,
+        float $discount,
+        float $tax
+    ) {
         $insuranceAmount = ($charges * $insurancePercent) / 100;
+
         return ($charges - $insuranceAmount - $discount) + $tax;
     }
 
-    public function recalculateBill(Bill $bill): void
+    // Recalculate full bill (amounts + outstanding)
+    public function recalculateBill(Bill $bill)
     {
-        $insuranceAmount          = ($bill->charges * $bill->insurance_coverage) / 100;
-        $bill->bill_amount        = ($bill->charges - $insuranceAmount - $bill->discount_amount) + $bill->tax_amount;
+        $insuranceAmount = ($bill->charges * $bill->insurance_coverage) / 100;
+
+        $bill->bill_amount = ($bill->charges - $insuranceAmount - $bill->discount_amount)
+            + $bill->tax_amount;
+
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
     }
 
-    // ── Bill Status ───────────────────────────────────────────────────────
+    // Resolve bill status based on payments
     public function resolveBillStatus(Bill $bill)
     {
         if ($bill->paid_amount <= 0) {
@@ -96,7 +123,7 @@ class BillService
         }
     }
 
-    // ── Update Bill ───────────────────────────────────────────────────────
+    // Update bill data and recalculate everything
     public function updateBill(Bill $bill, array $data)
     {
         $bill->fill([
@@ -111,7 +138,6 @@ class BillService
 
         $this->recalculateBill($bill);
 
-        // Draft being submitted → Pending, otherwise resolve from amounts
         if ($bill->status === 'Draft') {
             $bill->status = 'Pending';
         } else {
@@ -120,6 +146,7 @@ class BillService
 
         $bill->save();
 
+        // reload relations for response consistency
         $bill->load(
             'visit.appointment.patientCase.patient',
             'insurance_firm',
@@ -129,15 +156,17 @@ class BillService
         return $bill;
     }
 
-    // ── Update Bill Status (Cancelled / Written Off) ──────────────────────
+    // Update bill status (Cancel / Write Off)
     public function updateBillStatus(int $id, string $status)
     {
         $bill = Bill::findOrFail($id);
 
+        // cannot cancel if payments exist
         if ($status === 'Cancelled' && $bill->paid_amount > 0) {
             throw new \Exception('Cannot cancel a bill with payments posted. Use Write Off instead.');
         }
 
+        // write-off only allowed for unpaid/partial bills
         if ($status === 'Written Off' && !in_array($bill->status, ['Pending', 'Partial'])) {
             throw new \Exception('Only Pending or Partially paid bills can be written off.');
         }
@@ -151,6 +180,7 @@ class BillService
             'payments'
         );
 
+        // regenerate invoice after status change
         $settings = $this->settingService->getSettings();
         $this->documentService->generateInvoice($bill, $settings);
 

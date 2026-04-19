@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'firebasejwt' => \App\Http\Middleware\FirebaseJwtMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'filevalidation' => \App\Http\Middleware\filevalidationmiddleware::class,
+            'filevalidation' => \App\Http\Middleware\FileValidationMiddleware::class,
             'validate'      => \App\Http\Middleware\ValidateRequest::class,
         ]);
     })

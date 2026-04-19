@@ -26,6 +26,8 @@ class paymentController extends Controller
         private SettingService $settingService,
         private BillService $billService
     ) {}
+
+    // Get all payments with filters
     public function index(Request $request)
     {
         try {
@@ -39,24 +41,27 @@ class paymentController extends Controller
             ]);
 
             $payments = $this->paymentService->getFilteredPayments($filters);
+
             return $this->success($payments, 'Payments retrieved successfully');
         } catch (Exception $e) {
             return $this->error('An error occurred while fetching payments');
         }
     }
 
+    // Create new payment (and optional cheque + documents)
     public function store(Request $request)
     {
         DB::beginTransaction();
         try {
             $data = $request->all();
 
+            // create payment via service
             [$payment, $bill, $cheque] = $this->paymentService->createPayment(
                 $data,
                 $request->file('cheque_file')
             );
 
-
+            // store cheque document if uploaded
             if ($cheque) {
                 $this->documentService->storeChequeDocument(
                     $bill,
@@ -66,6 +71,7 @@ class paymentController extends Controller
                 );
             }
 
+            // generate invoice + receipt only when payment is completed
             if ($request->payment_status === 'Completed') {
                 $settings = $this->settingService->getSettings();
 
@@ -95,51 +101,60 @@ class paymentController extends Controller
     public function show($id)
     {
         try {
-            $payment = Payment::with('bill.visit.appointment.patientCase.patient', 'receiver')->findOrFail($id);
+            $payment = Payment::with(
+                'bill.visit.appointment.patientCase.patient',
+                'receiver'
+            )->findOrFail($id);
+
             return $this->success($payment, 'Payment retrieved successfully');
         } catch (Exception $e) {
             return $this->error('Payment not found');
         }
     }
 
-        public function update(Request $request, $id)
+    // Update payment (only pending/failed allowed)
+    public function update(Request $request, $id)
     {
         DB::beginTransaction();
         try {
             $payment = Payment::findOrFail($id);
- 
-            // Only Pending or Failed payments can be edited
+
+            // restrict editing to only pending or failed payments
             if (!in_array($payment->payment_status, ['Pending', 'Failed'])) {
                 DB::rollBack();
                 return $this->error('Only Pending or Failed payments can be edited.', 422);
             }
- 
-            $bill          = Bill::findOrFail($request->bill_id ?? $payment->bill_id);
+
+            $bill = Bill::findOrFail($request->bill_id ?? $payment->bill_id);
+
             $oldAmountPaid = $payment->amount_paid;
             $newAmountPaid = $request->amount_paid;
- 
-            // Overpayment guard
+
+            // prevent overpayment
             if ($newAmountPaid > ($bill->outstanding_amount + $oldAmountPaid)) {
                 DB::rollBack();
                 return $this->error('Amount paid cannot exceed outstanding amount.', 400);
             }
- 
-            // ── Step 1: Save old cheque path BEFORE anything overwrites it ────
+
+            // store old cheque before overwrite
             $oldChequePath = $payment->cheque_file_path;
-            $filePath      = $payment->cheque_file_path;
+
+            $filePath = $payment->cheque_file_path;
             $name = $type = $fileSize = null;
- 
-            // ── Step 2: Store new cheque file on disk if uploaded ─────────────
+
+            // handle new cheque upload
             if ($request->hasFile('cheque_file')) {
-                $file     = $request->file('cheque_file');
+                $file = $request->file('cheque_file');
+
                 $name     = $file->getClientOriginalName();
                 $type     = $file->getClientOriginalExtension();
                 $fileSize = $file->getSize();
                 $filePath = $file->store('cheque_files', 'public');
+
                 $payment->cheque_file_path = $filePath;
             }
- 
-            // ── Step 3: Update payment fields and save to DB ──────────────────
+
+            // update payment fields
             $payment->fill($request->only([
                 'amount_paid',
                 'payment_mode',
@@ -151,34 +166,39 @@ class paymentController extends Controller
                 'notes',
             ]));
             $payment->save();
- 
-            // ── Step 4: Update bill + regenerate PDFs only if Completed ───────
+
+            // update bill only if payment is completed
             if ($request->payment_status === 'Completed') {
-                $bill->paid_amount        += $newAmountPaid;
-                $bill->outstanding_amount  = $bill->bill_amount - $bill->paid_amount;
+                $bill->paid_amount += $newAmountPaid;
+                $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
+
                 $this->billService->resolveBillStatus($bill);
                 $bill->save();
- 
+
                 $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
                 $payment->load('bill.visit.appointment.patientCase.patient', 'receiver');
- 
+
                 $settings = $this->settingService->getSettings();
+
                 $this->documentService->generateInvoice($bill, $settings);
                 $this->documentService->generateReceipt($payment, $settings, true);
             }
- 
-            // ── Step 5: Handle cheque document AFTER payment saved ────────────
+
+            // handle cheque file replacement
             if ($request->hasFile('cheque_file')) {
-                // Delete old file from disk using saved old path
                 if ($oldChequePath) {
                     Storage::disk('public')->delete($oldChequePath);
                 }
- 
-                // storeChequeDocument soft deletes old record internally and creates new
+
                 $this->documentService->storeChequeDocument(
                     $bill,
                     $payment,
-                    ['name' => $name, 'type' => $type, 'path' => $filePath, 'size' => $fileSize],
+                    [
+                        'name' => $name,
+                        'type' => $type,
+                        'path' => $filePath,
+                        'size' => $fileSize
+                    ],
                     $payment->received_by
                 );
             }
@@ -191,15 +211,20 @@ class paymentController extends Controller
         }
     }
 
+    // Export payments to Excel
     public function export(Request $request)
     {
         try {
-            return Excel::download(new PaymentsExport($request->all()), 'payments.xlsx');
+            return Excel::download(
+                new PaymentsExport($request->all()),
+                'payments.xlsx'
+            );
         } catch (Exception $e) {
             return $this->error('Failed to export payments.');
         }
     }
 
+    // Delete payment (only if not completed or refunded)
     public function destroy($id)
     {
         DB::beginTransaction();
@@ -226,7 +251,7 @@ class paymentController extends Controller
         }
     }
 
-    // refund method
+    // Refund payment and regenerate bill + documents
     public function refund(Request $request, $id)
     {
         DB::beginTransaction();
@@ -240,13 +265,12 @@ class paymentController extends Controller
 
             $settings = $this->settingService->getSettings();
 
-            // Load payment with relationships for receipt PDF
             $payment->load([
                 'bill.visit.appointment.patientCase.patient',
                 'receiver'
             ]);
 
-            // Generate Refund Receipt PDF
+            // generate refund receipt
             $this->documentService->generateReceipt(
                 $payment,
                 $settings,
@@ -254,7 +278,7 @@ class paymentController extends Controller
                 true
             );
 
-            // Regenerate invoice PDF
+            // regenerate invoice after refund
             $bill->load('visit.appointment.patientCase.patient', 'insurance_firm', 'payments');
 
             $this->documentService->generateInvoice($bill, $settings);

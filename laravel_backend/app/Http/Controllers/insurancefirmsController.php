@@ -11,6 +11,7 @@ class insurancefirmsController extends Controller
 {
     use ApiResponse;
 
+    // Get all insurance firms (optionally only active ones)
     public function index(Request $request)
     {
         try {

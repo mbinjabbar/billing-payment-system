@@ -11,11 +11,13 @@ class PatientController extends Controller
 {
     use ApiResponse;
 
+    // List patients with optional search
     public function index(Request $request)
     {
         try {
             $query = Patient::query();
 
+            // search across basic patient fields
             $query->when(
                 $request->search ?? null,
                 fn($q) => $q->where('first_name', 'like', '%' . $request->search . '%')
@@ -26,12 +28,14 @@ class PatientController extends Controller
             );
 
             $patients = $query->latest()->paginate(10);
+
             return $this->success($patients, 'Patients retrieved successfully.');
         } catch (Exception $e) {
             return $this->error('Failed to fetch patients.');
         }
     }
 
+    // Get full patient details with related data
     public function show($id)
     {
         try {

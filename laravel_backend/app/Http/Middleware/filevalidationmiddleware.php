@@ -7,28 +7,34 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class filevalidationmiddleware
+class FileValidationMiddleware
 {
     use ApiResponse;
+
     public function handle(Request $request, Closure $next): Response
     {
-         if ($request->payment_mode !== 'Cheque') {
-        return $next($request);
-    }
+        // skip validation if payment is not cheque
+        if ($request->payment_mode !== 'Cheque') {
+            return $next($request);
+        }
 
+        // cheque must have an uploaded file
         if (!$request->hasFile('cheque_file')) {
             return $this->error('No file uploaded', 422);
         }
 
+        $file = $request->file('cheque_file');
+
+        // allowed types: PDF, JPG, PNG, DOCX
         $allowedMimes = [
             'application/pdf',
             'image/jpeg',
             'image/png',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ];
-        $maxSizeKB = 5120;
 
-        $file = $request->file('cheque_file');
+        // max file size = 5MB
+        $maxSizeKB = 5120;
 
         if (!in_array($file->getMimeType(), $allowedMimes)) {
             return $this->error('Invalid file type. Allowed: PDF, JPG, PNG, DOCX', 422);

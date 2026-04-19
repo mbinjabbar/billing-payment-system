@@ -3,22 +3,25 @@
 namespace App\Services;
 
 use App\Models\Bill;
-use App\Models\Document;
 use App\Models\Payment;
 
 class PaymentService
 {
+    // Validate if bill allows payment posting
     private function validateBill(Bill $bill, $amount)
     {
+        // block payments on finalized bills
         if (in_array($bill->status, ['Cancelled', 'Written Off', 'Paid'])) {
             throw new \Exception("Cannot post payment against {$bill->status} bill.");
         }
 
+        // prevent overpayment
         if ($amount > $bill->outstanding_amount) {
             throw new \Exception("Amount exceeds outstanding balance.");
         }
     }
 
+    // Update bill after successful payment
     private function updateBillAfterPayment(Bill $bill, $amount)
     {
         $bill->paid_amount += $amount;
@@ -31,11 +34,13 @@ class PaymentService
 
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
+        // determine bill status
         $bill->status = $bill->outstanding_amount <= 0 ? 'Paid' : 'Partial';
 
         $bill->save();
     }
 
+    // Handle cheque file upload (returns file metadata)
     private function handleChequeUpload($file)
     {
         if (!$file) return null;
@@ -47,9 +52,14 @@ class PaymentService
             'size' => $file->getSize(),
         ];
     }
+
+    // Get payments with filters
     public function getFilteredPayments(array $filters)
     {
-        $query = Payment::with('bill.visit.appointment.patientCase.patient', 'receiver')
+        $query = Payment::with(
+            'bill.visit.appointment.patientCase.patient',
+            'receiver'
+        )
             ->when(
                 $filters['bill_id'] ?? null,
                 fn($q, $billId) => $q->where('bill_id', $billId)
@@ -76,6 +86,7 @@ class PaymentService
             : $query->paginate(10);
     }
 
+    // Create payment + optional cheque handling
     public function createPayment(array $data, $file = null)
     {
         $bill = Bill::findOrFail($data['bill_id']);
@@ -88,6 +99,7 @@ class PaymentService
             'cheque_file_path' => $cheque['path'] ?? null,
         ]));
 
+        // immediately apply on bill if payment is completed
         if ($payment->payment_status === 'Completed') {
             $this->updateBillAfterPayment($bill, $data['amount_paid']);
         }
@@ -95,6 +107,7 @@ class PaymentService
         return [$payment, $bill, $cheque];
     }
 
+    // Recalculate bill when payment is edited
     public function recalculateBill(Bill $bill, float $newAmountPaid, float $oldAmountPaid)
     {
         $difference = $newAmountPaid - $oldAmountPaid;
@@ -116,6 +129,7 @@ class PaymentService
         return $bill;
     }
 
+    // Reverse payment effect from bill in updates/refunds
     public function reversePaymentImpact(Bill $bill, Payment $payment)
     {
         $bill->paid_amount -= $payment->amount_paid;
@@ -128,6 +142,7 @@ class PaymentService
 
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
+        // recalculate status after reversal
         if ($bill->paid_amount <= 0) {
             $bill->status = 'Pending';
         } elseif ($bill->outstanding_amount > 0) {
@@ -139,6 +154,7 @@ class PaymentService
         $bill->save();
     }
 
+    // Refund payment and adjust bill
     public function refundPayment(Payment $payment, ?float $refundAmount = null)
     {
         $bill = $payment->bill;
@@ -153,17 +169,24 @@ class PaymentService
             throw new \Exception('Refund amount cannot exceed original payment');
         }
 
-        // mark refunded
         $payment->update([
             'payment_status' => 'Refunded'
         ]);
 
-        // reverse bill
+        // adjust bill values after refund
         $bill->paid_amount -= $refundAmount;
+
         $insurance = ($bill->charges * $bill->insurance_coverage) / 100;
-        $bill->bill_amount = ($bill->charges - $insurance - $bill->discount_amount) + $bill->tax_amount;
+
+        $bill->bill_amount =
+            ($bill->charges - $insurance - $bill->discount_amount)
+            + $bill->tax_amount;
+
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
-        $bill->status = $bill->paid_amount <= 0 ? 'Pending' : ($bill->outstanding_amount > 0 ? 'Partial' : 'Paid');
+
+        $bill->status = $bill->paid_amount <= 0
+            ? 'Pending'
+            : ($bill->outstanding_amount > 0 ? 'Partial' : 'Paid');
 
         $bill->save();
 

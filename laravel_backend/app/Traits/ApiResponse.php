@@ -3,12 +3,11 @@
 namespace App\Traits;
 
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 trait ApiResponse
 {
-    protected function success(mixed $data, string $message = 'Success', int $code = 200, $stats = null): JsonResponse
+    protected function success(mixed $data, string $message = 'Success', int $code = 200, $stats = null)
     {
 
         $response = [
@@ -36,7 +35,7 @@ trait ApiResponse
         return response()->json($response, $code);
     }
 
-    protected function error(string $message = 'Error', int $code = 500, mixed $data = null): JsonResponse
+    protected function error(string $message = 'Error', int $code = 500, mixed $data = null)
     {
         return response()->json([
             'success' => false,
