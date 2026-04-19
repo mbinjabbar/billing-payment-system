@@ -29,7 +29,7 @@ export class DashboardComponent {
     });
   }
 
-  // ── From stats (accurate, full dataset) ──────────────────────────────────
+  // From stats
   totalBillAmount = computed(() => Number(this.stats().total_bill_amount));
   totalOutstandingAmount = computed(() => Number(this.stats().total_outstanding));
   totalPaidAmount = computed(() => Number(this.stats().total_paid_amount));

@@ -10,11 +10,7 @@ export class DocumentService {
   private http   = inject(HttpClient);
 
   getDocuments(params: any = {}) {
-    const stringParams: any = {};
-    Object.keys(params).forEach((key) => {
-      stringParams[key] = String(params[key]);
-    });
-    return this.http.get(`${this.apiUrl}/documents`, { params: stringParams });
+    return this.http.get(`${this.apiUrl}/documents`, { params });
   }
 
   downloadInvoice(billId: number) {

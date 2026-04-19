@@ -20,7 +20,6 @@ export class PaymentFormComponent {
   private billService    = inject(BillService);
   private authService    = inject(AuthService);
 
-  // ── State ─────────────────────────────────────────────────────────────────
   bill              = signal<any>(null);
   selectedFile      = signal<File | null>(null);
   existingCheque    = signal<any>(null);
@@ -44,7 +43,6 @@ export class PaymentFormComponent {
     notes:                 new FormControl(''),
   });
 
-  // ── Computed ──────────────────────────────────────────────────────────────
   outstanding = computed(() => Number(this.bill()?.outstanding_amount ?? 0));
 
   private amountPaidValue = toSignal(
@@ -77,7 +75,6 @@ export class PaymentFormComponent {
 
   showChequeFields = computed(() => this.paymentMode() === 'Cheque');
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit() {
     const billId = this.route.snapshot.paramMap.get('billId');
     const editId = this.route.snapshot.paramMap.get('id');
@@ -136,7 +133,7 @@ export class PaymentFormComponent {
     });
   }
 
-  // ── File ──────────────────────────────────────────────────────────────────
+  // File
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
@@ -170,7 +167,6 @@ export class PaymentFormComponent {
     this.selectedFile.set(null);
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   onSubmit() {
     if (this.paymentForm.invalid) {
       this.paymentForm.markAllAsTouched();

@@ -12,57 +12,53 @@ import { InsuranceFirmsService } from '../../../../core/services/insurance-firms
 export class InsuranceFirmsComponent {
   private insuranceService = inject(InsuranceFirmsService);
 
-  insuranceFirms   = signal<any[]>([]);
+  // State
+  insuranceFirms = signal<any[]>([]);
   editingInsurance = signal<any>(null);
-  loading          = signal(false);
-  error            = signal('');
-  success          = signal('');
-  confirmDeleteId  = signal<number | null>(null);
+  loading = signal(false);
+  error = signal('');
+  success = signal('');
+  confirmDeleteId = signal<number | null>(null);
 
-  // ── Pagination ────────────────────────────────────────────────────────────
-  currentPage  = signal(1);
-  totalPages   = signal(1);
-  totalItems   = signal(0);
-  perPage      = signal(10);
-  from         = computed(() => ((this.currentPage() - 1) * this.perPage()) + 1);
-  to           = computed(() => Math.min(this.currentPage() * this.perPage(), this.totalItems()));
-  visiblePages = computed(() => this.buildVisiblePages(this.totalPages(), this.currentPage()));
+  // Pagination
+  currentPage = signal(1);
+  totalPages = signal(1);
+  totalItems = signal(0);
+  perPage = signal(10);
 
+  from = computed(() =>
+    (this.currentPage() - 1) * this.perPage() + 1
+  );
+
+  to = computed(() =>
+    Math.min(this.currentPage() * this.perPage(), this.totalItems())
+  );
+
+  visiblePages = computed(() =>
+    this.buildVisiblePages(this.totalPages(), this.currentPage())
+  );
+
+  // Form
   insuranceForm = new FormGroup({
-    name:           new FormControl('', Validators.required),
-    firm_type:      new FormControl('Health', Validators.required),
-    carrier_code:   new FormControl(''),
+    name: new FormControl('', Validators.required),
+    firm_type: new FormControl('Health', Validators.required),
+    carrier_code: new FormControl(''),
     contact_person: new FormControl(''),
-    email:          new FormControl('', Validators.email),
-    phone:          new FormControl(''),
-    address:        new FormControl(''),
-    is_active:      new FormControl(true),
+    email: new FormControl('', Validators.email),
+    phone: new FormControl(''),
+    address: new FormControl(''),
+    is_active: new FormControl(true),
   });
 
   ngOnInit() {
     this.loadInsuranceFirms(1);
   }
 
-  private buildVisiblePages(total: number, current: number): (number | string)[] {
-    const pages: (number | string)[] = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-      return pages;
-    }
-    pages.push(1);
-    if (current > 3) pages.push('...');
-    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
-      pages.push(i);
-    }
-    if (current < total - 2) pages.push('...');
-    pages.push(total);
-    return pages;
-  }
-
   loadInsuranceFirms(page: number) {
     this.insuranceService.getInsuranceFirms(false, page).subscribe({
       next: (res: any) => {
         this.insuranceFirms.set(res.data ?? []);
+
         const meta = res.meta;
         if (meta) {
           this.currentPage.set(meta.current_page);
@@ -80,23 +76,13 @@ export class InsuranceFirmsComponent {
     this.loadInsuranceFirms(page);
   }
 
-  editInsurance(f: any) {
-    this.editingInsurance.set(f);
-    this.insuranceForm.patchValue(f);
-    this.error.set('');
-    this.success.set('');
-  }
-
-  cancelEdit() {
-    this.editingInsurance.set(null);
-    this.insuranceForm.reset({ firm_type: 'Health', is_active: true });
-  }
-
+  // Create / Update
   save() {
     if (this.insuranceForm.invalid) {
       this.insuranceForm.markAllAsTouched();
       return;
     }
+
     this.loading.set(true);
     this.error.set('');
     this.success.set('');
@@ -118,16 +104,41 @@ export class InsuranceFirmsComponent {
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to save insurance firm.');
         this.loading.set(false);
-      }
+      },
     });
   }
 
-  confirmDelete(id: number) { this.confirmDeleteId.set(id); }
-  cancelDelete()             { this.confirmDeleteId.set(null); }
+  // Edit flow
+  editInsurance(f: any) {
+    this.editingInsurance.set(f);
+    this.insuranceForm.patchValue(f);
+
+    this.error.set('');
+    this.success.set('');
+  }
+
+  cancelEdit() {
+    this.editingInsurance.set(null);
+
+    this.insuranceForm.reset({
+      firm_type: 'Health',
+      is_active: true,
+    });
+  }
+
+  // Delete flow
+  confirmDelete(id: number) {
+    this.confirmDeleteId.set(id);
+  }
+
+  cancelDelete() {
+    this.confirmDeleteId.set(null);
+  }
 
   executeDelete() {
     const id = this.confirmDeleteId();
     if (!id) return;
+
     this.insuranceService.deleteInsuranceFirm(id).subscribe({
       next: () => {
         this.cancelDelete();
@@ -137,8 +148,32 @@ export class InsuranceFirmsComponent {
       error: () => {
         this.error.set('Failed to delete. It may be in use by existing bills.');
         this.cancelDelete();
-      }
+      },
     });
+  }
+
+  // UI Helpers
+  private buildVisiblePages(total: number, current: number): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+
+    if (current > 3) pages.push('...');
+
+    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+      pages.push(i);
+    }
+
+    if (current < total - 2) pages.push('...');
+
+    pages.push(total);
+
+    return pages;
   }
 
   getFirmTypeClass(type: string): string {

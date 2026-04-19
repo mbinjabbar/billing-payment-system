@@ -43,7 +43,7 @@ export class DashboardComponent {
     });
   }
 
-  // ── Stats from full dataset ──────────────────────────────────────────────
+  // Stats
   totalCollected = computed(() =>
     Number(this.billStats().total_paid_amount)
   );
@@ -67,7 +67,7 @@ export class DashboardComponent {
     return pct > 100 ? 100 : pct;
   });
 
-  // ── UI helpers ───────────────────────────────────────────────────────────
+  // UI helpers
   getPaymentStatusClass(status: string): string {
     switch (status) {
       case 'Completed': return 'bg-green-100 text-green-700';

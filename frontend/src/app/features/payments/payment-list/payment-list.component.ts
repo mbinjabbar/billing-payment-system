@@ -21,10 +21,8 @@ export class PaymentListComponent {
   currentPage = signal(1);
   role        = signal<any>(this.authService.getRole());
 
-  // ── Delete confirmation ───────────────────────────────────────────────────
   confirmDeleteId = signal<number | null>(null);
 
-  // ── Refund confirmation ───────────────────────────────────────────────────
   confirmRefundId = signal<number | null>(null);
 
   filterForm = new FormGroup({
@@ -35,7 +33,6 @@ export class PaymentListComponent {
     to_date:        new FormControl(''),
   });
 
-  // ── Computed pagination ───────────────────────────────────────────────────
   totalItems = computed(() => this.payments()?.meta?.total    ?? 0);
   totalPages = computed(() => this.payments()?.meta?.last_page ?? 1);
   from       = computed(() => this.payments()?.meta?.from      ?? 0);
@@ -46,7 +43,6 @@ export class PaymentListComponent {
     this.fetchPayments();
   }
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
   fetchPayments(page: number = 1) {
     this.loading.set(true);
     const filters = { ...this.cleanFilters(this.filterForm.value), page };
@@ -68,7 +64,6 @@ export class PaymentListComponent {
     this.fetchPayments(1);
   }
 
-  // ── Pagination ────────────────────────────────────────────────────────────
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages()) return;
     this.fetchPayments(page);
@@ -93,7 +88,6 @@ export class PaymentListComponent {
     return pages;
   }
 
-  // ── Delete ────────────────────────────────────────────────────────────────
   confirmDelete(id: number) { this.confirmDeleteId.set(id); }
   cancelDelete()             { this.confirmDeleteId.set(null); }
 
@@ -109,7 +103,6 @@ export class PaymentListComponent {
     });
   }
 
-  // ── Refund — show confirmation first ──────────────────────────────────────
   confirmRefund(id: number) { this.confirmRefundId.set(id); }
   cancelRefund()             { this.confirmRefundId.set(null); }
 
@@ -128,7 +121,6 @@ export class PaymentListComponent {
     });
   }
 
-  // ── Export ────────────────────────────────────────────────────────────────
   exportPayments() {
     this.exporting.set(true);
     const filters = this.cleanFilters(this.filterForm.value);
@@ -150,7 +142,7 @@ export class PaymentListComponent {
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // UI Helpers
   private cleanFilters(filters: any): any {
     const cleaned: any = {};
     Object.keys(filters).forEach(key => {

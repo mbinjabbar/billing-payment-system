@@ -12,53 +12,49 @@ import { ProcedureCodesService } from '../../../../core/services/procedure-codes
 export class ProcedureCodesComponent {
   private procedureService = inject(ProcedureCodesService);
 
-  procedures       = signal<any[]>([]);
+  // State
+  procedures = signal<any[]>([]);
   editingProcedure = signal<any>(null);
-  loading          = signal(false);
-  error            = signal('');
-  success          = signal('');
-  confirmDeleteId  = signal<number | null>(null);
+  loading = signal(false);
+  error = signal('');
+  success = signal('');
+  confirmDeleteId = signal<number | null>(null);
 
-  // ── Pagination ────────────────────────────────────────────────────────────
-  currentPage  = signal(1);
-  totalPages   = signal(1);
-  totalItems   = signal(0);
-  perPage      = signal(10);
-  from         = computed(() => ((this.currentPage() - 1) * this.perPage()) + 1);
-  to           = computed(() => Math.min(this.currentPage() * this.perPage(), this.totalItems()));
-  visiblePages = computed(() => this.buildVisiblePages(this.totalPages(), this.currentPage()));
+  // Pagination
+  currentPage = signal(1);
+  totalPages = signal(1);
+  totalItems = signal(0);
+  perPage = signal(10);
 
+  from = computed(() =>
+    (this.currentPage() - 1) * this.perPage() + 1
+  );
+
+  to = computed(() =>
+    Math.min(this.currentPage() * this.perPage(), this.totalItems())
+  );
+
+  visiblePages = computed(() =>
+    this.buildVisiblePages(this.totalPages(), this.currentPage())
+  );
+
+  // Form
   procedureForm = new FormGroup({
-    code:            new FormControl('', Validators.required),
-    name:            new FormControl('', Validators.required),
+    code: new FormControl('', Validators.required),
+    name: new FormControl('', Validators.required),
     standard_charge: new FormControl('', [Validators.required, Validators.min(0)]),
-    is_active:       new FormControl(true),
+    is_active: new FormControl(true),
   });
 
   ngOnInit() {
     this.loadProcedures(1);
   }
 
-  private buildVisiblePages(total: number, current: number): (number | string)[] {
-    const pages: (number | string)[] = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-      return pages;
-    }
-    pages.push(1);
-    if (current > 3) pages.push('...');
-    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
-      pages.push(i);
-    }
-    if (current < total - 2) pages.push('...');
-    pages.push(total);
-    return pages;
-  }
-
   loadProcedures(page: number) {
     this.procedureService.getProcedureCodes(false, page).subscribe({
       next: (res: any) => {
         this.procedures.set(res.data ?? []);
+
         const meta = res.meta;
         if (meta) {
           this.currentPage.set(meta.current_page);
@@ -76,28 +72,13 @@ export class ProcedureCodesComponent {
     this.loadProcedures(page);
   }
 
-  editProcedure(p: any) {
-    this.editingProcedure.set(p);
-    this.procedureForm.patchValue({
-      code:            p.code,
-      name:            p.name,
-      standard_charge: p.standard_charge,
-      is_active:       p.is_active,
-    });
-    this.error.set('');
-    this.success.set('');
-  }
-
-  cancelEdit() {
-    this.editingProcedure.set(null);
-    this.procedureForm.reset({ is_active: true });
-  }
-
+  // Create / Update
   save() {
     if (this.procedureForm.invalid) {
       this.procedureForm.markAllAsTouched();
       return;
     }
+
     this.loading.set(true);
     this.error.set('');
     this.success.set('');
@@ -123,12 +104,39 @@ export class ProcedureCodesComponent {
     });
   }
 
-  confirmDelete(id: number) { this.confirmDeleteId.set(id); }
-  cancelDelete()             { this.confirmDeleteId.set(null); }
+  // Edit flow
+  editProcedure(p: any) {
+    this.editingProcedure.set(p);
+
+    this.procedureForm.patchValue({
+      code: p.code,
+      name: p.name,
+      standard_charge: p.standard_charge,
+      is_active: p.is_active,
+    });
+
+    this.error.set('');
+    this.success.set('');
+  }
+
+  cancelEdit() {
+    this.editingProcedure.set(null);
+    this.procedureForm.reset({ is_active: true });
+  }
+
+  // Delete flow
+  confirmDelete(id: number) {
+    this.confirmDeleteId.set(id);
+  }
+
+  cancelDelete() {
+    this.confirmDeleteId.set(null);
+  }
 
   executeDelete() {
     const id = this.confirmDeleteId();
     if (!id) return;
+
     this.procedureService.deleteProcedureCode(id).subscribe({
       next: () => {
         this.cancelDelete();
@@ -140,5 +148,29 @@ export class ProcedureCodesComponent {
         this.cancelDelete();
       }
     });
+  }
+
+  // UI Helpers
+  private buildVisiblePages(total: number, current: number): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+
+    if (current > 3) pages.push('...');
+
+    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+      pages.push(i);
+    }
+
+    if (current < total - 2) pages.push('...');
+
+    pages.push(total);
+
+    return pages;
   }
 }

@@ -13,6 +13,7 @@ import { BillService } from '../../../core/services/bill.service';
   templateUrl: './edit-bill.component.html',
 })
 export class EditBillComponent {
+
   private route                 = inject(ActivatedRoute);
   private router                = inject(Router);
   private procedureCodesService = inject(ProcedureCodesService);
@@ -21,21 +22,25 @@ export class EditBillComponent {
 
   protected Number = Number;
 
+  // state
   bill    = signal<any>(null);
   loading = signal(true);
   saving  = signal(false);
   error   = signal('');
 
-  procedures            = signal<any>({ data: [] });
-  selectedProcedures    = signal<any[]>([]);
+  // procedures state
+  procedures         = signal<any>({ data: [] });
+  selectedProcedures = signal<any[]>([]);
   procedureDropdownOpen = false;
   procedureSearch       = '';
 
+  // insurance state
   insuranceFirms        = signal<any>({ data: [] });
-  insuranceSearch       = signal('');
   selectedInsuranceId   = signal<number | null>(null);
   insuranceDropdownOpen = false;
+  insuranceSearch       = signal('');
 
+  // billing state
   dueDate = '';
   notes   = '';
   billing = signal({ insurance: 0, discount: 0, tax: 0 });
@@ -43,23 +48,27 @@ export class EditBillComponent {
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('billId'));
 
+    // load procedures
     this.procedureCodesService.getProcedureCodes(true).subscribe((res: any) => {
       this.procedures.set(res);
     });
 
+    // load insurance firms
     this.insuranceFirmsService.getInsuranceFirms(true).subscribe((res: any) => {
       this.insuranceFirms.set(res);
     });
 
+    // load bill
     this.billService.getBillById(id).subscribe({
       next: (res: any) => {
         const b = res.data ?? res;
-        this.bill.set(b);
 
+        this.bill.set(b);
         this.selectedProcedures.set(b.procedure_codes ?? []);
         this.selectedInsuranceId.set(b.insurance_firm_id ?? null);
+
         this.dueDate = b.due_date ?? '';
-        this.notes   = b.notes   ?? '';
+        this.notes   = b.notes ?? '';
 
         this.billing.set({
           insurance: Number(b.insurance_coverage),
@@ -76,6 +85,7 @@ export class EditBillComponent {
     });
   }
 
+  // procedure dropdown
   toggleProcedureDropdown() {
     this.procedureDropdownOpen = !this.procedureDropdownOpen;
     if (this.insuranceDropdownOpen) this.insuranceDropdownOpen = false;
@@ -96,15 +106,17 @@ export class EditBillComponent {
   addProcedure(code: string) {
     const found = this.procedures().data.find((p: any) => p.code === code);
     if (!found || this.isProcedureSelected(code)) return;
-    this.selectedProcedures.update((list) => [...list, found]);
-    this.procedureSearch       = '';
+
+    this.selectedProcedures.update(list => [...list, found]);
+    this.procedureSearch = '';
     this.procedureDropdownOpen = false;
   }
 
   removeProcedure(index: number) {
-    this.selectedProcedures.update((list) => list.filter((_, i) => i !== index));
+    this.selectedProcedures.update(list => list.filter((_, i) => i !== index));
   }
 
+  // insurance dropdown
   toggleInsuranceDropdown() {
     this.insuranceDropdownOpen = !this.insuranceDropdownOpen;
     if (this.procedureDropdownOpen) this.procedureDropdownOpen = false;
@@ -127,10 +139,11 @@ export class EditBillComponent {
   selectInsurance(id: number) {
     if (this.selectedInsuranceId() === id) {
       this.selectedInsuranceId.set(null);
-      this.billing.update((b) => ({ ...b, insurance: 0 }));
+      this.billing.update(b => ({ ...b, insurance: 0 }));
     } else {
       this.selectedInsuranceId.set(id);
     }
+
     this.insuranceDropdownOpen = false;
     this.insuranceSearch.set('');
   }
@@ -149,16 +162,20 @@ export class EditBillComponent {
     return firm ? `${firm.firm_type} insurance` : '';
   }
 
+  // billing update
   updateBilling(field: string, value: number) {
     if (field === 'insurance' && !this.selectedInsuranceId()) return;
 
     let val = Number(value);
+
     if (field === 'insurance' || field === 'tax') {
       val = Math.max(0, Math.min(100, val));
     }
-    this.billing.update((b) => ({ ...b, [field]: val }));
+
+    this.billing.update(b => ({ ...b, [field]: val }));
   }
 
+  // summary calculation
   summary = computed(() => {
     const billing      = this.billing();
     const hasInsurance = !!this.selectedInsuranceId();
@@ -167,10 +184,12 @@ export class EditBillComponent {
       (sum, p) => sum + Number(p.standard_charge), 0
     );
 
-    const insuranceAmount = hasInsurance ? (billing.insurance / 100) * total : 0;
+    const insuranceAmount = hasInsurance
+      ? (billing.insurance / 100) * total
+      : 0;
 
-    let remaining  = total - insuranceAmount;
-    remaining     -= Number(billing.discount);
+    let remaining = total - insuranceAmount;
+    remaining -= Number(billing.discount);
 
     const taxAmount = (billing.tax / 100) * remaining;
     const final     = remaining + taxAmount;
@@ -184,6 +203,7 @@ export class EditBillComponent {
     };
   });
 
+  // save bill
   save() {
     if (this.selectedProcedures().length === 0) {
       this.error.set('At least one procedure code is required.');
@@ -195,11 +215,12 @@ export class EditBillComponent {
 
     const s = this.summary();
 
-
     const payload = {
       insurance_firm_id:  this.selectedInsuranceId(),
-      procedure_codes:    this.selectedProcedures().map((p) => ({
-        code: p.code, name: p.name, standard_charge: p.standard_charge
+      procedure_codes:    this.selectedProcedures().map(p => ({
+        code: p.code,
+        name: p.name,
+        standard_charge: p.standard_charge
       })),
       charges:            Number(s.total),
       insurance_coverage: Number(this.billing().insurance),
@@ -207,7 +228,7 @@ export class EditBillComponent {
       tax_amount:         Number(this.billing().tax),
       bill_amount:        Number(s.final),
       due_date:           this.dueDate || null,
-      notes:              this.notes   || null,
+      notes:              this.notes || null,
     };
 
     this.billService.updateBill(this.bill().id, payload).subscribe({

@@ -11,20 +11,22 @@ import { SettingsService } from '../../../../core/services/settings.service';
 })
 export class AppConfigComponent {
   private settingsService = inject(SettingsService);
-  private settings        = inject(SettingsService);
+  private settingsStore = inject(SettingsService);
 
-  error       = signal('');
-  success     = signal('');
+  // UI State
+  error = signal('');
+  success = signal('');
   savingConfig = signal(false);
 
+  // Form
   settingsForm = new FormGroup({
-    clinic_name:      new FormControl('', Validators.required),
-    clinic_address:   new FormControl(''),
-    clinic_phone:     new FormControl(''),
-    clinic_email:     new FormControl('', Validators.email),
+    clinic_name: new FormControl('', Validators.required),
+    clinic_address: new FormControl(''),
+    clinic_phone: new FormControl(''),
+    clinic_email: new FormControl('', Validators.email),
     default_tax_rate: new FormControl('0'),
     default_due_days: new FormControl('30'),
-    invoice_footer:   new FormControl(''),
+    invoice_footer: new FormControl(''),
   });
 
   ngOnInit() {
@@ -33,8 +35,11 @@ export class AppConfigComponent {
 
   loadSettings() {
     this.settingsService.getSettings().subscribe({
-      next: (res: any) => this.settingsForm.patchValue(res.data ?? res),
-      error: () => this.error.set('Failed to load settings.'),
+      next: (res: any) =>
+        this.settingsForm.patchValue(res.data ?? res),
+
+      error: () =>
+        this.error.set('Failed to load settings.'),
     });
   }
 
@@ -43,6 +48,7 @@ export class AppConfigComponent {
       this.settingsForm.markAllAsTouched();
       return;
     }
+
     this.savingConfig.set(true);
     this.error.set('');
     this.success.set('');
@@ -50,13 +56,17 @@ export class AppConfigComponent {
     this.settingsService.saveSettings(this.settingsForm.value).subscribe({
       next: () => {
         this.success.set('Settings saved successfully.');
-        this.settings.load(); // update app title
+
+        // refresh global app settings after save so changes reflect immediately across the app
+        this.settingsStore.load();
+
         this.savingConfig.set(false);
       },
+
       error: () => {
         this.error.set('Failed to save settings.');
         this.savingConfig.set(false);
-      }
+      },
     });
   }
 }

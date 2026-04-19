@@ -14,11 +14,13 @@ export class DashboardComponent {
   private billService = inject(BillService);
   private paymentService = inject(PaymentPosterService);
 
+  // State
   bills = signal<any[]>([]);
   payments = signal<any[]>([]);
   recentBills = signal<any[]>([]);
   recentPayments = signal<any[]>([]);
 
+  // dashboard summary stats
   stats = signal<any>({
     total_bill_amount: 0,
     total_paid_amount: 0,
@@ -32,21 +34,25 @@ export class DashboardComponent {
 
   ngOnInit() {
     let loaded = 0;
+
+    // marks loading complete when both APIs finish
     const done = () => {
       if (++loaded === 2) this.loading.set(false);
     };
 
-    // Bills — for billing stats + recent bills table
+    // Bills (stats + recent bills)
     this.billService.getBills({ limit: 5 }).subscribe({
       next: (res: any) => {
-        this.recentBills.set((res.data ?? []));
+        this.recentBills.set(res.data ?? []);
+
         if (res.stats) this.stats.set(res.stats);
+
         done();
       },
       error: () => done(),
     });
 
-    // Payments — for payment stats + recent payments table
+    // Payments (recent payments)
     this.paymentService.getPayments({ limit: 5 }).subscribe({
       next: (res: any) => {
         this.payments.set(res.data ?? []);
@@ -57,25 +63,28 @@ export class DashboardComponent {
     });
   }
 
-  // ── Bill stats ────────────────────────────────────────────────────────────
+  // Computed Stats (Bills)
   totalBilled = computed(() => Number(this.stats().total_bill_amount));
   totalCollected = computed(() => Number(this.stats().total_paid_amount));
   totalOutstanding = computed(() => Number(this.stats().total_outstanding));
+
   pendingBillsCount = computed(() => this.stats().pending_count);
   partialBillsCount = computed(() => this.stats().partial_count);
   paidBillsCount = computed(() => this.stats().paid_count);
 
+  // collection progress percentage
   collectionProgress = computed(() => {
     const total = this.totalBilled();
     if (!total) return 0;
+
     const pct = (this.totalCollected() / total) * 100;
     return pct > 100 ? 100 : pct;
   });
 
-  // ── Payment stats ────────────────────────────────────────────────────────
+  // Computed Stats (Payments)
   totalPaymentsCount = computed(() => this.payments().length);
 
-  // ── UI helpers ───────────────────────────────────────────────────────────
+  // UI Helpers
   getBillStatusClass(status: string): string {
     switch (status) {
       case 'Paid':

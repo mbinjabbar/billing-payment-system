@@ -18,7 +18,6 @@ export class PatientListComponent {
   error       = signal('');
   searchQuery = signal('');
 
-  // ── Pagination ────────────────────────────────────────────────────────────
   currentPage  = signal(1);
   totalPages   = signal(1);
   totalItems   = signal(0);

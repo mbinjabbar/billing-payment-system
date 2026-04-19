@@ -28,7 +28,7 @@ export class VisitComponent {
     visit_date:   new FormControl(''),
   });
 
-  // ── Pagination signals ───────────────────────────────────────────────────
+  // Pagination
   currentPage = signal(1);
   totalPages  = signal(1);
   totalItems  = signal(0);
@@ -40,7 +40,6 @@ export class VisitComponent {
     this.loadVisits(1);
   }
 
-  // ── Fetch ────────────────────────────────────────────────────────────────
   loadVisits(page: number) {
     this.loading.set(true);
     const filters = this.cleanFilters(this.filterForm.value);
@@ -77,7 +76,6 @@ export class VisitComponent {
     return cleaned;
   }
 
-  // ── Pagination ───────────────────────────────────────────────────────────
   visiblePages = computed(() => {
     const total   = this.totalPages();
     const current = this.currentPage();
@@ -103,7 +101,7 @@ export class VisitComponent {
     this.loadVisits(page);
   }
 
-  // ── UI helpers ───────────────────────────────────────────────────────────
+  //  UI helpers
   getVisitStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case 'completed': return 'bg-green-200 text-green-700';

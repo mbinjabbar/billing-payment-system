@@ -25,7 +25,7 @@ export class AppComponent {
     )
   );
 
-  showShell = computed(() => {
+  showLayout = computed(() => {
     const url = this.url();
     if (!url) return false;
 
