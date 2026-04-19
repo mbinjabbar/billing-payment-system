@@ -3,17 +3,19 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProcedureCodesService {
   private apiUrl = `${environment.laravelApiUrl}/procedurecodes`;
-  private http   = inject(HttpClient);
+  private http = inject(HttpClient);
 
-  getProcedureCodes(activeOnly: boolean = false) {
+  getProcedureCodes(activeOnly: boolean = false, page: number = 1) {
     let params = new HttpParams();
 
-    if(activeOnly) {
-      params = params.set('active_only', true)
+    if (activeOnly) {
+      params = params.set('active_only', true);
+    } else {
+      params = params.set('page', page);
     }
     return this.http.get(this.apiUrl, { params });
   }

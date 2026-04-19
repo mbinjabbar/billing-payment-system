@@ -16,10 +16,12 @@ class procedurecodesController extends Controller
         $query = ProcedureMaster::query();
 
         if($request->boolean('active_only')) {
-            $query->where('is_active', true);
+            $activeProcedureCodes = $query->where('is_active', true)->get();
+            return $this->success($activeProcedureCodes, 'Insurance firms retrieved successfully');
         }
         
-        $procedureCodes = $query->get();
+        $procedureCodes = $query->latest()->paginate(10);
+        
         return $this->success($procedureCodes, 'Procedure codes retrieved successfully');
         } catch (Exception $e) {
             return $this->error('Unable to fetch procedure codes.');

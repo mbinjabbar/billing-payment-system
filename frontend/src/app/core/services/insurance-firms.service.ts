@@ -9,11 +9,13 @@ export class InsuranceFirmsService {
   private apiUrl = `${environment.laravelApiUrl}/insurancefirms`;
   private http = inject(HttpClient);
 
-  getInsuranceFirms(activeOnly: boolean = false) {
+  getInsuranceFirms(activeOnly: boolean = false, page: number = 1) {
     let params = new HttpParams();
 
     if (activeOnly) {
       params = params.set('active_only', true)
+    } else {
+      params = params.set('page', page);
     }
     return this.http.get(this.apiUrl, { params });
   }

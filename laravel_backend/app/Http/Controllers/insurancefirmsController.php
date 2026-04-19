@@ -17,10 +17,11 @@ class insurancefirmsController extends Controller
             $query = InsuranceFirm::query();
 
             if ($request->boolean('active_only')) {
-                $query->where('is_active', true);
+                $activeInsuranceFirms = $query->where('is_active', true)->get();
+                return $this->success($activeInsuranceFirms, 'Insurance firms retrieved successfully');
             }
 
-            $insuranceFirms = $query->get();
+            $insuranceFirms = $query->latest()->paginate(10);
 
             return $this->success($insuranceFirms, 'Insurance firms retrieved successfully');
         } catch (Exception $e) {
