@@ -135,6 +135,9 @@
 
               <td class="px-5 py-4 whitespace-nowrap">
                 <p class="font-bold">{{ bill.visit.appointment.patient_case.patient.full_name }}</p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">
+                  Billed by: {{ bill.creator?.full_name ?? '—' }}
+                </p>
               </td>
 
               <td class="px-5 py-4 whitespace-nowrap text-sm">
@@ -202,7 +205,7 @@
                       @if (bill.paid_amount == 0) {
                       <option value="Cancelled">Cancel Bill</option>
                       }
-                      @if (bill.status === 'Partial') {
+                      @if (bill.status === 'Partial' || bill.status === 'Pending') {
                       <option value="Written Off">Write Off</option>
                       }
                     </select>
@@ -329,7 +332,8 @@
 <!-- Change Status Confirm Modal -->
 @if (confirmStatusId()) {
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-  <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
+  <div
+    class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
     <div class="flex flex-col items-center text-center gap-4">
       <div class="w-14 h-14 rounded-full flex items-center justify-center"
         [class]="confirmStatusValue() === 'Cancelled' ? 'bg-gray-100' : 'bg-red-50'">
@@ -344,9 +348,9 @@
         </h3>
         <p class="text-sm text-on-surface-variant font-body mt-1">
           @if (confirmStatusValue() === 'Cancelled') {
-            This bill will be marked as Cancelled. This action cannot be undone.
+          This bill will be marked as Cancelled. This action cannot be undone.
           } @else {
-            This bill will be written off. The outstanding balance will be forgiven. This action cannot be undone.
+          This bill will be written off. The outstanding balance will be forgiven. This action cannot be undone.
           }
         </p>
       </div>

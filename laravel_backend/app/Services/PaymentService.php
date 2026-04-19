@@ -49,7 +49,7 @@ class PaymentService
     }
     public function getFilteredPayments(array $filters)
     {
-        $query = Payment::with('bill.visit.appointment.patientCase.patient')
+        $query = Payment::with('bill.visit.appointment.patientCase.patient', 'receiver')
             ->when(
                 $filters['bill_id'] ?? null,
                 fn($q, $billId) => $q->where('bill_id', $billId)

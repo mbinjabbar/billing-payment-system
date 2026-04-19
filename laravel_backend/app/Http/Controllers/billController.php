@@ -121,6 +121,7 @@ class billController extends Controller
             $bill = Bill::with([
                 'visit.appointment.patientCase.patient',
                 'insurance_firm',
+                'creator',
                 'payments'
             ])->findOrFail($id);
             return $this->success($bill, 'Bill detail fetched successfully.');

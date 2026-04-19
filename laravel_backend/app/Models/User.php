@@ -10,6 +10,7 @@ class User extends Authenticatable
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = ['full_name'];
     protected $fillable = [
         'first_name',
         'last_name',

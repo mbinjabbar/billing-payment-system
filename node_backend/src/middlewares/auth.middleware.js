@@ -10,6 +10,7 @@ export const authenticate = async (req, res, next) => {
         }
 
         const decoded = verifyJWT(token);
+        if (!decoded) return res.api.error('Invalid or expired token', 401);
         req.user = decoded;
         next();
     } catch (err) {

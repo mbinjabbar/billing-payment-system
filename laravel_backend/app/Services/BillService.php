@@ -11,7 +11,7 @@ class BillService
     // ── Query Builder (private — shared internally) ───────────────────────
     private function buildBillQuery(array $filters)
     {
-        $query = Bill::with('visit.appointment.patientCase.patient', 'insurance_firm');
+        $query = Bill::with('visit.appointment.patientCase.patient', 'insurance_firm', 'creator');
 
         $query->when(
             $filters['status'] ?? null,
@@ -138,8 +138,8 @@ class BillService
             throw new \Exception('Cannot cancel a bill with payments posted. Use Write Off instead.');
         }
 
-        if ($status === 'Written Off' && $bill->status !== 'Partial') {
-            throw new \Exception('Only partially paid bills can be written off.');
+        if ($status === 'Written Off' && !in_array($bill->status, ['Pending', 'Partial'])) {
+            throw new \Exception('Only Pending or Partially paid bills can be written off.');
         }
 
         $bill->status = $status;

@@ -12,23 +12,24 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class DocumentListComponent {
   private documentService = inject(DocumentService);
-  private authService = inject(AuthService);
+  private authService     = inject(AuthService);
 
   role = computed(() => this.authService.getRole() ?? '');
 
-  documents = signal<any>({});
-  loading = signal(false);
+  documents   = signal<any>({});
+  loading     = signal(false);
   currentPage = signal(1);
-  activeType = signal('');
+  activeType  = signal('');
 
-  // ── Computed pagination ──────────────────────────────────────────────────
-  list = computed(() => this.documents()?.data ?? []);
-  totalItems = computed(() => this.documents()?.meta?.total ?? 0);
+  downloadingId = signal<number | null>(null);
+  downloadError = signal('');
+
+  list       = computed(() => this.documents()?.data       ?? []);
+  totalItems = computed(() => this.documents()?.meta?.total     ?? 0);
   totalPages = computed(() => this.documents()?.meta?.last_page ?? 1);
-  from = computed(() => this.documents()?.meta?.from ?? 0);
-  to = computed(() => this.documents()?.meta?.to ?? 0);
+  from       = computed(() => this.documents()?.meta?.from      ?? 0);
+  to         = computed(() => this.documents()?.meta?.to        ?? 0);
 
-  // ── Doc type filter pills per role ───────────────────────────────────────
   visibleDocTypes = computed(() => {
     switch (this.role()) {
       case 'Biller':
@@ -61,19 +62,17 @@ export class DocumentListComponent {
   }
 
   filterByType(type: string) {
-    // Toggle off if same type clicked again
     this.activeType.set(this.activeType() === type ? '' : type);
     this.loadDocuments(1);
   }
 
-  // ── Pagination ───────────────────────────────────────────────────────────
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages()) return;
     this.loadDocuments(page);
   }
 
   visiblePages(): (number | string)[] {
-    const total = this.totalPages();
+    const total   = this.totalPages();
     const current = this.currentPage();
     const pages: (number | string)[] = [];
 
@@ -92,41 +91,42 @@ export class DocumentListComponent {
   }
 
   downloadDocument(doc: any) {
-    this.documentService.downloadDocument(doc);
+    this.downloadingId.set(doc.id);
+    this.downloadError.set('');
+
+    const filename = `${doc.document_type.replace(' ', '_')}_${doc.bill?.bill_number ?? doc.id}.pdf`;
+
+    this.documentService.downloadDocument(doc).subscribe({
+      next: (blob: Blob) => {
+        this.documentService.triggerDownload(blob, filename);
+        this.downloadingId.set(null);
+      },
+      error: () => {
+        this.downloadError.set('Failed to download document. Please try again.');
+        this.downloadingId.set(null);
+      }
+    });
   }
 
-  // ── UI helpers ───────────────────────────────────────────────────────────
   getDocTypeClass(type: string): string {
     switch (type) {
-      case 'Invoice':
-        return 'bg-cyan-100 text-cyan-700';
-      case 'NF2 Form':
-        return 'bg-orange-100 text-orange-700';
-      case 'Cheque Image':
-        return 'bg-purple-100 text-purple-700';
-      case 'Supporting Document':
-        return 'bg-gray-100 text-gray-600';
-      case 'Receipt':
-        return 'bg-green-100 text-green-700';
-      default:
-        return 'bg-gray-100 text-gray-600';
+      case 'Invoice':            return 'bg-cyan-100 text-cyan-700';
+      case 'NF2 Form':           return 'bg-orange-100 text-orange-700';
+      case 'Cheque Image':       return 'bg-purple-100 text-purple-700';
+      case 'Supporting Document':return 'bg-gray-100 text-gray-600';
+      case 'Receipt':            return 'bg-green-100 text-green-700';
+      default:                   return 'bg-gray-100 text-gray-600';
     }
   }
 
   getDocIcon(type: string): string {
     switch (type) {
-      case 'Invoice':
-        return 'receipt_long';
-      case 'NF2 Form':
-        return 'article';
-      case 'Cheque Image':
-        return 'image';
-      case 'Supporting Document':
-        return 'folder';
-      case 'Receipt':
-        return 'receipt';
-      default:
-        return 'description';
+      case 'Invoice':            return 'receipt_long';
+      case 'NF2 Form':           return 'article';
+      case 'Cheque Image':       return 'image';
+      case 'Supporting Document':return 'folder';
+      case 'Receipt':            return 'receipt';
+      default:                   return 'description';
     }
   }
 }

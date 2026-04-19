@@ -9,6 +9,14 @@
       </p>
     </section>
 
+      <!-- Download Error -->
+@if (downloadError()) {
+  <div class="mb-4 flex items-center gap-3 p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+    <span class="material-symbols-outlined icon-md">error_outline</span>
+    {{ downloadError() }}
+  </div>
+}
+
     <!-- Table Card -->
     <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
 
@@ -140,13 +148,18 @@
                 </span>
               </td>
 
-              <!-- Actions -->
-              <td class="px-5 py-4 text-right">
-                <button (click)="downloadDocument(doc)"
-                  class="px-2 py-2 rounded-full text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container hover:text-white transition inline-flex items-center gap-1.5">
-                  <span class="material-symbols-outlined icon-sm">download</span>
-                </button>
-              </td>
+       <!-- Actions -->
+<td class="px-5 py-4 text-right">
+  <button (click)="downloadDocument(doc)"
+    [disabled]="downloadingId() === doc.id"
+    class="px-2 py-2 rounded-full text-xs font-bold bg-primary/10 text-primary hover:bg-primary-container hover:text-white transition inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+    @if (downloadingId() === doc.id) {
+      <span class="material-symbols-outlined icon-sm animate-spin">progress_activity</span>
+    } @else {
+      <span class="material-symbols-outlined icon-sm">download</span>
+    }
+  </button>
+</td>
 
             </tr>
             }

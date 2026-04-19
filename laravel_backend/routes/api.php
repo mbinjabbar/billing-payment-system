@@ -14,14 +14,16 @@ use App\Http\Rules\UpdateBillRules;
 use App\Http\Rules\StorePaymentRules;
 use App\Http\Rules\UpdatePaymentRules;
 
-// ── Unauthenticated Routes ────────────────────────────────────────────────────
-Route::get('/bills/invoice/{id}',           [documentController::class, 'downloadInvoice']);
-Route::get('/bills/nf2/{id}',               [documentController::class, 'downloadNF2']);
-Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloadReceipt']);
-Route::get('/documents/cheque/{id}',        [documentController::class, 'downloadCheque']);
-Route::get('/settings',                     [SettingsController::class, 'index']);
+// ── Unauthenticated ───────────────────────────────────────────────────────────
+Route::get('/settings', [SettingsController::class, 'index']);
 
 Route::middleware('firebasejwt')->group(function () {
+
+    // ── Document downloads — authenticated, all roles ─────────────────────
+    Route::get('/bills/invoice/{id}',           [documentController::class, 'downloadInvoice']);
+    Route::get('/bills/nf2/{id}',               [documentController::class, 'downloadNF2']);
+    Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloadReceipt']);
+    Route::get('/documents/cheque/{id}',        [documentController::class, 'downloadCheque']);
 
     // ── All Roles — read only ─────────────────────────────────────────────
     Route::get('/bills/stats', [billController::class, 'stats']);
@@ -32,14 +34,11 @@ Route::middleware('firebasejwt')->group(function () {
     // ── Admin + Biller ────────────────────────────────────────────────────
     Route::middleware('role:Admin,Biller')->group(function () {
 
-        // Visits — read only
         Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
 
-        // Patients — read only
         Route::get('/patients',      [PatientController::class, 'index']);
         Route::get('/patients/{id}', [PatientController::class, 'show']);
 
-        // Bills
         Route::post('/bills', [billController::class, 'store'])
             ->middleware('validate:' . StoreBillRules::class);
 
@@ -49,7 +48,6 @@ Route::middleware('firebasejwt')->group(function () {
         Route::post('/bills/export',       [billController::class, 'export']);
         Route::patch('/bills/{id}/status', [billController::class, 'updateStatus']);
 
-        // Read only
         Route::get('/procedurecodes', [procedurecodesController::class, 'index']);
         Route::get('/insurancefirms', [insurancefirmsController::class, 'index']);
     });

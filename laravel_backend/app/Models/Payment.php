@@ -45,7 +45,7 @@ class Payment extends Model
 
     public function receiver()
     {
-        return $this->belongsTo(User::class, 'received_by');
+        return $this->belongsTo(User::class, 'received_by')->withTrashed();
     }
 
     public function documents()

@@ -95,7 +95,7 @@ class paymentController extends Controller
     public function show($id)
     {
         try {
-            $payment = Payment::with('bill.visit.appointment.patientCase.patient')->findOrFail($id);
+            $payment = Payment::with('bill.visit.appointment.patientCase.patient', 'receiver')->findOrFail($id);
             return $this->success($payment, 'Payment retrieved successfully');
         } catch (Exception $e) {
             return $this->error('Payment not found');

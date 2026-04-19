@@ -157,9 +157,10 @@
               <!-- Patient -->
               <td class="px-5 py-4">
                 <p class="font-bold">
-                  {{
-                  payment.bill?.visit?.appointment?.patient_case?.patient?.full_name
-                  ?? '—' }}
+                  {{ payment.bill?.visit?.appointment?.patient_case?.patient?.full_name ?? '—' }}
+                </p>
+                <p class="text-xs text-on-surface-variant font-label mt-0.5">
+                  Received by: {{ payment.receiver?.full_name ?? '—' }}
                 </p>
               </td>
 
@@ -212,59 +213,57 @@
               </td>
 
               <!-- Actions -->
-<td class="px-5 py-4">
-  <div class="flex items-center justify-center gap-1">
+              <td class="px-5 py-4">
+                <div class="flex items-center justify-center gap-1">
 
-    <!-- Edit — Pending/Failed only, disabled otherwise -->
-    @if (payment.payment_status === 'Pending' || payment.payment_status === 'Failed') {
-      <button [routerLink]="['/payments/edit', payment.id]"
-        title="Edit Payment"
-        class="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-secondary-container transition">
-        <span class="material-symbols-outlined icon-sm">edit</span>
-      </button>
-    } @else {
-      <button disabled
-        [title]="payment.payment_status === 'Completed' ? 'Cannot edit — payment completed' : 'Cannot edit — payment ' + payment.payment_status"
-        class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
-        <span class="material-symbols-outlined icon-sm">edit</span>
-      </button>
-    }
+                  <!-- Edit — Pending/Failed only, disabled otherwise -->
+                  @if (payment.payment_status === 'Pending' || payment.payment_status === 'Failed') {
+                  <button [routerLink]="['/payments/edit', payment.id]" title="Edit Payment"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-secondary-container transition">
+                    <span class="material-symbols-outlined icon-sm">edit</span>
+                  </button>
+                  } @else {
+                  <button disabled
+                    [title]="payment.payment_status === 'Completed' ? 'Cannot edit — payment completed' : 'Cannot edit — payment ' + payment.payment_status"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
+                    <span class="material-symbols-outlined icon-sm">edit</span>
+                  </button>
+                  }
 
-    <!-- Refund — Admin + Payment Poster, Completed only -->
-    @if (role() === 'Admin' || role() === 'Payment Poster') {
-      @if (payment.payment_status === 'Completed') {
-        <button (click)="confirmRefund(payment.id)"
-          title="Refund Payment"
-          class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition">
-          <span class="material-symbols-outlined icon-sm">currency_exchange</span>
-        </button>
-      } @else {
-        <button disabled
-          [title]="payment.payment_status === 'Refunded' ? 'Already refunded' : 'Only Completed payments can be refunded'"
-          class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
-          <span class="material-symbols-outlined icon-sm">currency_exchange</span>
-        </button>
-      }
-    }
+                  <!-- Refund — Admin + Payment Poster, Completed only -->
+                  @if (role() === 'Admin' || role() === 'Payment Poster') {
+                  @if (payment.payment_status === 'Completed') {
+                  <button (click)="confirmRefund(payment.id)" title="Refund Payment"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition">
+                    <span class="material-symbols-outlined icon-sm">currency_exchange</span>
+                  </button>
+                  } @else {
+                  <button disabled
+                    [title]="payment.payment_status === 'Refunded' ? 'Already refunded' : 'Only Completed payments can be refunded'"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
+                    <span class="material-symbols-outlined icon-sm">currency_exchange</span>
+                  </button>
+                  }
+                  }
 
-    <!-- Delete — Admin only -->
-   @if (role() === 'Admin') {
-  @if (payment.payment_status === 'Pending' || payment.payment_status === 'Failed') {
-    <button (click)="confirmDelete(payment.id)" title="Delete Payment"
-      class="w-8 h-8 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition">
-      <span class="material-symbols-outlined icon-sm">delete</span>
-    </button>
-  } @else {
-    <button disabled
-      [title]="payment.payment_status === 'Completed' ? 'Use Refund instead' : 'Cannot delete — payment ' + payment.payment_status"
-      class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
-      <span class="material-symbols-outlined icon-sm">delete</span>
-    </button>
-  }
-}
+                  <!-- Delete — Admin only -->
+                  @if (role() === 'Admin') {
+                  @if (payment.payment_status === 'Pending' || payment.payment_status === 'Failed') {
+                  <button (click)="confirmDelete(payment.id)" title="Delete Payment"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                  } @else {
+                  <button disabled
+                    [title]="payment.payment_status === 'Completed' ? 'Use Refund instead' : 'Cannot delete — payment ' + payment.payment_status"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant/30 cursor-not-allowed">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                  }
+                  }
 
-  </div>
-</td>
+                </div>
+              </td>
 
             </tr>
             }
@@ -343,7 +342,8 @@
 <!-- Refund Confirm Modal -->
 @if (confirmRefundId()) {
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-  <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
+  <div
+    class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
     <div class="flex flex-col items-center text-center gap-4">
       <div class="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center">
         <span class="material-symbols-outlined text-orange-600 icon-xl">currency_exchange</span>

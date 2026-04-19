@@ -39,27 +39,38 @@
           Back to Bills
         </a>
 
- <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
 
-  <!-- Download Invoice -->
-   @if(bill().status !== 'Draft'){
-  <button (click)="downloadInvoice(bill().id)"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary">
-    <span class="material-symbols-outlined icon-sm">download</span>
-    Download Invoice
-  </button>
-  }
+          <!-- Download Invoice -->
+          <!-- Download Invoice -->
+          @if (bill().status !== 'Draft') {
+          <button (click)="downloadInvoice()" [disabled]="downloadingInvoice()"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-bold text-sm font-headline active:scale-97 transition-all bg-primary-container hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (downloadingInvoice()) {
+            <span class="material-symbols-outlined icon-sm animate-spin">progress_activity</span>
+            Downloading...
+            } @else {
+            <span class="material-symbols-outlined icon-sm">download</span>
+            Download Invoice
+            }
+          </button>
+          }
 
-  <!-- Download NF2 — only for car accident bills -->
-  @if (isCarAccident()) {
-    <button (click)="downloadNF2(bill().id)"
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm font-headline active:scale-97 transition-all border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100">
-      <span class="material-symbols-outlined icon-sm">description</span>
-      Download NF2
-    </button>
-  }
+          <!-- Download NF2 — only for car accident bills -->
+          @if (isCarAccident()) {
+          <button (click)="downloadNF2()" [disabled]="downloadingNF2()"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm font-headline active:scale-97 transition-all border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (downloadingNF2()) {
+            <span class="material-symbols-outlined icon-sm animate-spin">progress_activity</span>
+            Downloading...
+            } @else {
+            <span class="material-symbols-outlined icon-sm">description</span>
+            Download NF2
+            }
+          </button>
+          }
 
-</div>
+        </div>
       </div>
 
       <!-- INVOICE CARD -->
@@ -112,18 +123,22 @@
             <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Case No.
             </p>
             <p class="font-bold font-headline text-on-surface mb-2">{{ caseNumber() }}</p>
-            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Case Type - Case Category
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Case Type
+              - Case Category
             </p>
             <p class="font-bold font-headline text-on-surface">{{ caseType() }} - {{ caseCategory()}}</p>
           </div>
 
-          <!-- Doctor & Visit Date -->
+          <!-- Doctor & Visit Date & Billed By -->
           <div class="p-6">
             <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-2">Doctor
             </p>
             <p class="font-bold font-headline text-on-surface">{{ doctorName() }}</p>
             <p class="text-[10px] text-on-surface-variant mt-1 font-label">Visit: {{ bill().visit?.visit_date |
               date:'MMM d, y' }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label mb-1 mt-4">
+              Billed By</p>
+            <p class="font-bold font-headline text-on-surface">{{ bill().creator?.full_name ?? '—' }}</p>
           </div>
         </div>
 

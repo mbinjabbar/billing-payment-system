@@ -20,17 +20,18 @@ export class PaymentFormComponent {
   private billService    = inject(BillService);
   private authService    = inject(AuthService);
 
-  // ── State ────────────────────────────────────────────────────────────────
-  bill         = signal<any>(null);
-  selectedFile = signal<File | null>(null);
-  existingCheque = signal<any>(null);
-  submitting   = signal(false);
-  error        = signal('');
-  billId       = 0;
-  paymentId    = 0;
+  // ── State ─────────────────────────────────────────────────────────────────
+  bill              = signal<any>(null);
+  selectedFile      = signal<File | null>(null);
+  existingCheque    = signal<any>(null);
+  submitting        = signal(false);
+  error             = signal('');
+  billId            = 0;
+  paymentId         = 0;
+  paymentMode       = signal('');
 
-  // Tracks selected payment mode for conditional rendering
-  paymentMode  = signal('');
+  // Stores the original amount paid when editing — needed for overpayment check
+  originalAmountPaid = signal<number>(0);
 
   paymentForm = new FormGroup({
     amount_paid:           new FormControl('', [Validators.required, Validators.min(0.01)]),
@@ -43,30 +44,40 @@ export class PaymentFormComponent {
     notes:                 new FormControl(''),
   });
 
-  // ── Computed ─────────────────────────────────────────────────────────────
+  // ── Computed ──────────────────────────────────────────────────────────────
   outstanding = computed(() => Number(this.bill()?.outstanding_amount ?? 0));
-  
+
   private amountPaidValue = toSignal(
     this.paymentForm.get('amount_paid')!.valueChanges,
-    { initialValue: ''}
-  )
+    { initialValue: '' }
+  );
 
   payingNow = computed(() => {
     const val = Number(this.amountPaidValue());
     return isNaN(val) ? 0 : val;
   });
 
-  remaining = computed(() => {
-    const rem = this.outstanding() - this.payingNow();
-    return Math.max(0, rem);
-  });
-
   isEdit = computed(() => this.paymentId > 0);
 
-  // ── Conditional field visibility ─────────────────────────────────────────
+  // On edit: true ceiling = outstanding + original amount (payment not yet reversed)
+  // On create: ceiling = outstanding
+  maxAllowed = computed(() =>
+    this.isEdit()
+      ? this.outstanding() + this.originalAmountPaid()
+      : this.outstanding()
+  );
+
+  remaining = computed(() =>
+    Math.max(0, this.maxAllowed() - this.payingNow())
+  );
+
+  isOverpaying = computed(() =>
+    this.payingNow() > this.maxAllowed() && this.maxAllowed() > 0
+  );
+
   showChequeFields = computed(() => this.paymentMode() === 'Cheque');
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit() {
     const billId = this.route.snapshot.paramMap.get('billId');
     const editId = this.route.snapshot.paramMap.get('id');
@@ -81,10 +92,8 @@ export class PaymentFormComponent {
       this.loadPayment(this.paymentId);
     }
 
-    // Track payment mode changes for conditional rendering
     this.paymentForm.get('payment_mode')?.valueChanges.subscribe(val => {
       this.paymentMode.set(val ?? '');
-      // Clear mode-specific fields when switching modes
       this.selectedFile.set(null);
       this.paymentForm.patchValue({
         check_number:          '',
@@ -105,23 +114,29 @@ export class PaymentFormComponent {
     this.paymentService.getPaymentById(id).subscribe({
       next: (res: any) => {
         const data = res.data;
+
         if (data.payment_date) {
           data.payment_date = data.payment_date.split('T')[0];
         }
+
         this.billId = data.bill_id;
+
+        // Store original amount before patching the form — used for overpayment check
+        this.originalAmountPaid.set(Number(data.amount_paid ?? 0));
+
         this.loadBill(data.bill_id);
         this.paymentForm.patchValue(data);
-        // Set paymentMode signal when editing so conditional fields render
         this.paymentMode.set(data.payment_mode ?? '');
+
         if (data.cheque_file_path) {
-        this.existingCheque.set(data.cheque_file_path);
-      }
+          this.existingCheque.set(data.cheque_file_path);
+        }
       },
       error: () => this.error.set('Failed to load payment details.'),
     });
   }
 
-  // ── File ─────────────────────────────────────────────────────────────────
+  // ── File ──────────────────────────────────────────────────────────────────
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
@@ -133,7 +148,7 @@ export class PaymentFormComponent {
       'image/png',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
 
     if (!allowedTypes.includes(file.type)) {
       this.error.set('Invalid file type. Allowed: PDF, JPG, PNG, DOCX');
@@ -162,9 +177,11 @@ export class PaymentFormComponent {
       return;
     }
 
-    // Prevent overpayment
-    if (!this.isEdit() && this.payingNow() > this.outstanding()) {
-      this.error.set(`Amount cannot exceed outstanding balance of $${this.outstanding().toFixed(2)}`);
+    // Overpayment guard — runs for both create and edit
+    if (this.isOverpaying()) {
+      this.error.set(
+        `Amount cannot exceed $${this.maxAllowed().toFixed(2)} (outstanding balance${this.isEdit() ? ' including this payment' : ''})`
+      );
       return;
     }
 
@@ -186,7 +203,6 @@ export class PaymentFormComponent {
     if (file) fd.append('cheque_file', file);
 
     if (this.isEdit()) {
-      fd.append('_method', 'PUT');
       this.paymentService.updatePayment(this.paymentId, fd).subscribe({
         next: () => this.router.navigate(['/payments']),
         error: (err) => {

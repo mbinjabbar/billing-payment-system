@@ -298,6 +298,18 @@
             <span class="font-bold font-headline text-error">${{ outstanding().toFixed(2) }}</span>
           </div>
 
+          <!-- On edit show max allowed so user knows their ceiling -->
+          @if (isEdit() && originalAmountPaid() > 0) {
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant font-body">Original Payment</span>
+              <span class="font-bold font-headline text-on-surface-variant">${{ originalAmountPaid().toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant font-body">Max Allowed</span>
+              <span class="font-bold font-headline">${{ maxAllowed().toFixed(2) }}</span>
+            </div>
+          }
+
           <div class="flex justify-between text-sm">
             <span class="text-on-surface-variant font-body">Paying Now</span>
             <span class="font-bold font-headline text-primary">${{ payingNow().toFixed(2) }}</span>
@@ -308,8 +320,8 @@
             <div class="text-3xl font-extrabold font-headline mt-1">
               ${{ remaining().toFixed(2) }}
             </div>
-            @if (payingNow() > outstanding() && outstanding() > 0) {
-              <p class="text-xs text-error font-label mt-1">Exceeds outstanding amount</p>
+            @if (isOverpaying()) {
+              <p class="text-xs text-error font-label mt-1">Exceeds maximum allowed amount</p>
             }
           </div>
 
@@ -321,7 +333,7 @@
           }
 
           <button type="submit" form="postPaymentForm"
-            [disabled]="submitting() || paymentForm.invalid"
+            [disabled]="submitting() || paymentForm.invalid || isOverpaying()"
             class="w-full mt-2 text-white font-bold py-4 rounded-lg shadow-lg font-headline transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             style="background: linear-gradient(135deg, #005bc4 0%, #4388fd 100%);">
             <span class="flex items-center justify-center gap-2">

@@ -17,7 +17,7 @@ class procedurecodesController extends Controller
 
         if($request->boolean('active_only')) {
             $activeProcedureCodes = $query->where('is_active', true)->get();
-            return $this->success($activeProcedureCodes, 'Insurance firms retrieved successfully');
+            return $this->success($activeProcedureCodes, 'Procedure codes retrieved successfully');
         }
         
         $procedureCodes = $query->latest()->paginate(10);
@@ -65,6 +65,7 @@ class procedurecodesController extends Controller
     {
         try {
             $data = $request->validate([
+                'name' => 'required',
                 'code' => 'unique:procedure_masters,code,' . $id,
                 'standard_charge' => 'numeric|decimal:2|between:0,99999999.99',
                 'is_active' => 'boolean'

@@ -7,38 +7,61 @@ import { environment } from '../../../environments/environment';
 })
 export class DocumentService {
   private apiUrl = environment.laravelApiUrl;
-  private http = inject(HttpClient);
+  private http   = inject(HttpClient);
 
   getDocuments(params: any = {}) {
     const stringParams: any = {};
     Object.keys(params).forEach((key) => {
-      {
-        stringParams[key] = String(params[key]);
-      }
+      stringParams[key] = String(params[key]);
     });
     return this.http.get(`${this.apiUrl}/documents`, { params: stringParams });
   }
 
-  downloadDocument(document: any) {
-    let url = '';
-    switch (document.document_type) {
+  downloadInvoice(billId: number) {
+    return this.http.get(`${this.apiUrl}/bills/invoice/${billId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadNF2(billId: number) {
+    return this.http.get(`${this.apiUrl}/bills/nf2/${billId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadReceipt(paymentId: number) {
+    return this.http.get(`${this.apiUrl}/payments/receipt/${paymentId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadCheque(documentId: number) {
+    return this.http.get(`${this.apiUrl}/documents/cheque/${documentId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadDocument(doc: any) {
+    switch (doc.document_type) {
       case 'Invoice':
-        url = `${this.apiUrl}/bills/invoice/${document.bill_id}`;
-        break;
+        return this.downloadInvoice(doc.bill_id);
       case 'NF2 Form':
-        url = `${this.apiUrl}/bills/nf2/${document.bill_id}`;
-        break;
-      case 'Cheque Image':
-        url = `${this.apiUrl}/documents/cheque/${document.id}`;
-        break;
+        return this.downloadNF2(doc.bill_id);
       case 'Receipt':
-        url = `${this.apiUrl}/payments/receipt/${document.payment_id}`;
-        break;
+        return this.downloadReceipt(doc.payment_id);
+      case 'Cheque Image':
+        return this.downloadCheque(doc.id);
       default:
-        url = `${this.apiUrl}/documents/cheque/${document.id}`;
+        return this.downloadCheque(doc.id);
     }
-    const link = window.document.createElement('a');
-    link.href = url;
-    link.click();
+  }
+
+  triggerDownload(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 }
