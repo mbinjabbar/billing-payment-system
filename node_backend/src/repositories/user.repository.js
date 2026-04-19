@@ -1,10 +1,9 @@
 import User from '../models/User.model.js';
+import { paginate } from '../utils/helpers.js';
 
 class UserRepository {
-    async findAll() {
-        return await User.findAll({
-            attributes: { exclude: ['password'] }
-        });
+    async findAll({ page = 1, limit = 10 } = {}) {
+        return await paginate(User, { page, limit, attributes: { exclude: ['password', 'deleted_at'] } });
     }
 
     async findByEmail(email) {
@@ -26,7 +25,7 @@ class UserRepository {
     async update(id, updateData) {
         const user = await User.findByPk(id);
         if (user) {
-            return await user.update(updateData)
+            return await user.update(updateData);
         }
         return null;
     }

@@ -2,15 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
   private apiUrl = `${environment.nodeApiUrl}/users`;
   private http   = inject(HttpClient);
 
-  getUsers() {
-    return this.http.get(this.apiUrl);
+  getUsers(page: number = 1, limit: number = 10) {
+    return this.http.get(this.apiUrl, {
+      params: { page, limit }
+    });
   }
 
   getUserById(id: number) {

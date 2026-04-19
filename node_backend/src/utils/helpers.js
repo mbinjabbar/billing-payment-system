@@ -48,8 +48,8 @@ export const generateToken = (user) => {
             role: user.role
         },
         process.env.JWT_SECRET,
-        { 
-            expiresIn: process.env.JWT_EXPIRES_IN || '8h' 
+        {
+            expiresIn: process.env.JWT_EXPIRES_IN || '8h'
         }
     );
 };
@@ -71,3 +71,27 @@ export const isTokenRevoked = async (token) => {
     const blacklisted = await redisClient.get(`blacklist:${token}`);
     return !!blacklisted;
 };
+
+export const paginate = async (model, { page = 1, limit = 10, where = {}, attributes, order = [['created_at', 'DESC']] }) => {
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await model.findAndCountAll({
+        where,
+        attributes,
+        limit,
+        offset,
+        order
+    });
+
+    return {
+        data: rows,
+        meta: {
+            total: count,
+            per_page: limit,
+            current_page: page,
+            last_page: Math.ceil(count / limit),
+            from: count === 0 ? 0 : offset + 1,
+            to: Math.min(offset + limit, count),
+        }
+    };
+}
