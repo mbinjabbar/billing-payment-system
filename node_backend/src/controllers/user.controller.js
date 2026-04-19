@@ -15,7 +15,7 @@ const getAllUsers = async (req, res, next) => {
 const createUser = async (req, res, next) => {
     try {
         const user = await userService.createUser(req.body);
-        return res.api.created(user, 'User created successfully');
+        return res.api.success(user, 'User created successfully', 201);
     } catch (error) {
         next(error);
     }

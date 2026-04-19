@@ -11,10 +11,6 @@ export class ApiResponse {
         });
     }
 
-    created(data = {}, message = 'Created successfully') {
-        return this.success(data, message, 201);
-    }
-
     error(message = 'Something went wrong', statusCode = 500) {
         return this.res.status(statusCode).json({
             success: false,
