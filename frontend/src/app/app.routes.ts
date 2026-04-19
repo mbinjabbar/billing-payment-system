@@ -58,6 +58,20 @@ export const routes: Routes = [
     ]
   },
 
+  // Patients — Admin + Biller only
+  {
+    path: 'patients',
+    canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
+    loadComponent: () =>
+      import('./features/patients/patient-list/patient-list.component').then(m => m.PatientListComponent)
+  },
+  {
+    path: 'patients/:id',
+    canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
+    loadComponent: () =>
+      import('./features/patients/patient-detail/patient-detail.component').then(m => m.PatientDetailComponent)
+  },
+
   // Visits
   {
     path: 'visits',
@@ -66,7 +80,7 @@ export const routes: Routes = [
       import('./features/bills/visit/visit.component').then(m => m.VisitComponent)
   },
 
-  // Bills — specific routes
+  // Bills
   {
     path: 'bills/create/:visitId',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller'])],
@@ -92,7 +106,6 @@ export const routes: Routes = [
       import('./features/payments/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
   },
   {
-    // bill list
     path: 'bills',
     canActivate: [authGuard, roleGuard(['Admin', 'Biller', 'Payment Poster'])],
     loadComponent: () =>
@@ -107,7 +120,6 @@ export const routes: Routes = [
       import('./features/payments/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
   },
   {
-    // payment list
     path: 'payments',
     canActivate: [authGuard, roleGuard(['Admin', 'Payment Poster'])],
     loadComponent: () =>
@@ -129,18 +141,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/documents/document-list/document-list.component').then(m => m.DocumentListComponent)
   },
-  // 404 Not Found
+
+  // 404 + 403
   {
     path: 'not-found',
     loadComponent: () =>
-      import('./shared/not-found/not-found.component').then(m=> m.NotFoundComponent)
+      import('./shared/not-found/not-found.component').then(m => m.NotFoundComponent)
   },
-    // 403 Forbidden
   {
     path: 'forbidden',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./shared/forbidden/forbidden.component').then(m=> m.ForbiddenComponent)
+      import('./shared/forbidden/forbidden.component').then(m => m.ForbiddenComponent)
   },
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];

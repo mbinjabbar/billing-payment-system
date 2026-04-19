@@ -1,0 +1,184 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <div class="pt-10 px-10 pb-12 space-y-8 w-full">
+
+    <!-- Header -->
+    <section>
+      <h2 class="text-4xl font-extrabold tracking-tight font-headline">Patients</h2>
+      <p class="text-on-surface-variant mt-2 font-body">
+        View and search all registered patients in the system.
+      </p>
+    </section>
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Table Card -->
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+
+      <!-- Table Header + Search -->
+      <div class="px-6 py-5 border-b border-outline-variant/10 flex flex-wrap items-center justify-between gap-4">
+        <h3 class="text-xl font-bold font-headline">Patient Records</h3>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/20 focus-within:border-primary transition">
+            <span class="material-symbols-outlined text-on-surface-variant icon-sm">search</span>
+            <input type="text" placeholder="Search by name, phone or email..."
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              (keyup.enter)="onSearch()"
+              class="bg-transparent text-sm outline-none w-56 font-body" />
+            @if (searchQuery()) {
+              <button (click)="clearSearch()" class="text-on-surface-variant hover:text-on-surface transition">
+                <span class="material-symbols-outlined icon-sm">close</span>
+              </button>
+            }
+          </div>
+
+          <button (click)="onSearch()"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition font-headline">
+            Search
+          </button>
+
+          @if (!loading()) {
+            <p class="text-xs text-on-surface-variant font-label whitespace-nowrap">
+              {{ from() }}–{{ to() }} of {{ totalItems() }} patients
+            </p>
+          }
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="flex items-center justify-center py-20">
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+            <p class="text-sm text-on-surface-variant font-label">Loading patients...</p>
+          </div>
+        </div>
+      }
+
+      @if (!loading()) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Patient</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Age</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Gender</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Phone</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase">Email</th>
+                <th class="px-5 py-3.5 text-xs font-bold uppercase text-center">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-outline-variant/10">
+
+              @if (patients().length === 0) {
+                <tr>
+                  <td colspan="6" class="px-5 py-16 text-center">
+                    <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">person_search</span>
+                    <p class="text-sm font-bold text-on-surface-variant">No patients found</p>
+                    @if (searchQuery()) {
+                      <p class="text-xs text-on-surface-variant/60 mt-1 font-label">Try a different search term</p>
+                    }
+                  </td>
+                </tr>
+              }
+
+              @for (patient of patients(); track patient.id) {
+                <tr class="hover:bg-surface-container-low transition">
+
+                  <!-- Patient -->
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="text-sm font-bold text-primary font-headline">
+                          {{ patient.first_name?.charAt(0) }}{{ patient.last_name?.charAt(0) }}
+                        </span>
+                      </div>
+                      <div>
+                        <p class="font-bold">{{ patient.full_name }}</p>
+                        @if (patient.city) {
+                          <p class="text-xs text-on-surface-variant font-label">{{ patient.city }}</p>
+                        }
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Age -->
+                  <td class="px-5 py-4 text-center text-sm">
+                    {{ calculateAge(patient.date_of_birth) }}
+                  </td>
+
+                  <!-- Gender -->
+                  <td class="px-5 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold capitalize"
+                      [class]="getGenderClass(patient.gender)">
+                      {{ patient.gender ?? '—' }}
+                    </span>
+                  </td>
+
+                  <!-- Phone -->
+                  <td class="px-5 py-4 text-on-surface-variant text-sm">
+                    {{ patient.phone ?? patient.mobile ?? '—' }}
+                  </td>
+
+                  <!-- Email -->
+                  <td class="px-5 py-4 text-on-surface-variant text-sm">
+                    {{ patient.email ?? '—' }}
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-5 py-4 text-center">
+                    <a [routerLink]="['/patients', patient.id]" title="View Patient"
+                      class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-primary/10 text-primary hover:bg-primary-container transition">
+                      <span class="material-symbols-outlined icon-sm">visibility</span>
+                    </a>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
+            <p class="text-xs text-on-surface-variant font-label">
+              Page <span class="font-bold text-on-surface">{{ currentPage() }}</span> of {{ totalPages() }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button (click)="goToPage(1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">«</button>
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">‹</button>
+
+              @for (page of visiblePages(); track $index) {
+                @if (page === '...') {
+                  <span class="px-2.5 py-1.5 text-xs text-on-surface-variant">...</span>
+                } @else {
+                  <button (click)="goToPage(+page)"
+                    class="px-2.5 py-1.5 rounded-md text-xs font-bold transition"
+                    [class]="currentPage() === page ? 'bg-primary text-white' : 'hover:bg-surface-container-low text-on-surface'">
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">›</button>
+              <button (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+                class="px-2.5 py-1.5 rounded-md text-xs font-bold hover:bg-surface-container-low disabled:opacity-30 transition">»</button>
+            </div>
+          </div>
+        }
+      }
+
+    </section>
+  </div>
+</div>

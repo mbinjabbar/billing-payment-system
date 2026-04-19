@@ -1,0 +1,388 @@
+<div class="bg-surface text-on-surface min-h-screen font-body">
+  <div class="pt-10 px-10 pb-12 space-y-8 w-full">
+
+    <!-- Back -->
+    <a [routerLink]="['/patients']"
+      class="inline-flex items-center text-primary text-sm font-semibold hover:translate-x-[-2px] transition-transform">
+      <span class="material-symbols-outlined mr-1 icon-md">arrow_back</span>
+      Back to Patients
+    </a>
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="p-4 rounded-lg bg-error-container/20 border border-error/20 text-error text-sm font-semibold">
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+          <p class="text-sm text-on-surface-variant font-label">Loading patient details...</p>
+        </div>
+      </div>
+    }
+
+    @if (!loading() && patient()) {
+
+      <!-- ── PATIENT HEADER ─────────────────────────────────────────────── -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-8">
+        <div class="flex items-center gap-6">
+          <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <span class="text-xl font-bold text-primary font-headline">
+              {{ patient().first_name?.charAt(0) }}{{ patient().last_name?.charAt(0) }}
+            </span>
+          </div>
+          <div>
+            <h2 class="text-3xl font-extrabold tracking-tight font-headline">{{ patient().full_name }}</h2>
+            <div class="flex flex-wrap items-center gap-3 mt-1">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold capitalize"
+                [class]="getGenderClass(patient().gender)">
+                {{ patient().gender ?? 'Unknown' }}
+              </span>
+              @if (patient().date_of_birth) {
+                <span class="text-sm text-on-surface-variant font-label">
+                  Age {{ calculateAge(patient().date_of_birth) }}
+                </span>
+                <span class="text-on-surface-variant/30">·</span>
+                <span class="text-sm text-on-surface-variant font-label">
+                  DOB {{ patient().date_of_birth | date:'MMM d, y' }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PERSONAL DETAILS GRID ──────────────────────────────────────── -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Contact -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant font-label mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined icon-sm">contact_phone</span>
+            Contact
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Phone</span>
+              <span class="font-semibold">{{ patient().phone ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Mobile</span>
+              <span class="font-semibold">{{ patient().mobile ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Email</span>
+              <span class="font-semibold">{{ patient().email ?? '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant font-label mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined icon-sm">location_on</span>
+            Address
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Street</span>
+              <span class="font-semibold text-right max-w-40">{{ patient().address ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">City</span>
+              <span class="font-semibold">{{ patient().city ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">State</span>
+              <span class="font-semibold">{{ patient().state ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Postal Code</span>
+              <span class="font-semibold">{{ patient().postal_code ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Country</span>
+              <span class="font-semibold">{{ patient().country ?? '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant font-label mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined icon-sm text-error">emergency</span>
+            Emergency Contact
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Name</span>
+              <span class="font-semibold">{{ patient().emergency_contact_name ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-on-surface-variant">Phone</span>
+              <span class="font-semibold">{{ patient().emergency_contact_phone ?? '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── CASES ──────────────────────────────────────────────────────── -->
+      <div>
+        <h3 class="text-xl font-bold font-headline mb-4">
+          Cases
+          <span class="text-sm font-normal text-on-surface-variant ml-2">
+            {{ patient().cases?.length ?? 0 }} total
+          </span>
+        </h3>
+
+        @if (!patient().cases?.length) {
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 p-16 text-center">
+            <span class="material-symbols-outlined text-outline-variant icon-xl mb-3 block">folder_open</span>
+            <p class="text-sm font-bold text-on-surface-variant">No cases found for this patient.</p>
+          </div>
+        }
+
+        <div class="space-y-6">
+          @for (case_ of patient().cases; track case_.id) {
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+
+              <!-- Case Header -->
+              <div class="px-6 py-5 border-b border-outline-variant/10">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                  <div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                      <span class="px-2 py-0.5 rounded text-xs font-bold bg-primary/10 text-primary font-headline">
+                        {{ case_.case_number }}
+                      </span>
+                      <span class="px-2.5 py-1 rounded-full text-xs font-bold capitalize"
+                        [class]="getCaseStatusClass(case_.status)">
+                        {{ case_.status }}
+                      </span>
+                      @if (case_.priority) {
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold capitalize"
+                          [class]="getPriorityClass(case_.priority)">
+                          {{ case_.priority }}
+                        </span>
+                      }
+                    </div>
+                    <p class="font-bold text-lg">
+                      {{ case_.case_type }}
+                      @if (case_.case_category) {
+                        <span class="font-normal text-on-surface-variant text-base"> — {{ case_.case_category }}</span>
+                      }
+                    </p>
+                  </div>
+                  <div class="text-right text-xs text-on-surface-variant font-label space-y-1">
+                    <p>Opened: {{ case_.opened_date | date:'MMM d, y' }}</p>
+                    @if (case_.closed_date) {
+                      <p>Closed: {{ case_.closed_date | date:'MMM d, y' }}</p>
+                    }
+                  </div>
+                </div>
+
+                <!-- Case meta -->
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  @if (case_.referring_doctor) {
+                    <div>
+                      <p class="text-xs text-on-surface-variant font-label mb-0.5">Referring Doctor</p>
+                      <p class="font-semibold">{{ case_.referring_doctor }}</p>
+                    </div>
+                  }
+                  @if (case_.description) {
+                    <div class="md:col-span-3">
+                      <p class="text-xs text-on-surface-variant font-label mb-0.5">Description</p>
+                      <p class="text-on-surface-variant">{{ case_.description }}</p>
+                    </div>
+                  }
+                </div>
+
+                <!-- NF2 Auto Accident -->
+                @if (case_.nf2_detail) {
+                  <div class="mt-4 pt-4 border-t border-outline-variant/10">
+                    <p class="text-xs font-bold uppercase tracking-widest text-orange-600 font-label mb-3">
+                      Auto Accident Details
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      @if (case_.nf2_detail.accident_date) {
+                        <div>
+                          <p class="text-xs text-on-surface-variant font-label mb-0.5">Accident Date</p>
+                          <p class="font-semibold">{{ case_.nf2_detail.accident_date | date:'MMM d, y' }}</p>
+                        </div>
+                      }
+                      @if (case_.nf2_detail.accident_location) {
+                        <div>
+                          <p class="text-xs text-on-surface-variant font-label mb-0.5">Location</p>
+                          <p class="font-semibold">{{ case_.nf2_detail.accident_location }}</p>
+                        </div>
+                      }
+                      @if (case_.nf2_detail.claim_number) {
+                        <div>
+                          <p class="text-xs text-on-surface-variant font-label mb-0.5">Claim #</p>
+                          <p class="font-semibold">{{ case_.nf2_detail.claim_number }}</p>
+                        </div>
+                      }
+                      @if (case_.nf2_detail.policy_number) {
+                        <div>
+                          <p class="text-xs text-on-surface-variant font-label mb-0.5">Policy #</p>
+                          <p class="font-semibold">{{ case_.nf2_detail.policy_number }}</p>
+                        </div>
+                      }
+                      @if (case_.nf2_detail.vehicle_make) {
+                        <div>
+                          <p class="text-xs text-on-surface-variant font-label mb-0.5">Vehicle</p>
+                          <p class="font-semibold">
+                            {{ case_.nf2_detail.vehicle_year }} {{ case_.nf2_detail.vehicle_make }}
+                          </p>
+                        </div>
+                      }
+                      @if (case_.nf2_detail.injury_description) {
+                        <div class="col-span-2 md:col-span-3">
+                          <p class="text-xs text-on-surface-variant font-label mb-0.5">Injury Description</p>
+                          <p class="text-on-surface-variant">{{ case_.nf2_detail.injury_description }}</p>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Appointments -->
+              @if (case_.appointments?.length > 0) {
+                <div class="divide-y divide-outline-variant/10">
+                  @for (appt of case_.appointments; track appt.id) {
+                    <div class="px-6 py-5">
+
+                      <!-- Appointment row -->
+                      <div class="flex items-start justify-between flex-wrap gap-3 mb-3">
+                        <div class="flex items-center gap-3">
+                          <span class="material-symbols-outlined text-on-surface-variant icon-md">calendar_today</span>
+                          <div>
+                            <p class="font-bold text-sm">
+                              {{ appt.appointment_date | date:'MMM d, y' }}
+                              @if (appt.appointment_time) {
+                                <span class="font-normal text-on-surface-variant"> at {{ appt.appointment_time }}</span>
+                              }
+                            </p>
+                            <p class="text-xs text-on-surface-variant font-label">
+                              {{ appt.appointment_type }}
+                              @if (appt.doctor_name) { — Dr. {{ appt.doctor_name }} }
+                              @if (appt.duration_minutes) { · {{ appt.duration_minutes }} min }
+                            </p>
+                          </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                          [class]="getApptStatusClass(appt.appointment_status)">
+                          {{ appt.appointment_status }}
+                        </span>
+                      </div>
+
+                      <!-- Appointment notes -->
+                      @if (appt.specialty_required || appt.notes) {
+                        <div class="pl-9 text-sm space-y-1 mb-3">
+                          @if (appt.specialty_required) {
+                            <p class="text-on-surface-variant">
+                              <span class="font-semibold">Specialty:</span> {{ appt.specialty_required }}
+                            </p>
+                          }
+                          @if (appt.notes) {
+                            <p class="text-on-surface-variant">
+                              <span class="font-semibold">Notes:</span> {{ appt.notes }}
+                            </p>
+                          }
+                        </div>
+                      }
+
+                      <!-- Visit -->
+                      @if (appt.visit) {
+                        <div class="ml-9 p-4 rounded-lg bg-surface-container-low border border-outline-variant/10 space-y-3">
+                          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label">
+                            Visit — {{ appt.visit.visit_date | date:'MMM d, y' }}
+                          </p>
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            @if (appt.visit.diagnosis) {
+                              <div>
+                                <p class="text-xs text-on-surface-variant font-label mb-0.5">Diagnosis</p>
+                                <p>{{ appt.visit.diagnosis }}</p>
+                              </div>
+                            }
+                            @if (appt.visit.treatment_notes) {
+                              <div>
+                                <p class="text-xs text-on-surface-variant font-label mb-0.5">Treatment Notes</p>
+                                <p>{{ appt.visit.treatment_notes }}</p>
+                              </div>
+                            }
+                            @if (appt.visit.prescriptions) {
+                              <div>
+                                <p class="text-xs text-on-surface-variant font-label mb-0.5">Prescriptions</p>
+                                <p>{{ appt.visit.prescriptions }}</p>
+                              </div>
+                            }
+                            @if (appt.visit.follow_up_required) {
+                              <div>
+                                <p class="text-xs text-on-surface-variant font-label mb-0.5">Follow-up</p>
+                                <p>{{ appt.visit.follow_up_date ? (appt.visit.follow_up_date | date:'MMM d, y') : 'Required' }}</p>
+                              </div>
+                            }
+                          </div>
+
+                          <!-- Bill -->
+                          @if (appt.visit.bill) {
+                            <div class="pt-3 border-t border-outline-variant/10 flex items-center justify-between flex-wrap gap-3">
+                              <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-on-surface-variant icon-sm">receipt_long</span>
+                                <div>
+                                  <p class="text-xs text-on-surface-variant font-label">{{ appt.visit.bill.bill_number }}</p>
+                                  <p class="font-bold text-sm">${{ appt.visit.bill.bill_amount }}</p>
+                                </div>
+                              </div>
+                              <div class="flex items-center gap-3">
+                                <div class="text-right text-xs">
+                                  <p class="text-green-600 font-semibold">Paid: ${{ appt.visit.bill.paid_amount }}</p>
+                                  <p class="text-error font-semibold">Due: ${{ appt.visit.bill.outstanding_amount }}</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                                  [class]="getBillStatusClass(appt.visit.bill.status)">
+                                  {{ appt.visit.bill.status }}
+                                </span>
+                                <a [routerLink]="['/bills/invoice', appt.visit.bill.id]"
+                                  title="View Invoice"
+                                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary hover:bg-primary-container transition">
+                                  <span class="material-symbols-outlined icon-sm">open_in_new</span>
+                                </a>
+                              </div>
+                            </div>
+                          } @else {
+                            <p class="text-xs text-on-surface-variant/50 font-label italic pt-2 border-t border-outline-variant/10">
+                              No bill generated for this visit.
+                            </p>
+                          }
+                        </div>
+                      } @else {
+                        <p class="ml-9 text-xs text-on-surface-variant/50 font-label italic">
+                          No visit record for this appointment.
+                        </p>
+                      }
+
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="px-6 py-8 text-center text-sm text-on-surface-variant/60 font-label italic">
+                  No appointments for this case.
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+      </div>
+
+    }
+
+  </div>
+</div>

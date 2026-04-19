@@ -11,6 +11,7 @@ interface NavItem {
 
 const BILLER_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard',      route: '/biller' },
+  { label: 'Patients',  icon: 'person',          route: '/patients' },
   { label: 'Visits',    icon: 'calendar_today', route: '/visits' },
   { label: 'Bills',     icon: 'receipt_long',   route: '/bills' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
@@ -25,12 +26,13 @@ const PAYMENT_POSTER_NAV: NavItem[] = [
 
 const ADMIN_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard',      route: '/admin' },
+  { label: 'Patients',  icon: 'person',          route: '/patients' },
   { label: 'Visits',    icon: 'calendar_today', route: '/visits' },
   { label: 'Bills',     icon: 'receipt_long',   route: '/bills' },
   { label: 'Payments',  icon: 'payments',       route: '/payments' },
   { label: 'Documents', icon: 'description',    route: '/documents' },
   { label: 'Users',     icon: 'group',           route: '/admin/users' },
-  { label: 'Settings', icon: 'settings', route: '/admin/settings' },
+  { label: 'Settings',  icon: 'settings',        route: '/admin/settings' },
 ];
 
 @Component({

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class PatientCase extends Model
 {
     use SoftDeletes;
+    protected $table = 'patient_cases';
     protected $fillable = [
         'patient_id',
         'case_number',
@@ -19,6 +20,7 @@ class PatientCase extends Model
         'opened_date',
         'closed_date',
         'referring_doctor',
+        'car_accident'
     ];
     public function patient()
     {
