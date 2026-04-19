@@ -233,7 +233,7 @@
     <!-- Refund — Admin + Payment Poster, Completed only -->
     @if (role() === 'Admin' || role() === 'Payment Poster') {
       @if (payment.payment_status === 'Completed') {
-        <button (click)="onRefundPayment(payment.id)"
+        <button (click)="confirmRefund(payment.id)"
           title="Refund Payment"
           class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition">
           <span class="material-symbols-outlined icon-sm">currency_exchange</span>
@@ -333,6 +333,35 @@
         <button (click)="executeDelete()"
           class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-error text-white hover:bg-error/90 transition font-headline">
           Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Refund Confirm Modal -->
+@if (confirmRefundId()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
+    <div class="flex flex-col items-center text-center gap-4">
+      <div class="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-orange-600 icon-xl">currency_exchange</span>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold font-headline">Refund Payment?</h3>
+        <p class="text-sm text-on-surface-variant font-body mt-1">
+          This payment will be marked as Refunded and the bill amounts will be reversed. This action cannot be undone.
+        </p>
+      </div>
+      <div class="flex gap-3 w-full mt-2">
+        <button (click)="cancelRefund()"
+          class="flex-1 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+          Cancel
+        </button>
+        <button (click)="executeRefund()"
+          class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition font-headline">
+          Confirm Refund
         </button>
       </div>
     </div>

@@ -325,3 +325,43 @@
   </div>
 </div>
 }
+
+<!-- Change Status Confirm Modal -->
+@if (confirmStatusId()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 p-8 max-w-sm w-full mx-4">
+    <div class="flex flex-col items-center text-center gap-4">
+      <div class="w-14 h-14 rounded-full flex items-center justify-center"
+        [class]="confirmStatusValue() === 'Cancelled' ? 'bg-gray-100' : 'bg-red-50'">
+        <span class="material-symbols-outlined icon-xl"
+          [class]="confirmStatusValue() === 'Cancelled' ? 'text-gray-500' : 'text-red-600'">
+          {{ confirmStatusValue() === 'Cancelled' ? 'cancel' : 'money_off' }}
+        </span>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold font-headline">
+          {{ confirmStatusValue() === 'Cancelled' ? 'Cancel Bill?' : 'Write Off Bill?' }}
+        </h3>
+        <p class="text-sm text-on-surface-variant font-body mt-1">
+          @if (confirmStatusValue() === 'Cancelled') {
+            This bill will be marked as Cancelled. This action cannot be undone.
+          } @else {
+            This bill will be written off. The outstanding balance will be forgiven. This action cannot be undone.
+          }
+        </p>
+      </div>
+      <div class="flex gap-3 w-full mt-2">
+        <button (click)="cancelStatusChange()"
+          class="flex-1 py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-container-low transition font-headline">
+          Cancel
+        </button>
+        <button (click)="executeStatusChange()"
+          class="flex-1 py-2.5 rounded-lg text-sm font-bold text-white transition font-headline"
+          [class]="confirmStatusValue() === 'Cancelled' ? 'bg-gray-500 hover:bg-gray-600' : 'bg-red-600 hover:bg-red-700'">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

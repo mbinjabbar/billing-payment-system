@@ -21,7 +21,14 @@ export class BillListComponent implements OnInit {
   currentPage     = signal(1);
   role            = computed(() => this.authService.getRole());
   exporting       = signal(false);
+
+  // ── Delete confirmation ───────────────────────────────────────────────────
   confirmDeleteId = signal<number | null>(null);
+
+  // ── Change status confirmation ────────────────────────────────────────────
+  confirmStatusId     = signal<number | null>(null);
+  confirmStatusValue  = signal<string>('');
+  pendingSelectRef: HTMLSelectElement | null = null;
 
   filterForm = new FormGroup({
     patient_name: new FormControl(''),
@@ -56,7 +63,7 @@ export class BillListComponent implements OnInit {
     this.fetchBills(1);
   }
 
-  // ── Delete (Admin only) ───────────────────────────────────────────────────
+  // ── Delete ────────────────────────────────────────────────────────────────
   confirmDelete(id: number) { this.confirmDeleteId.set(id); }
   cancelDelete()             { this.confirmDeleteId.set(null); }
 
@@ -72,18 +79,43 @@ export class BillListComponent implements OnInit {
     });
   }
 
-  // ── Status override ───────────────────────────────────────────────────────
+  // ── Change Status — show confirmation first ───────────────────────────────
   overrideStatus(billId: number, event: Event) {
     const select = event.target as HTMLSelectElement;
     const status = select.value;
     if (!status) return;
 
-    this.billService.updateBillStatus(billId, status).subscribe({
+    // Save reference to reset select if user cancels
+    this.pendingSelectRef = select;
+    this.confirmStatusId.set(billId);
+    this.confirmStatusValue.set(status);
+  }
+
+  cancelStatusChange() {
+    // Reset select back to empty
+    if (this.pendingSelectRef) {
+      this.pendingSelectRef.value = '';
+      this.pendingSelectRef = null;
+    }
+    this.confirmStatusId.set(null);
+    this.confirmStatusValue.set('');
+  }
+
+  executeStatusChange() {
+    const id     = this.confirmStatusId();
+    const status = this.confirmStatusValue();
+    if (!id || !status) return;
+
+    this.billService.updateBillStatus(id, status).subscribe({
       next: () => {
-        select.value = '';
+        this.confirmStatusId.set(null);
+        this.confirmStatusValue.set('');
+        this.pendingSelectRef = null;
         this.fetchBills(this.currentPage());
       },
-      error: () => { select.value = ''; }
+      error: () => {
+        this.cancelStatusChange();
+      }
     });
   }
 
