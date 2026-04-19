@@ -12,6 +12,10 @@ class filevalidationmiddleware
     use ApiResponse;
     public function handle(Request $request, Closure $next): Response
     {
+         if ($request->payment_mode !== 'cheque') {
+        return $next($request); //skip validation
+    }
+
         if (!$request->hasFile('cheque_file')) {
             return $this->error('No file uploaded', 422);
         }
