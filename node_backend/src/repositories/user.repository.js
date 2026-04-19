@@ -3,12 +3,12 @@ import { paginate } from '../utils/helpers.js';
 
 class UserRepository {
     async findAll({ page = 1, limit = 10 } = {}) {
-        return await paginate(User, { page, limit, attributes: { exclude: ['password', 'deleted_at'] } });
+        return await paginate(User, { page, limit, attributes: { exclude: ['password'] } });
     }
 
     async findByEmail(email) {
         return await User.findOne({
-            where: { email, deleted_at: null }
+            where: { email }
         });
     }
 
