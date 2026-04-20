@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DocumentType;
 use App\Services\DocumentService;
 use App\Traits\ApiResponse;
 use Exception;
@@ -31,7 +32,7 @@ class documentController extends Controller
     public function downloadInvoice($id)
     {
         try {
-            $document = $this->documentService->getDocument('Invoice', $id);
+            $document = $this->documentService->getDocument(DocumentType::INVOICE->value, $id);
             $filePath = $this->documentService->resolveFilePath($document);
 
             return response()->download($filePath);
@@ -44,7 +45,7 @@ class documentController extends Controller
     public function downloadNF2($id)
     {
         try {
-            $document = $this->documentService->getDocument('NF2 Form', $id);
+            $document = $this->documentService->getDocument(DocumentType::NF2->value, $id);
             $filePath = $this->documentService->resolveFilePath($document);
 
             return response()->download($filePath);
@@ -57,7 +58,7 @@ class documentController extends Controller
     public function downloadReceipt($paymentId)
     {
         try {
-            $document = $this->documentService->getDocument('Receipt', $paymentId);
+            $document = $this->documentService->getDocument(DocumentType::RECEIPT->value, $paymentId);
             $filePath = $this->documentService->resolveFilePath($document);
 
             return response()->download($filePath);

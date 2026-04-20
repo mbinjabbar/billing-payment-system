@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BillStatus;
 use App\Models\Bill;
 
 class BillService
@@ -86,9 +87,9 @@ class BillService
             'total_paid_amount' => (clone $query)->sum('paid_amount'),
             'total_outstanding' => (clone $query)->sum('outstanding_amount'),
             'total_bills'       => (clone $query)->count(),
-            'pending_count'     => (clone $query)->where('status', 'Pending')->count(),
-            'partial_count'     => (clone $query)->where('status', 'Partial')->count(),
-            'paid_count'        => (clone $query)->where('status', 'Paid')->count(),
+            'pending_count'     => (clone $query)->where('status', BillStatus::PENDING->value)->count(),
+            'partial_count'     => (clone $query)->where('status', BillStatus::PARTIAL->value)->count(),
+            'paid_count'        => (clone $query)->where('status', BillStatus::PAID->value)->count(),
         ];
     }
 
@@ -119,11 +120,11 @@ class BillService
     public function resolveBillStatus(Bill $bill)
     {
         if ($bill->paid_amount <= 0) {
-            $bill->status = 'Pending';
+            $bill->status = BillStatus::PENDING->value;
         } elseif ($bill->outstanding_amount <= 0) {
-            $bill->status = 'Paid';
+            $bill->status = BillStatus::PAID->value;
         } else {
-            $bill->status = 'Partial';
+            $bill->status = BillStatus::PARTIAL->value;
         }
     }
 
@@ -142,8 +143,8 @@ class BillService
 
         $this->recalculateBill($bill);
 
-        if ($bill->status === 'Draft') {
-            $bill->status = 'Pending';
+        if ($bill->status === BillStatus::DRAFT->value) {
+            $bill->status = BillStatus::PENDING->value;
         } else {
             $this->resolveBillStatus($bill);
         }
@@ -166,12 +167,12 @@ class BillService
         $bill = Bill::findOrFail($id);
 
         // cannot cancel if payments exist
-        if ($status === 'Cancelled' && $bill->paid_amount > 0) {
+        if ($status === BillStatus::CANCELLED->value && $bill->paid_amount > 0) {
             throw new \Exception('Cannot cancel a bill with payments posted. Use Write Off instead.');
         }
 
         // write-off only allowed for unpaid/partial bills
-        if ($status === 'Written Off' && !in_array($bill->status, ['Pending', 'Partial'])) {
+        if ($status === BillStatus::WRITTEN_OFF->value && !in_array($bill->status, BillStatus::CAN_BE_WRITTEN_OFF)) {
             throw new \Exception('Only Pending or Partially paid bills can be written off.');
         }
 

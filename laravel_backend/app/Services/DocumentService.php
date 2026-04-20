@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\DocumentType;
+use App\Enums\UserRole;
 use App\Models\Bill;
 use App\Models\Document;
 use App\Models\Payment;
@@ -21,10 +23,10 @@ class DocumentService
         // restrict document visibility based on user role
         $role = $filters['role'] ?? null;
 
-        if ($role === 'Biller') {
-            $query->whereIn('document_type', ['Invoice', 'NF2 Form']);
-        } elseif ($role === 'Payment Poster') {
-            $query->whereIn('document_type', ['Invoice', 'Cheque Image', 'Receipt']);
+        if ($role === UserRole::BILLER->value) {
+            $query->whereIn('document_type', [DocumentType::BILLER_TYPES]);
+        } elseif ($role === UserRole::PAYMENT_POSTER->value) {
+            $query->whereIn('document_type', DocumentType::PAYMENT_POSTER_TYPES);
         }
 
         // filter by document type if provided
@@ -40,7 +42,7 @@ class DocumentService
     {
         $query = Document::where('document_type', $type)->latest();
 
-        if ($type === 'Receipt') {
+        if ($type === DocumentType::RECEIPT->value) {
             $query->where('payment_id', $id);
         } else {
             $query->where('bill_id', $id);
@@ -54,7 +56,7 @@ class DocumentService
     {
         $document = Document::findOrFail($id);
 
-        if ($document->document_type !== 'Cheque Image') {
+        if ($document->document_type !== DocumentType::CHEQUE->value) {
             throw new \Exception('Not a cheque document.');
         }
 
@@ -64,7 +66,7 @@ class DocumentService
     // Resolve physical file path (public vs private storage)
     public function resolveFilePath(Document $document): string
     {
-        $basePath = $document->document_type === 'Cheque Image'
+        $basePath = $document->document_type === DocumentType::CHEQUE
             ? storage_path('app/public/' . $document->file_path)
             : storage_path('app/private/' . $document->file_path);
 
@@ -150,7 +152,7 @@ class DocumentService
             $bill,
             'Invoice_pdf',
             'Invoice_',
-            'Invoice',
+            DocumentType::INVOICE->value,
             $settings,
             true
         );
@@ -160,14 +162,14 @@ class DocumentService
     public function generateBillDocuments(Bill $bill, array $settings)
     {
         $filesToGenerate = [
-            ['view' => 'Invoice_pdf', 'prefix' => 'Invoice_', 'type' => 'Invoice']
+            ['view' => 'Invoice_pdf', 'prefix' => 'Invoice_', 'type' => DocumentType::INVOICE->value]
         ];
 
         if ($bill->visit->appointment->patientCase->car_accident) {
             $filesToGenerate[] = [
                 'view' => 'NF2_pdf',
                 'prefix' => 'NF2_',
-                'type' => 'NF2 Form'
+                'type' => DocumentType::NF2->value
             ];
         }
 
@@ -185,6 +187,7 @@ class DocumentService
     // Generate receipt (supports refund + update modes)
     public function generateReceipt($payment, array $settings, $isUpdate = false, bool $isRefund = false)
     {
+        $type = DocumentType::RECEIPT->value;
         $suffix = $isRefund ? '_refund' : '';
         $fileName = 'Receipt_' . $payment->payment_number . $suffix . '.pdf';
         $path = 'bills/' . $fileName;
@@ -196,7 +199,7 @@ class DocumentService
         $fileSize = filesize($fullPath);
 
         $document = Document::where('payment_id', $payment->id)
-            ->where('document_type', 'Receipt')
+            ->where('document_type', $type)
             ->first();
 
         // update existing receipt or create new one
@@ -210,7 +213,7 @@ class DocumentService
             Document::create([
                 'bill_id'       => $payment->bill_id,
                 'payment_id'    => $payment->id,
-                'document_type' => 'Receipt',
+                'document_type' => $type,
                 'file_name'     => $fileName,
                 'file_type'     => 'application/pdf',
                 'file_path'     => $path,
@@ -230,14 +233,16 @@ class DocumentService
         int $uploadedBy
     ) {
         // remove previous cheque document
+        $type = DocumentType::CHEQUE->value;
+
         Document::where('payment_id', $payment->id)
-            ->where('document_type', 'Cheque Image')
+            ->where('document_type', $type)
             ->delete();
 
         Document::create([
             'bill_id'       => $bill->id,
             'payment_id'    => $payment->id,
-            'document_type' => 'Cheque Image',
+            'document_type' => $type,
             'file_name'     => $cheque['name'],
             'file_type'     => $cheque['type'],
             'file_path'     => $cheque['path'],

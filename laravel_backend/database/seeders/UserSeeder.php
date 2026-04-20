@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Faker\Factory;
@@ -11,7 +12,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $faker = Factory::create();
-        $roles = ['Admin', 'Biller', 'Payment Poster'];
+        $roles = UserRole::ALL_ROLES;
 
         foreach ($roles as $role) {
             User::create([
