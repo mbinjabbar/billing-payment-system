@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,8 +15,8 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['Admin', 'Biller', 'Payment Poster'])
-                  ->default('Biller');
+            $table->enum('role', UserRole::ALL_ROLES)
+                  ->default(UserRole::BILLER->value);
             $table->timestamps();
             $table->softDeletes(); 
         });

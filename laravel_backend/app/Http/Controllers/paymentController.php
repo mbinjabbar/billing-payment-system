@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 use App\Models\Payment;
 use Exception;
@@ -72,7 +73,7 @@ class paymentController extends Controller
             }
 
             // generate invoice + receipt only when payment is completed
-            if ($request->payment_status === 'Completed') {
+            if ($request->payment_status === PaymentStatus::COMPLETED->value) {
                 $settings = $this->settingService->getSettings();
 
                 $bill->load(
@@ -120,7 +121,7 @@ class paymentController extends Controller
             $payment = Payment::findOrFail($id);
 
             // restrict editing to only pending or failed payments
-            if (!in_array($payment->payment_status, ['Pending', 'Failed'])) {
+            if (!in_array($payment->payment_status, PaymentStatus::ALLOWED_EDIT)) {
                 DB::rollBack();
                 return $this->error('Only Pending or Failed payments can be edited.', 422);
             }
@@ -168,7 +169,7 @@ class paymentController extends Controller
             $payment->save();
 
             // update bill only if payment is completed
-            if ($request->payment_status === 'Completed') {
+            if ($request->payment_status === PaymentStatus::COMPLETED->value) {
                 $bill->paid_amount += $newAmountPaid;
                 $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
@@ -231,12 +232,12 @@ class paymentController extends Controller
         try {
             $payment = Payment::findOrFail($id);
 
-            if ($payment->payment_status === 'Completed') {
+            if ($payment->payment_status === PaymentStatus::COMPLETED->value) {
                 DB::rollBack();
                 return $this->error('Cannot delete a Completed payment. Use Refund instead.', 422);
             }
 
-            if ($payment->payment_status === 'Refunded') {
+            if ($payment->payment_status === PaymentStatus::REFUNDED->value) {
                 DB::rollBack();
                 return $this->error('Cannot delete a Refunded payment.', 422);
             }

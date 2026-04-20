@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\BillStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Bill;
 use App\Models\Payment;
 
@@ -11,7 +13,7 @@ class PaymentService
     private function validateBill(Bill $bill, $amount)
     {
         // block payments on finalized bills
-        if (in_array($bill->status, ['Cancelled', 'Written Off', 'Paid'])) {
+        if (in_array($bill->status, BillStatus::IS_FINALIZED)) {
             throw new \Exception("Cannot post payment against {$bill->status} bill.");
         }
 
@@ -35,7 +37,7 @@ class PaymentService
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
         // determine bill status
-        $bill->status = $bill->outstanding_amount <= 0 ? 'Paid' : 'Partial';
+        $bill->status = $bill->outstanding_amount <= 0 ? BillStatus::PAID->value : BillStatus::PARTIAL->value;
 
         $bill->save();
     }
@@ -100,7 +102,7 @@ class PaymentService
         ]));
 
         // immediately apply on bill if payment is completed
-        if ($payment->payment_status === 'Completed') {
+        if ($payment->payment_status === PaymentStatus::COMPLETED->value) {
             $this->updateBillAfterPayment($bill, $data['amount_paid']);
         }
 
@@ -122,7 +124,7 @@ class PaymentService
 
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
-        $bill->status = $bill->outstanding_amount <= 0 ? 'Paid' : 'Partial';
+        $bill->status = $bill->outstanding_amount <= 0 ? BillStatus::PAID->value : BillStatus::PARTIAL->value;
 
         $bill->save();
 
@@ -144,11 +146,11 @@ class PaymentService
 
         // recalculate status after reversal
         if ($bill->paid_amount <= 0) {
-            $bill->status = 'Pending';
+            $bill->status = BillStatus::PENDING->value;
         } elseif ($bill->outstanding_amount > 0) {
-            $bill->status = 'Partial';
+            $bill->status = BillStatus::PARTIAL->value;
         } else {
-            $bill->status = 'Paid';
+            $bill->status = BillStatus::PAID->value;
         }
 
         $bill->save();
@@ -159,7 +161,7 @@ class PaymentService
     {
         $bill = $payment->bill;
 
-        if ($payment->payment_status !== 'Completed') {
+        if ($payment->payment_status !== PaymentStatus::COMPLETED->value) {
             throw new \Exception('Only Completed payments can be refunded');
         }
 
@@ -170,7 +172,7 @@ class PaymentService
         }
 
         $payment->update([
-            'payment_status' => 'Refunded'
+            'payment_status' => PaymentStatus::REFUNDED->value
         ]);
 
         // adjust bill values after refund
@@ -185,8 +187,8 @@ class PaymentService
         $bill->outstanding_amount = $bill->bill_amount - $bill->paid_amount;
 
         $bill->status = $bill->paid_amount <= 0
-            ? 'Pending'
-            : ($bill->outstanding_amount > 0 ? 'Partial' : 'Paid');
+            ? BillStatus::PENDING->value
+            : ($bill->outstanding_amount > 0 ? BillStatus::PARTIAL->value : BillStatus::PAID->value);
 
         $bill->save();
 

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BillStatus;
 use App\Models\Visit;
 
 class VisitService
@@ -49,7 +50,7 @@ class VisitService
             // visits that already have a bill (excluding drafts)
             'billed' => Visit::whereHas(
                 'bill',
-                fn($q) => $q->whereNotIn('status', ['Draft'])
+                fn($q) => $q->whereNotIn('status', [BillStatus::DRAFT->value])
             )->count(),
 
             // completed visits without any bill yet

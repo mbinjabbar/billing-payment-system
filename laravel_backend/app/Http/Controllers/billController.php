@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BillStatus;
 use App\Exports\BillsExport;
 use Illuminate\Http\Request;
 use App\Models\Bill;
@@ -51,7 +52,7 @@ class billController extends Controller
     {
         // prevent duplicate bill for same visit (except draft)
         $exists = Bill::where('visit_id', $request->visit_id)
-            ->whereNotIn('status', ['Draft'])
+            ->whereNotIn('status', BillStatus::DRAFT->value)
             ->exists();
 
         if ($exists) {
@@ -94,7 +95,7 @@ class billController extends Controller
             ]);
 
             // if draft, stop here (no documents needed)
-            if ($data['status'] === 'Draft') {
+            if ($data['status'] === BillStatus::DRAFT->value) {
                 DB::commit();
                 return $this->success($bill, 'Bill saved as draft successfully.');
             }
@@ -144,7 +145,7 @@ class billController extends Controller
             $bill = Bill::findOrFail($id);
 
             // block edit if payments already exist
-            if ($bill->paid_amount > 0 && $bill->status !== 'Draft') {
+            if ($bill->paid_amount > 0 && $bill->status !== BillStatus::DRAFT->value) {
                 DB::rollBack();
                 return $this->error('Cannot edit a bill that has payments posted against it.', 403);
             }
@@ -173,7 +174,7 @@ class billController extends Controller
             $bill = Bill::findOrFail($id);
 
             // prevent deletion if financial activity exists
-            if (in_array($bill->status, ['Partial', 'Paid', 'Written Off'])) {
+            if (in_array($bill->status, BillStatus::FINANCIAL_ACTIVE)) {
                 DB::rollBack();
                 return $this->error('Cannot delete a bill with payments posted against it.', 422);
             }

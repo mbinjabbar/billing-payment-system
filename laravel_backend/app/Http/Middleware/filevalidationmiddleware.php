@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\PaymentMode;
 use App\Traits\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class FileValidationMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // skip validation if payment is not cheque
-        if ($request->payment_mode !== 'Cheque') {
+        if ($request->payment_mode !== PaymentMode::CHEQUE->value) {
             return $next($request);
         }
 

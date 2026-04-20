@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VisitController;
 use App\Http\Controllers\billController;
@@ -32,7 +33,7 @@ Route::middleware('firebasejwt')->group(function () {
     Route::get('/documents',   [documentController::class, 'index']);
 
     // Admin + Biller 
-    Route::middleware('role:Admin,Biller')->group(function () {
+    Route::middleware(UserRole::ADMIN_BILLER)->group(function () {
 
         Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
 
@@ -53,7 +54,7 @@ Route::middleware('firebasejwt')->group(function () {
     });
 
     // Admin + Payment Poster 
-    Route::middleware('role:Admin,Payment Poster')->group(function () {
+    Route::middleware(UserRole::ADMIN_PAYEMNT_POSTER)->group(function () {
 
         Route::get('/payments',      [paymentController::class, 'index']);
         Route::get('/payments/{id}', [paymentController::class, 'show']);
@@ -69,7 +70,7 @@ Route::middleware('firebasejwt')->group(function () {
     });
 
     // Admin Only
-    Route::middleware('role:Admin')->group(function () {
+    Route::middleware(UserRole::ONLY_ADMIN)->group(function () {
 
         Route::delete('/bills/{id}',    [billController::class, 'destroy']);
         Route::delete('/payments/{id}', [paymentController::class, 'destroy']);
