@@ -52,7 +52,7 @@ class billController extends Controller
     {
         // prevent duplicate bill for same visit (except draft)
         $exists = Bill::where('visit_id', $request->visit_id)
-            ->whereNotIn('status', BillStatus::DRAFT->value)
+            ->whereNotIn('status', [BillStatus::DRAFT->value])
             ->exists();
 
         if ($exists) {
