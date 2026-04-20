@@ -44,6 +44,9 @@ class BillService
             ])
         );
 
+        $searchTerm = isset($filters['patient_name'])
+       ? '%' . str_replace(' ', '%', $filters['patient_name']) . '%'
+       : null;
         // search by patient name
         $query->when(
             $filters['patient_name'] ?? null,
@@ -53,6 +56,7 @@ class BillService
                     ->where('first_name', 'like', '%' . $filters['patient_name'] . '%')
                     ->orWhere('middle_name', 'like', '%' . $filters['patient_name'] . '%')
                     ->orWhere('last_name', 'like', '%' . $filters['patient_name'] . '%')
+                    ->orWhereRaw("CONCAT_WS(' ', first_name, middle_name, last_name) LIKE ?", [$searchTerm])
             )
         );
 

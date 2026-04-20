@@ -24,18 +24,19 @@ class VisitService
         );
 
         // search by patient name
-        $query->when(
-            $filters['patient_name'] ?? null,
-            fn($q) =>
-            $q->whereHas(
-                'appointment.patientCase.patient',
-                fn($sub) =>
-                $sub->where('first_name', 'like', '%' . $filters['patient_name'] . '%')
-                    ->orWhere('middle_name', 'like', '%' . $filters['patient_name'] . '%')
-                    ->orWhere('last_name', 'like', '%' . $filters['patient_name'] . '%')
-                    ->orWhereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ['%' . $filters['patient_name'] . '%'])
-            )
-        );
+       $searchTerm = isset($filters['patient_name'])
+       ? '%' . str_replace(' ', '%', $filters['patient_name']) . '%'
+       : null;
+ 
+       $query->when($filters['patient_name'] ?? null, function ($q) use ($filters, $searchTerm) {
+        $q->whereHas('appointment.patientCase.patient', function ($sub) use ($filters, $searchTerm) {
+        $sub->where('first_name', 'like', '%' . $filters['patient_name'] . '%')
+            ->orWhere('middle_name', 'like', '%' . $filters['patient_name'] . '%')
+            ->orWhere('last_name', 'like', '%' . $filters['patient_name'] . '%')
+            ->orWhereRaw("CONCAT_WS(' ', first_name, middle_name, last_name) LIKE ?", [$searchTerm]);
+    });
+});
+ 
 
         return $query->latest('visit_date')->paginate(10);
     }

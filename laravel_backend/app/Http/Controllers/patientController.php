@@ -18,6 +18,7 @@ class PatientController extends Controller
             $query = Patient::query();
 
             // search across basic patient fields
+            $searchTerm = '%' . str_replace(' ', '%', $request->search ?? '') . '%';
             $query->when(
                 $request->search ?? null,
                 fn($q) => $q->where('first_name', 'like', '%' . $request->search . '%')
@@ -25,6 +26,7 @@ class PatientController extends Controller
                     ->orWhere('last_name',   'like', '%' . $request->search . '%')
                     ->orWhere('phone',       'like', '%' . $request->search . '%')
                     ->orWhere('email',       'like', '%' . $request->search . '%')
+                  ->orWhereRaw("CONCAT_WS(' ', first_name, middle_name, last_name) LIKE ?", [$searchTerm])                
             );
 
             $patients = $query->latest()->paginate(10);
