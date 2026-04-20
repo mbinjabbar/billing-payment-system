@@ -33,6 +33,7 @@ class VisitService
                 $sub->where('first_name', 'like', '%' . $filters['patient_name'] . '%')
                     ->orWhere('middle_name', 'like', '%' . $filters['patient_name'] . '%')
                     ->orWhere('last_name', 'like', '%' . $filters['patient_name'] . '%')
+                    ->orWhereRaw("CONCAT(first_name, ' ', middle_name, ' ', last_name) LIKE ?", ['%' . $filters['patient_name'] . '%'])
             )
         );
 

@@ -14,24 +14,24 @@ use App\Http\Rules\UpdateBillRules;
 use App\Http\Rules\StorePaymentRules;
 use App\Http\Rules\UpdatePaymentRules;
 
-// ── Unauthenticated ───────────────────────────────────────────────────────────
+// Unauthenticated 
 Route::get('/settings', [SettingsController::class, 'index']);
 
 Route::middleware('firebasejwt')->group(function () {
 
-    // ── Document downloads — authenticated, all roles ─────────────────────
+    // Document downloads — authenticated, all roles 
     Route::get('/bills/invoice/{id}',           [documentController::class, 'downloadInvoice']);
     Route::get('/bills/nf2/{id}',               [documentController::class, 'downloadNF2']);
     Route::get('/payments/receipt/{paymentId}', [documentController::class, 'downloadReceipt']);
     Route::get('/documents/cheque/{id}',        [documentController::class, 'downloadCheque']);
 
-    // ── All Roles — read only ─────────────────────────────────────────────
+    // All Roles — read only 
     Route::get('/bills/stats', [billController::class, 'stats']);
     Route::get('/bills',       [billController::class, 'index']);
     Route::get('/bills/{id}',  [billController::class, 'show']);
     Route::get('/documents',   [documentController::class, 'index']);
 
-    // ── Admin + Biller ────────────────────────────────────────────────────
+    // Admin + Biller 
     Route::middleware('role:Admin,Biller')->group(function () {
 
         Route::apiResource('visits', VisitController::class)->only(['index', 'show']);
@@ -52,7 +52,7 @@ Route::middleware('firebasejwt')->group(function () {
         Route::get('/insurancefirms', [insurancefirmsController::class, 'index']);
     });
 
-    // ── Admin + Payment Poster ────────────────────────────────────────────
+    // Admin + Payment Poster 
     Route::middleware('role:Admin,Payment Poster')->group(function () {
 
         Route::get('/payments',      [paymentController::class, 'index']);
@@ -68,7 +68,7 @@ Route::middleware('firebasejwt')->group(function () {
         Route::patch('/payments/{id}/refund', [paymentController::class, 'refund']);
     });
 
-    // ── Admin Only ────────────────────────────────────────────────────────
+    // Admin Only
     Route::middleware('role:Admin')->group(function () {
 
         Route::delete('/bills/{id}',    [billController::class, 'destroy']);
