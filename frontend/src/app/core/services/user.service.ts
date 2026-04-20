@@ -5,11 +5,11 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private apiUrl = `${environment.nodeApiUrl}/users`;
-  private http   = inject(HttpClient);
+  private http = inject(HttpClient);
 
-  getUsers(page: number = 1, limit: number = 10) {
+  getUsers(page: number = 1, limit: number = 10, search: string = '') {
     return this.http.get(this.apiUrl, {
-      params: { page, limit }
+      params: { page, limit, search }
     });
   }
 

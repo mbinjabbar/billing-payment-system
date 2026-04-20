@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
@@ -21,6 +22,9 @@ export class UserListComponent {
   confirmDeleteId = signal<number | null>(null);
 
   currentUserId = this.authService.getUserId();
+
+  searchTerm = signal('');
+  private searchSubject = new Subject<string>();
 
   // pagination
   currentPage = signal(1);
@@ -63,31 +67,42 @@ export class UserListComponent {
 
   ngOnInit() {
     this.loadUsers(1);
-  }
-
-  loadUsers(page: number) {
-    this.loading.set(true);
-
-    this.userService.getUsers(page, this.perPage()).subscribe({
-      next: (res: any) => {
-        this.users.set(res.data?.data ?? res.data ?? []);
-
-        const meta = res.data?.meta;
-        if (meta) {
-          this.currentPage.set(meta.current_page);
-          this.totalPages.set(meta.last_page);
-          this.totalItems.set(meta.total);
-          this.perPage.set(meta.per_page);
-        }
-
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load users.');
-        this.loading.set(false);
-      },
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(searchValue => {
+      this.searchTerm.set(searchValue);
+      this.currentPage.set(1);
+      this.loadUsers(1);
     });
   }
+
+  onSearch(event: Event) {
+  const value = (event.target as HTMLInputElement).value;
+  this.searchSubject.next(value);
+}
+
+ loadUsers(page: number) {
+  this.loading.set(true);
+
+  this.userService.getUsers(page, this.perPage(), this.searchTerm()).subscribe({
+    next: (res: any) => {
+      this.users.set(res.data?.data ?? res.data ?? []);
+      const meta = res.data?.meta;
+      if (meta) {
+        this.currentPage.set(meta.current_page);
+        this.totalPages.set(meta.last_page);
+        this.totalItems.set(meta.total);
+        this.perPage.set(meta.per_page);
+      }
+      this.loading.set(false);
+    },
+    error: () => {
+      this.error.set('Failed to load users.');
+      this.loading.set(false);
+    },
+  });
+}
 
   // pagination action
   goToPage(page: number) {

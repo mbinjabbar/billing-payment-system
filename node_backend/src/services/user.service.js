@@ -3,8 +3,8 @@ import { hashPassword } from '../utils/helpers.js';
 import { NotFoundError, ConflictError } from '../errors/errors.js';
 
 class UserService {
-    async getAllUsers({ page = 1, limit = 10 } = {}) {
-        return await userRepository.findAll({ page, limit });
+    async getAllUsers({ page = 1, limit = 10, search } = {}) {
+        return await userRepository.findAll({ page, limit, search });
     }
 
     async getUserById(id) {

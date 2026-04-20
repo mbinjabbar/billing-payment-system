@@ -1,9 +1,18 @@
+import { Op } from 'sequelize';
 import User from '../models/User.model.js';
 import { paginate } from '../utils/helpers.js';
 
 class UserRepository {
-    async findAll({ page = 1, limit = 10 } = {}) {
-        return await paginate(User, { page, limit, attributes: { exclude: ['password'] } });
+    async findAll({ page = 1, limit = 10, search = ''} = {}) {
+        const where = search?.trim() ? {
+            [Op.or]: [
+                { first_name: { [Op.like]: `%${search}%`}},
+                { last_name: { [Op.like]: `%${search}%`}},
+                { email: { [Op.like]: `%${search}%`}},
+                { role: { [Op.like]: `%${search}%`}},
+            ]
+        } : {};
+        return await paginate(User, { page, limit, where, attributes: { exclude: ['password'] } });
     }
 
     async findByEmail(email) {

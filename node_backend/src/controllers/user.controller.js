@@ -2,10 +2,12 @@ import userService from '../services/user.service.js';
 
 const getAllUsers = async (req, res, next) => {
     try {
-        const page  = parseInt(req.query.page)  || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const { page = 1, limit = 10, search = '' } = req.query;
 
-        const result = await userService.getAllUsers({ page, limit });
+        const result = await userService.getAllUsers({ 
+            page: parseInt(page), 
+            limit: parseInt(limit), 
+            search });
         return res.api.success(result, 'Users retrieved successfully');
     } catch (error) {
         next(error);
