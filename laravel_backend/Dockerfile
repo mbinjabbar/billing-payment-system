@@ -1,12 +1,13 @@
 FROM php:8.2-fpm
 
-# Install system dependencies for gd
+# Install system dependencies for gd and zip
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
+    libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd \
+    && docker-php-ext-install gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
