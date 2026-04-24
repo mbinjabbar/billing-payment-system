@@ -23,3 +23,5 @@ RUN composer install --optimize-autoloader --no-scripts --no-interaction
 
 # Copy application code
 COPY . .
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
