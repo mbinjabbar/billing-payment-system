@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'filevalidation' => \App\Http\Middleware\FileValidationMiddleware::class,
             'validate'      => \App\Http\Middleware\ValidateRequest::class,
         ]);
+        $middleware->trustProxies(at: '*');
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
