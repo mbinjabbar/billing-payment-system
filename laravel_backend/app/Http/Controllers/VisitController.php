@@ -25,7 +25,7 @@ class VisitController extends Controller
 
             return $this->success($visits, 'Visits list fetched successfully.', 200, $stats);
         } catch (Exception $e) {
-            return $this->error('Unable to fetch visits list.');
+            return $this->error('Unable to fetch visits list.'. $e->getMessage());
         }
     }
 
