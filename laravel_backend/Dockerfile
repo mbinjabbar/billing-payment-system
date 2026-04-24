@@ -9,6 +9,11 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Rest of your Dockerfile...
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy project files
 COPY composer.json composer.lock ./
+
+# Install dependencies
 RUN composer install --optimize-autoloader --no-scripts --no-interaction
