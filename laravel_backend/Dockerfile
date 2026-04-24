@@ -1,5 +1,7 @@
 FROM php:8.2-fpm
 
+WORKDIR /app
+
 # Install system dependencies for gd and zip
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
@@ -18,3 +20,6 @@ COPY composer.json composer.lock ./
 
 # Install dependencies
 RUN composer install --optimize-autoloader --no-scripts --no-interaction
+
+# Copy application code
+COPY . .
