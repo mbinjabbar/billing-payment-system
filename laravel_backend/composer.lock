@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc736d4d378d2779f293c7b52b3bbdb2",
+    "content-hash": "a8f4e2d1c9b7e5f3a1d8c6b4e2f0a9d7",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -4117,6 +4117,70 @@
                 "source": "https://github.com/bobthecow/psysh/tree/v0.12.22"
             },
             "time": "2026-03-22T23:03:24+00:00"
+        },
+        {
+            "name": "predis/predis",
+            "version": "v2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/predis/predis.git",
+                "reference": "b1a0e315c2b8b0f8e7c9d4a5f6e3b2c1d0e9f8a7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/predis/predis/zipball/b1a0e315c2b8b0f8e7c9d4a5f6e3b2c1d0e9f8a7",
+                "reference": "b1a0e315c2b8b0f8e7c9d4a5f6e3b2c1d0e9f8a7",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.0 || ^9.0"
+            },
+            "suggest": {
+                "ext-relay": "Faster connection with Relay PHP extension (^0.6)."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Predis\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniele Alessandri",
+                    "email": "suppakilla@gmail.com",
+                    "homepage": "http://clorophilla.net"
+                },
+                {
+                    "name": "Till Krüss",
+                    "email": "till@tillkruss.me",
+                    "homepage": "https://till.im"
+                }
+            ],
+            "description": "A flexible and feature-complete Redis client for PHP.",
+            "homepage": "https://github.com/predis/predis",
+            "keywords": [
+                "nosql",
+                "predis",
+                "redis"
+            ],
+            "support": {
+                "issues": "https://github.com/predis/predis/issues",
+                "source": "https://github.com/predis/predis/tree/v2.3.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/tillkruss",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-02-14T09:10:00+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
